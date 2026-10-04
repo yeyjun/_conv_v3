@@ -1,0 +1,5 @@
+In the inventory report window, make the data grid flexible when its window is rescaled.
+
+In the inventory report window, make the description values in upper case format.
+
+After the transaction on the purchases, does it save on the database for items purchased?

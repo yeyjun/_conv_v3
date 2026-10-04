@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pages="clr-namespace:MauiRemoteController.Pages"
+             x:Class="MauiRemoteController.Pages.TerminalDetailPage"
+             Title="Terminal">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Edit" Clicked="OnEditClicked" />
+    </ContentPage.ToolbarItems>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+
+            <VerticalStackLayout Spacing="2">
+                <Label x:Name="HeaderNameLabel" FontSize="20" FontAttributes="Bold" />
+                <Label x:Name="HeaderHostLabel" FontSize="13" Opacity="0.7" />
+            </VerticalStackLayout>
+
+            <Border Padding="14" Stroke="#33808080" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Status" FontAttributes="Bold" />
+                    <Label x:Name="StatusSummaryLabel" Text="Not checked yet." LineBreakMode="WordWrap" />
+                    <Button Text="Refresh Status" Clicked="OnRefreshStatusClicked" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Padding="14" Stroke="#33808080" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Activate License" FontAttributes="Bold" />
+                    <Entry x:Name="LicenseKeyEntry" Placeholder="License key" />
+                    <Button Text="Activate" Clicked="OnActivateClicked" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Padding="14" Stroke="#33808080" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Menu Visibility" FontAttributes="Bold" />
+                    <Label Text="Checked items are hidden on that terminal." FontSize="12" Opacity="0.7" />
+
+                    <CollectionView x:Name="MenuItemsView" HeightRequest="240">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="pages:MenuCheckItem">
+                                <Grid Padding="0,4" ColumnDefinitions="Auto,*">
+                                    <CheckBox Grid.Column="0" IsChecked="{Binding IsHidden}" />
+                                    <Label Grid.Column="1" Text="{Binding Label}" VerticalOptions="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <HorizontalStackLayout Spacing="10">
+                        <Button Text="Reload Menus" Clicked="OnLoadMenusClicked" />
+                        <Button Text="Save Changes" Clicked="OnSaveMenusClicked" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

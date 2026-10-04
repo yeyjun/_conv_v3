@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:pages="clr-namespace:MauiRemoteController.Pages"
+             x:Class="MauiRemoteController.Pages.TerminalListPage"
+             x:DataType="pages:TerminalListPage"
+             Title="Terminals">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Refresh All" Clicked="OnRefreshAllClicked" />
+        <ToolbarItem Text="Add" Clicked="OnAddClicked" />
+    </ContentPage.ToolbarItems>
+
+    <Grid>
+        <CollectionView x:Name="TerminalsView"
+                         SelectionMode="None"
+                         Margin="12">
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8" Padding="30">
+                    <Label Text="No terminals yet." FontSize="16" HorizontalOptions="Center" />
+                    <Label Text="Tap Add to save your first terminal." FontSize="13" Opacity="0.7" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="pages:TerminalListItem">
+                    <SwipeView>
+                        <SwipeView.RightItems>
+                            <SwipeItems>
+                                <SwipeItem Text="Delete"
+                                           BackgroundColor="#C0392B"
+                                           Invoked="OnDeleteSwipeInvoked"
+                                           CommandParameter="{Binding Id}" />
+                            </SwipeItems>
+                        </SwipeView.RightItems>
+
+                        <Grid Padding="12,10" ColumnDefinitions="*,Auto">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnTerminalTapped" CommandParameter="{Binding Id}" />
+                            </Grid.GestureRecognizers>
+
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="{Binding Name}" FontSize="16" FontAttributes="Bold" />
+                                <Label Text="{Binding HostAndPort}" FontSize="13" Opacity="0.7" />
+                            </VerticalStackLayout>
+
+                            <Label Grid.Column="1"
+                                   Text="{Binding StatusText}"
+                                   TextColor="{Binding StatusColor}"
+                                   VerticalOptions="Center"
+                                   FontAttributes="Bold" />
+                        </Grid>
+                    </SwipeView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <ActivityIndicator x:Name="LoadingIndicator" IsRunning="False" IsVisible="False"
+                            VerticalOptions="Center" HorizontalOptions="Center" />
+    </Grid>
+
+</ContentPage>

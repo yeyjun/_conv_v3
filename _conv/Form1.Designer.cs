@@ -1,0 +1,1540 @@
+﻿namespace _conv
+{
+    partial class Purchases
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Purchases));
+            System.Windows.Forms.DataVisualization.Charting.ChartArea dashboardChartArea = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series dashboardSeries = new System.Windows.Forms.DataVisualization.Charting.Series();
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.tbx_serialcode = new System.Windows.Forms.TextBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.dgv_items = new System.Windows.Forms.DataGridView();
+            this.counter = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.change = new System.Windows.Forms.Label();
+            this.tbx_denomination = new System.Windows.Forms.TextBox();
+            this.gbx_itemsearch = new System.Windows.Forms.GroupBox();
+            this.listing = new System.Windows.Forms.Label();
+            this.dgv_itemSearch = new System.Windows.Forms.DataGridView();
+            this.label1 = new System.Windows.Forms.Label();
+            this.tbx_search = new System.Windows.Forms.TextBox();
+            this.lbl_warning = new System.Windows.Forms.Label();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.printDialog1 = new System.Windows.Forms.PrintDialog();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.printDocument1 = new System.Drawing.Printing.PrintDocument();
+            this.selltype = new System.Windows.Forms.ComboBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.teller = new System.Windows.Forms.Label();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.salesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.vIewSalesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.myTransactionHistoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.generateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.barcodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.printPreviewDialog1 = new System.Windows.Forms.PrintPreviewDialog();
+            this.printDocument2 = new System.Drawing.Printing.PrintDocument();
+            this.label10 = new System.Windows.Forms.Label();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gettingStartedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.techRequirementsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.transactionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.holdTransactionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resumeTransactionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewHeldTransactionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reportsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.inventoryReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.salesReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pettyCashReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.salesChartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dailySalesChartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.monthlySalesChartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.quarterlySalesChartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.receiptsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.usersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.taxConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.systemConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loyaltyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPageSales = new System.Windows.Forms.TabPage();
+            this.tabPageManagePrices = new System.Windows.Forms.TabPage();
+            this.lbl_managePricesTitle = new System.Windows.Forms.Label();
+            this.lbl_managePricesStatus = new System.Windows.Forms.Label();
+            this.btn_refreshPrices = new System.Windows.Forms.Button();
+            this.btn_savePrices = new System.Windows.Forms.Button();
+            this.btn_addItem = new System.Windows.Forms.Button();
+            this.btn_deletePrice = new System.Windows.Forms.Button();
+            this.lbl_managePricesSearch = new System.Windows.Forms.Label();
+            this.tbx_managePricesSearch = new System.Windows.Forms.TextBox();
+            this.dgv_managePrices = new System.Windows.Forms.DataGridView();
+            this.tabPageDashboard = new System.Windows.Forms.TabPage();
+            this.lblDashboardTitle = new System.Windows.Forms.Label();
+            this.btnDashboardRefresh = new System.Windows.Forms.Button();
+            this.lblDashboardStatus = new System.Windows.Forms.Label();
+            this.tlpDashboardBody = new System.Windows.Forms.TableLayoutPanel();
+            this.tlpKpiRow = new System.Windows.Forms.TableLayoutPanel();
+            this.pnlDashToday = new System.Windows.Forms.Panel();
+            this.lblDashTodaySub = new System.Windows.Forms.Label();
+            this.lblDashTodayValue = new System.Windows.Forms.Label();
+            this.lblDashTodayTitle = new System.Windows.Forms.Label();
+            this.pnlDashMonth = new System.Windows.Forms.Panel();
+            this.lblDashMonthSub = new System.Windows.Forms.Label();
+            this.lblDashMonthValue = new System.Windows.Forms.Label();
+            this.lblDashMonthTitle = new System.Windows.Forms.Label();
+            this.pnlDashStock = new System.Windows.Forms.Panel();
+            this.lblDashStockSub = new System.Windows.Forms.Label();
+            this.lblDashStockValue = new System.Windows.Forms.Label();
+            this.lblDashStockTitle = new System.Windows.Forms.Label();
+            this.pnlDashOutOfStock = new System.Windows.Forms.Panel();
+            this.lblDashOutOfStockSub = new System.Windows.Forms.Label();
+            this.lblDashOutOfStockValue = new System.Windows.Forms.Label();
+            this.lblDashOutOfStockTitle = new System.Windows.Forms.Label();
+            this.tlpChartGrid = new System.Windows.Forms.TableLayoutPanel();
+            this.gbxDashChart = new System.Windows.Forms.GroupBox();
+            this.chartDashboardSales = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.gbxDashLowStock = new System.Windows.Forms.GroupBox();
+            this.pnlDashLowStockToolbar = new System.Windows.Forms.Panel();
+            this.btnPrintOutOfStock = new System.Windows.Forms.Button();
+            this.dgvDashboardLowStock = new System.Windows.Forms.DataGridView();
+            this.colDashSerial = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colDashDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colDashQty = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.pnlDashButtons = new System.Windows.Forms.Panel();
+            this.btnDashInventoryReport = new System.Windows.Forms.Button();
+            this.btnDashSalesChart = new System.Windows.Forms.Button();
+            this.btnDashPettyCash = new System.Windows.Forms.Button();
+            this.btnDashLoyalty = new System.Windows.Forms.Button();
+            this.btnDashSystemConfig = new System.Windows.Forms.Button();
+            this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_items)).BeginInit();
+            this.gbx_itemsearch.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_itemSearch)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.menuStrip1.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.tabPageSales.SuspendLayout();
+            this.tabPageManagePrices.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_managePrices)).BeginInit();
+            this.tabPageDashboard.SuspendLayout();
+            this.tlpDashboardBody.SuspendLayout();
+            this.tlpKpiRow.SuspendLayout();
+            this.pnlDashToday.SuspendLayout();
+            this.pnlDashMonth.SuspendLayout();
+            this.pnlDashStock.SuspendLayout();
+            this.pnlDashOutOfStock.SuspendLayout();
+            this.tlpChartGrid.SuspendLayout();
+            this.gbxDashChart.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chartDashboardSales)).BeginInit();
+            this.gbxDashLowStock.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDashboardLowStock)).BeginInit();
+            this.pnlDashButtons.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // notifyIcon1
+            // 
+            this.notifyIcon1.Text = "notifyIcon1";
+            this.notifyIcon1.Visible = true;
+            // 
+            // tbx_serialcode
+            // 
+            this.tbx_serialcode.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
+            this.tbx_serialcode.Font = new System.Drawing.Font("Microsoft Sans Serif", 52F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tbx_serialcode.Location = new System.Drawing.Point(10, 131);
+            this.tbx_serialcode.Name = "tbx_serialcode";
+            this.tbx_serialcode.Size = new System.Drawing.Size(810, 86);
+            this.tbx_serialcode.TabIndex = 0;
+            this.tbx_serialcode.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.tbx_serialcode.TextChanged += new System.EventHandler(this.textchanged_tbx_serialcode);
+            this.tbx_serialcode.Enter += new System.EventHandler(this.tbx_serialcode_Enter2);
+            this.tbx_serialcode.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tbx_serialcode_KeyUp);
+            this.tbx_serialcode.Validated += new System.EventHandler(this.tbx_serialcode_Validated_1);
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
+            this.groupBox1.BackColor = System.Drawing.Color.MintCream;
+            this.groupBox1.Controls.Add(this.dgv_items);
+            this.groupBox1.Controls.Add(this.counter);
+            this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox1.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.groupBox1.Location = new System.Drawing.Point(491, 243);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(481, 408);
+            this.groupBox1.TabIndex = 1;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Item List";
+            // 
+            // dgv_items
+            // 
+            this.dgv_items.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
+            this.dgv_items.AllowUserToOrderColumns = true;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.Blue;
+            this.dgv_items.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            this.dgv_items.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.Raised;
+            this.dgv_items.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_items.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
+            this.dgv_items.Location = new System.Drawing.Point(6, 29);
+            this.dgv_items.Name = "dgv_items";
+            this.dgv_items.ReadOnly = true;
+            this.dgv_items.Size = new System.Drawing.Size(469, 286);
+            this.dgv_items.TabIndex = 2;
+            this.dgv_items.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_items_CellContentClick);
+            this.dgv_items.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_items_RowsAdded);
+            this.dgv_items.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.dgv_items_RowsRemoved);
+            this.dgv_items.UserAddedRow += new System.Windows.Forms.DataGridViewRowEventHandler(this.dgv_items_UserAddedRow);
+            this.dgv_items.UserDeletedRow += new System.Windows.Forms.DataGridViewRowEventHandler(this.dgv_items_UserDeletedRow);
+            this.dgv_items.KeyUp += new System.Windows.Forms.KeyEventHandler(this.dgv_items_KeyUp);
+            // 
+            // counter
+            // 
+            this.counter.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            this.counter.AutoSize = true;
+            this.counter.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.counter.Location = new System.Drawing.Point(6, 328);
+            this.counter.Name = "counter";
+            this.counter.Size = new System.Drawing.Size(224, 29);
+            this.counter.TabIndex = 1;
+            this.counter.Text = "Add items on-board";
+            // 
+            // label3
+            // 
+            this.label3.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.label3.Location = new System.Drawing.Point(792, 654);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(33, 31);
+            this.label3.TabIndex = 5;
+            this.label3.Text = "₱";
+            // 
+            // change
+            // 
+            this.change.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            this.change.AutoSize = true;
+            this.change.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.change.ForeColor = System.Drawing.Color.OrangeRed;
+            this.change.Location = new System.Drawing.Point(491, 658);
+            this.change.Name = "change";
+            this.change.Size = new System.Drawing.Size(189, 31);
+            this.change.TabIndex = 4;
+            this.change.Text = "Change: 0.00";
+            // 
+            // tbx_denomination
+            // 
+            this.tbx_denomination.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            this.tbx_denomination.Enabled = false;
+            this.tbx_denomination.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tbx_denomination.Location = new System.Drawing.Point(830, 651);
+            this.tbx_denomination.Name = "tbx_denomination";
+            this.tbx_denomination.Size = new System.Drawing.Size(136, 38);
+            this.tbx_denomination.TabIndex = 3;
+            this.tbx_denomination.Text = "*****.**";
+            this.tbx_denomination.TextChanged += new System.EventHandler(this.tbx_denomination_TextChanged);
+            this.tbx_denomination.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tbx_denomination_KeyUp);
+            // 
+            // gbx_itemsearch
+            // 
+            this.gbx_itemsearch.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left;
+            this.gbx_itemsearch.BackColor = System.Drawing.SystemColors.Info;
+            this.gbx_itemsearch.Controls.Add(this.listing);
+            this.gbx_itemsearch.Controls.Add(this.dgv_itemSearch);
+            this.gbx_itemsearch.Controls.Add(this.label1);
+            this.gbx_itemsearch.Controls.Add(this.tbx_search);
+            this.gbx_itemsearch.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.25F, System.Drawing.FontStyle.Bold);
+            this.gbx_itemsearch.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.gbx_itemsearch.Location = new System.Drawing.Point(10, 243);
+            this.gbx_itemsearch.Name = "gbx_itemsearch";
+            this.gbx_itemsearch.Size = new System.Drawing.Size(473, 455);
+            this.gbx_itemsearch.TabIndex = 2;
+            this.gbx_itemsearch.TabStop = false;
+            this.gbx_itemsearch.Text = "Search";
+            // 
+            // listing
+            // 
+            this.listing.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            this.listing.AutoSize = true;
+            this.listing.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.listing.ForeColor = System.Drawing.Color.Tomato;
+            this.listing.Location = new System.Drawing.Point(358, 431);
+            this.listing.Name = "listing";
+            this.listing.Size = new System.Drawing.Size(79, 15);
+            this.listing.TabIndex = 6;
+            this.listing.Text = "Listed items: ";
+            // 
+            // dgv_itemSearch
+            // 
+            this.dgv_itemSearch.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
+            this.dgv_itemSearch.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_itemSearch.Cursor = System.Windows.Forms.Cursors.Default;
+            this.dgv_itemSearch.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnF2;
+            this.dgv_itemSearch.Location = new System.Drawing.Point(7, 58);
+            this.dgv_itemSearch.Name = "dgv_itemSearch";
+            this.dgv_itemSearch.Size = new System.Drawing.Size(460, 370);
+            this.dgv_itemSearch.TabIndex = 5;
+            this.dgv_itemSearch.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_itemSearch_CellContentClick);
+            this.dgv_itemSearch.CellContextMenuStripChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_itemSearch_CellContextMenuStripChanged);
+            this.dgv_itemSearch.CellContextMenuStripNeeded += new System.Windows.Forms.DataGridViewCellContextMenuStripNeededEventHandler(this.dgv_itemSearch_CellContextMenuStripNeeded);
+            this.dgv_itemSearch.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_itemSearch_CellDoubleClick);
+            this.dgv_itemSearch.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.dgv_itemSearch_KeyPress);
+            this.dgv_itemSearch.KeyUp += new System.Windows.Forms.KeyEventHandler(this.dgv_itemSearch_KeyUp);
+            // 
+            // label1
+            // 
+            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.Tomato;
+            this.label1.Location = new System.Drawing.Point(4, 431);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(165, 15);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Select the item then press F7";
+            // 
+            // tbx_search
+            // 
+            this.tbx_search.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
+            this.tbx_search.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F);
+            this.tbx_search.Location = new System.Drawing.Point(9, 22);
+            this.tbx_search.Name = "tbx_search";
+            this.tbx_search.Size = new System.Drawing.Size(458, 30);
+            this.tbx_search.TabIndex = 0;
+            this.tbx_search.TextChanged += new System.EventHandler(this.tbx_search_TextChanged);
+            this.tbx_search.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbx_search_KeyPress);
+            this.tbx_search.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tbx_search_KeyUp);
+            // 
+            // lbl_warning
+            // 
+            this.lbl_warning.AutoSize = true;
+            this.lbl_warning.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_warning.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.lbl_warning.Location = new System.Drawing.Point(517, 52);
+            this.lbl_warning.Name = "lbl_warning";
+            this.lbl_warning.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.lbl_warning.Size = new System.Drawing.Size(115, 25);
+            this.lbl_warning.TabIndex = 3;
+            this.lbl_warning.Text = "Welcome!";
+            this.lbl_warning.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // textBox1
+            // 
+            this.textBox1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            this.textBox1.BackColor = System.Drawing.SystemColors.InactiveCaptionText;
+            this.textBox1.Enabled = false;
+            this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 52F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox1.ForeColor = System.Drawing.SystemColors.Window;
+            this.textBox1.Location = new System.Drawing.Point(829, 131);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(142, 86);
+            this.textBox1.TabIndex = 4;
+            this.textBox1.Text = "1";
+            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            this.textBox1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyUp);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.label2.Location = new System.Drawing.Point(11, 104);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(311, 18);
+            this.label2.TabIndex = 6;
+            this.label2.Text = "2) Scan item or Select from items below";
+            // 
+            // label4
+            // 
+            this.label4.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.label4.Location = new System.Drawing.Point(829, 113);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(70, 18);
+            this.label4.TabIndex = 7;
+            this.label4.Text = "Quantity";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.ForeColor = System.Drawing.Color.Tomato;
+            this.label5.Location = new System.Drawing.Point(10, 220);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(325, 13);
+            this.label5.TabIndex = 8;
+            this.label5.Text = "Press F4 to activate items below; Press F9 to activate denomination";
+            // 
+            // printDialog1
+            // 
+            this.printDialog1.UseEXDialog = true;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            this.pictureBox1.Location = new System.Drawing.Point(832, 4);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(116, 105);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 9;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Tag = "Loading";
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Morally Serif", 30F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.ForeColor = System.Drawing.Color.Teal;
+            this.label6.Location = new System.Drawing.Point(509, 5);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(317, 44);
+            this.label6.TabIndex = 10;
+            this.label6.Text = "Baclig Minimart";
+            // 
+            // printDocument1
+            // 
+            this.printDocument1.BeginPrint += new System.Drawing.Printing.PrintEventHandler(this.printDocument1_BeginPrint);
+            this.printDocument1.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.PrintDocument1_PrintPage);
+            this.printDocument1.EndPrint += new System.Drawing.Printing.PrintEventHandler(this.printDocument1_EndPrint);
+            // 
+            // selltype
+            // 
+            this.selltype.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.selltype.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.selltype.FormattingEnabled = true;
+            this.selltype.Items.AddRange(new object[] {
+            "Wholesale",
+            "Retail",
+            "By Piece",
+            "Select..."});
+            this.selltype.Location = new System.Drawing.Point(12, 40);
+            this.selltype.Name = "selltype";
+            this.selltype.Size = new System.Drawing.Size(306, 28);
+            this.selltype.TabIndex = 11;
+            this.selltype.SelectedIndexChanged += new System.EventHandler(this.selltype_SelectedIndexChanged);
+            this.selltype.KeyUp += new System.Windows.Forms.KeyEventHandler(this.selltype_KeyUp);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label7.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.label7.Location = new System.Drawing.Point(9, 19);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(160, 18);
+            this.label7.TabIndex = 12;
+            this.label7.Text = "1) Type of Purchase";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.ForeColor = System.Drawing.Color.Tomato;
+            this.label8.Location = new System.Drawing.Point(341, 220);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(302, 13);
+            this.label8.TabIndex = 13;
+            this.label8.Text = "Select an item from item List then press F12 to change quantity";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(839, 224);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(15, 13);
+            this.label9.TabIndex = 14;
+            this.label9.Text = "**";
+            // 
+            // teller
+            // 
+            this.teller.AutoSize = true;
+            this.teller.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.teller.ForeColor = System.Drawing.Color.Tomato;
+            this.teller.Location = new System.Drawing.Point(522, 80);
+            this.teller.Name = "teller";
+            this.teller.Size = new System.Drawing.Size(61, 22);
+            this.teller.TabIndex = 15;
+            this.teller.Text = "Teller:";
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.salesToolStripMenuItem,
+            this.generateToolStripMenuItem,
+            this.transactionToolStripMenuItem,
+            this.reportsToolStripMenuItem,
+            this.receiptsToolStripMenuItem,
+            this.usersToolStripMenuItem,
+            this.loyaltyToolStripMenuItem,
+            this.taxConfigToolStripMenuItem,
+            this.systemConfigToolStripMenuItem,
+            this.helpToolStripMenuItem,
+            this.gettingStartedToolStripMenuItem,
+            this.techRequirementsToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(983, 24);
+            this.menuStrip1.TabIndex = 16;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // salesToolStripMenuItem
+            // 
+            this.salesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.vIewSalesToolStripMenuItem,
+            this.myTransactionHistoryToolStripMenuItem});
+            this.salesToolStripMenuItem.Name = "salesToolStripMenuItem";
+            this.salesToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
+            this.salesToolStripMenuItem.Text = "Sales";
+            this.salesToolStripMenuItem.Click += new System.EventHandler(this.salesToolStripMenuItem_Click);
+            //
+            // vIewSalesToolStripMenuItem
+            //
+            this.vIewSalesToolStripMenuItem.Name = "vIewSalesToolStripMenuItem";
+            this.vIewSalesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.vIewSalesToolStripMenuItem.Text = "View Sales";
+            this.vIewSalesToolStripMenuItem.Click += new System.EventHandler(this.vIewSalesToolStripMenuItem_Click);
+            //
+            // myTransactionHistoryToolStripMenuItem
+            //
+            this.myTransactionHistoryToolStripMenuItem.Name = "myTransactionHistoryToolStripMenuItem";
+            this.myTransactionHistoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.myTransactionHistoryToolStripMenuItem.Text = "My Transaction History";
+            this.myTransactionHistoryToolStripMenuItem.Click += new System.EventHandler(this.myTransactionHistoryToolStripMenuItem_Click);
+            //
+            // generateToolStripMenuItem
+            // 
+            this.generateToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.barcodeToolStripMenuItem,
+            this.reportToolStripMenuItem});
+            this.generateToolStripMenuItem.Name = "generateToolStripMenuItem";
+            this.generateToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
+            this.generateToolStripMenuItem.Text = "Generate";
+            // 
+            // barcodeToolStripMenuItem
+            // 
+            this.barcodeToolStripMenuItem.Name = "barcodeToolStripMenuItem";
+            this.barcodeToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.barcodeToolStripMenuItem.Text = "Barcode";
+            this.barcodeToolStripMenuItem.Click += new System.EventHandler(this.barcodeToolStripMenuItem_Click);
+            // 
+            // reportToolStripMenuItem
+            // 
+            this.reportToolStripMenuItem.Name = "reportToolStripMenuItem";
+            this.reportToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
+            this.reportToolStripMenuItem.Text = "Report";
+            this.reportToolStripMenuItem.Click += new System.EventHandler(this.reportToolStripMenuItem_Click);
+            //
+            // transactionToolStripMenuItem
+            //
+            this.transactionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.holdTransactionToolStripMenuItem,
+            this.resumeTransactionToolStripMenuItem,
+            this.viewHeldTransactionsToolStripMenuItem});
+            this.transactionToolStripMenuItem.Name = "transactionToolStripMenuItem";
+            this.transactionToolStripMenuItem.Size = new System.Drawing.Size(88, 20);
+            this.transactionToolStripMenuItem.Text = "Transaction";
+            //
+            // holdTransactionToolStripMenuItem
+            //
+            this.holdTransactionToolStripMenuItem.Name = "holdTransactionToolStripMenuItem";
+            this.holdTransactionToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
+            this.holdTransactionToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.holdTransactionToolStripMenuItem.Text = "Hold Transaction";
+            this.holdTransactionToolStripMenuItem.Click += new System.EventHandler(this.holdTransactionToolStripMenuItem_Click);
+            //
+            // resumeTransactionToolStripMenuItem
+            //
+            this.resumeTransactionToolStripMenuItem.Name = "resumeTransactionToolStripMenuItem";
+            this.resumeTransactionToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F8;
+            this.resumeTransactionToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.resumeTransactionToolStripMenuItem.Text = "Resume Transaction";
+            this.resumeTransactionToolStripMenuItem.Click += new System.EventHandler(this.resumeTransactionToolStripMenuItem_Click);
+            //
+            // viewHeldTransactionsToolStripMenuItem
+            //
+            this.viewHeldTransactionsToolStripMenuItem.Name = "viewHeldTransactionsToolStripMenuItem";
+            this.viewHeldTransactionsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
+            this.viewHeldTransactionsToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
+            this.viewHeldTransactionsToolStripMenuItem.Text = "View Held Transactions";
+            this.viewHeldTransactionsToolStripMenuItem.Click += new System.EventHandler(this.viewHeldTransactionsToolStripMenuItem_Click);
+            //
+            // reportsToolStripMenuItem
+            //
+            this.reportsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.inventoryReportToolStripMenuItem,
+            this.salesReportToolStripMenuItem,
+            this.pettyCashReportToolStripMenuItem,
+            this.salesChartToolStripMenuItem});
+            this.reportsToolStripMenuItem.Name = "reportsToolStripMenuItem";
+            this.reportsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
+            this.reportsToolStripMenuItem.Text = "Report";
+            //
+            // inventoryReportToolStripMenuItem
+            //
+            this.inventoryReportToolStripMenuItem.Name = "inventoryReportToolStripMenuItem";
+            this.inventoryReportToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.inventoryReportToolStripMenuItem.Text = "Inventory";
+            this.inventoryReportToolStripMenuItem.Click += new System.EventHandler(this.inventoryReportToolStripMenuItem_Click);
+            //
+            // salesReportToolStripMenuItem
+            //
+            this.salesReportToolStripMenuItem.Name = "salesReportToolStripMenuItem";
+            this.salesReportToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.salesReportToolStripMenuItem.Text = "Sales";
+            this.salesReportToolStripMenuItem.Click += new System.EventHandler(this.salesReportToolStripMenuItem_Click);
+            //
+            // pettyCashReportToolStripMenuItem
+            //
+            this.pettyCashReportToolStripMenuItem.Name = "pettyCashReportToolStripMenuItem";
+            this.pettyCashReportToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.pettyCashReportToolStripMenuItem.Text = "Petty Cash";
+            this.pettyCashReportToolStripMenuItem.Click += new System.EventHandler(this.pettyCashReportToolStripMenuItem_Click);
+            //
+            // salesChartToolStripMenuItem
+            //
+            this.salesChartToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dailySalesChartToolStripMenuItem,
+            this.monthlySalesChartToolStripMenuItem,
+            this.quarterlySalesChartToolStripMenuItem});
+            this.salesChartToolStripMenuItem.Name = "salesChartToolStripMenuItem";
+            this.salesChartToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.salesChartToolStripMenuItem.Text = "Sales Chart";
+            //
+            // dailySalesChartToolStripMenuItem
+            //
+            this.dailySalesChartToolStripMenuItem.Name = "dailySalesChartToolStripMenuItem";
+            this.dailySalesChartToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.dailySalesChartToolStripMenuItem.Text = "Daily";
+            this.dailySalesChartToolStripMenuItem.Click += new System.EventHandler(this.dailySalesChartToolStripMenuItem_Click);
+            //
+            // monthlySalesChartToolStripMenuItem
+            //
+            this.monthlySalesChartToolStripMenuItem.Name = "monthlySalesChartToolStripMenuItem";
+            this.monthlySalesChartToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.monthlySalesChartToolStripMenuItem.Text = "Monthly";
+            this.monthlySalesChartToolStripMenuItem.Click += new System.EventHandler(this.monthlySalesChartToolStripMenuItem_Click);
+            //
+            // quarterlySalesChartToolStripMenuItem
+            //
+            this.quarterlySalesChartToolStripMenuItem.Name = "quarterlySalesChartToolStripMenuItem";
+            this.quarterlySalesChartToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.quarterlySalesChartToolStripMenuItem.Text = "Quarterly";
+            this.quarterlySalesChartToolStripMenuItem.Click += new System.EventHandler(this.quarterlySalesChartToolStripMenuItem_Click);
+            //
+            // receiptsToolStripMenuItem
+            //
+            this.receiptsToolStripMenuItem.Name = "receiptsToolStripMenuItem";
+            this.receiptsToolStripMenuItem.Size = new System.Drawing.Size(65, 20);
+            this.receiptsToolStripMenuItem.Text = "Receipts";
+            this.receiptsToolStripMenuItem.Click += new System.EventHandler(this.receiptsToolStripMenuItem_Click);
+            //
+            // usersToolStripMenuItem
+            //
+            this.usersToolStripMenuItem.Name = "usersToolStripMenuItem";
+            this.usersToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
+            this.usersToolStripMenuItem.Text = "Users";
+            this.usersToolStripMenuItem.Click += new System.EventHandler(this.usersToolStripMenuItem_Click);
+            //
+            // loyaltyToolStripMenuItem
+            //
+            this.loyaltyToolStripMenuItem.Name = "loyaltyToolStripMenuItem";
+            this.loyaltyToolStripMenuItem.Size = new System.Drawing.Size(65, 20);
+            this.loyaltyToolStripMenuItem.Text = "Loyalty";
+            this.loyaltyToolStripMenuItem.Click += new System.EventHandler(this.loyaltyToolStripMenuItem_Click);
+            //
+            // taxConfigToolStripMenuItem
+            //
+            this.taxConfigToolStripMenuItem.Name = "taxConfigToolStripMenuItem";
+            this.taxConfigToolStripMenuItem.Size = new System.Drawing.Size(65, 20);
+            this.taxConfigToolStripMenuItem.Text = "Tax Config";
+            this.taxConfigToolStripMenuItem.Click += new System.EventHandler(this.taxConfigToolStripMenuItem_Click);
+            //
+            // systemConfigToolStripMenuItem
+            //
+            // Hidden from the menu bar - reached only via the Ctrl+Shift+S shortcut handled in
+            // Purchases.ProcessCmdKey, since a hidden ToolStripMenuItem's own ShortcutKeys never fires.
+            this.systemConfigToolStripMenuItem.Name = "systemConfigToolStripMenuItem";
+            this.systemConfigToolStripMenuItem.Size = new System.Drawing.Size(100, 20);
+            this.systemConfigToolStripMenuItem.Text = "System Config";
+            // Visibility is applied at runtime from the HIDDEN_MENUS setting (see
+            // Purchases.ApplyMenuVisibility) - hidden by default, same as before this became
+            // admin-configurable via System Config > Menus.
+            this.systemConfigToolStripMenuItem.Click += new System.EventHandler(this.systemConfigToolStripMenuItem_Click);
+            //
+            // printPreviewDialog1
+            //
+            this.printPreviewDialog1.AutoScrollMargin = new System.Drawing.Size(0, 0);
+            this.printPreviewDialog1.AutoScrollMinSize = new System.Drawing.Size(0, 0);
+            this.printPreviewDialog1.ClientSize = new System.Drawing.Size(550, 650);
+            this.printPreviewDialog1.Enabled = true;
+            this.printPreviewDialog1.Icon = ((System.Drawing.Icon)(resources.GetObject("printPreviewDialog1.Icon")));
+            this.printPreviewDialog1.Name = "printPreviewDialog1";
+            this.printPreviewDialog1.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.printPreviewDialog1.Text = "Print Preview";
+            this.printPreviewDialog1.UseAntiAlias = true;
+            this.printPreviewDialog1.Visible = false;
+            this.printPreviewDialog1.Load += new System.EventHandler(this.printPreviewDialog1_Load);
+            // 
+            // printDocument2
+            //
+            this.printDocument2.BeginPrint += new System.Drawing.Printing.PrintEventHandler(this.printDocument2_BeginPrint);
+            this.printDocument2.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.printDocument2_PrintPage);
+            //
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.ForeColor = System.Drawing.Color.Tomato;
+            this.label10.Location = new System.Drawing.Point(10, 71);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(125, 13);
+            this.label10.TabIndex = 17;
+            this.label10.Text = "Press F1/F2/F3 to select";
+            //
+            // tabControl1
+            //
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
+            this.tabControl1.Controls.Add(this.tabPageSales);
+            this.tabControl1.Controls.Add(this.tabPageManagePrices);
+            this.tabControl1.Controls.Add(this.tabPageDashboard);
+            this.tabControl1.Location = new System.Drawing.Point(0, 24);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(991, 736);
+            this.tabControl1.TabIndex = 100;
+            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
+            //
+            // tabPageSales
+            //
+            this.tabPageSales.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageSales.Location = new System.Drawing.Point(4, 22);
+            this.tabPageSales.Name = "tabPageSales";
+            this.tabPageSales.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageSales.Size = new System.Drawing.Size(983, 710);
+            this.tabPageSales.TabIndex = 0;
+            this.tabPageSales.Text = "Sales";
+            this.tabPageSales.Controls.Add(this.label10);
+            this.tabPageSales.Controls.Add(this.teller);
+            this.tabPageSales.Controls.Add(this.label9);
+            this.tabPageSales.Controls.Add(this.label8);
+            this.tabPageSales.Controls.Add(this.label7);
+            this.tabPageSales.Controls.Add(this.selltype);
+            this.tabPageSales.Controls.Add(this.label6);
+            this.tabPageSales.Controls.Add(this.pictureBox1);
+            this.tabPageSales.Controls.Add(this.label3);
+            this.tabPageSales.Controls.Add(this.label5);
+            this.tabPageSales.Controls.Add(this.tbx_denomination);
+            this.tabPageSales.Controls.Add(this.change);
+            this.tabPageSales.Controls.Add(this.label4);
+            this.tabPageSales.Controls.Add(this.label2);
+            this.tabPageSales.Controls.Add(this.textBox1);
+            this.tabPageSales.Controls.Add(this.lbl_warning);
+            this.tabPageSales.Controls.Add(this.gbx_itemsearch);
+            this.tabPageSales.Controls.Add(this.groupBox1);
+            this.tabPageSales.Controls.Add(this.tbx_serialcode);
+            //
+            // tabPageManagePrices
+            //
+            this.tabPageManagePrices.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageManagePrices.Location = new System.Drawing.Point(4, 22);
+            this.tabPageManagePrices.Name = "tabPageManagePrices";
+            this.tabPageManagePrices.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageManagePrices.Size = new System.Drawing.Size(983, 710);
+            this.tabPageManagePrices.TabIndex = 1;
+            this.tabPageManagePrices.Text = "Manage Prices";
+            this.tabPageManagePrices.Controls.Add(this.dgv_managePrices);
+            this.tabPageManagePrices.Controls.Add(this.btn_savePrices);
+            this.tabPageManagePrices.Controls.Add(this.btn_refreshPrices);
+            this.tabPageManagePrices.Controls.Add(this.btn_addItem);
+            this.tabPageManagePrices.Controls.Add(this.btn_deletePrice);
+            this.tabPageManagePrices.Controls.Add(this.lbl_managePricesStatus);
+            this.tabPageManagePrices.Controls.Add(this.lbl_managePricesTitle);
+            this.tabPageManagePrices.Controls.Add(this.lbl_managePricesSearch);
+            this.tabPageManagePrices.Controls.Add(this.tbx_managePricesSearch);
+            //
+            // lbl_managePricesTitle
+            //
+            this.lbl_managePricesTitle.AutoSize = true;
+            this.lbl_managePricesTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_managePricesTitle.ForeColor = System.Drawing.Color.Teal;
+            this.lbl_managePricesTitle.Location = new System.Drawing.Point(10, 10);
+            this.lbl_managePricesTitle.Name = "lbl_managePricesTitle";
+            this.lbl_managePricesTitle.Size = new System.Drawing.Size(320, 22);
+            this.lbl_managePricesTitle.TabIndex = 0;
+            this.lbl_managePricesTitle.Text = "Manage Item Prices (Restricted)";
+            //
+            // lbl_managePricesSearch
+            //
+            this.lbl_managePricesSearch.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.lbl_managePricesSearch.AutoSize = true;
+            this.lbl_managePricesSearch.Location = new System.Drawing.Point(400, 14);
+            this.lbl_managePricesSearch.Name = "lbl_managePricesSearch";
+            this.lbl_managePricesSearch.Size = new System.Drawing.Size(44, 13);
+            this.lbl_managePricesSearch.TabIndex = 6;
+            this.lbl_managePricesSearch.Text = "Search:";
+            //
+            // tbx_managePricesSearch
+            //
+            this.tbx_managePricesSearch.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.tbx_managePricesSearch.Location = new System.Drawing.Point(450, 11);
+            this.tbx_managePricesSearch.Name = "tbx_managePricesSearch";
+            this.tbx_managePricesSearch.Size = new System.Drawing.Size(300, 22);
+            this.tbx_managePricesSearch.TabIndex = 7;
+            this.tbx_managePricesSearch.TextChanged += new System.EventHandler(this.tbx_managePricesSearch_TextChanged);
+            //
+            // dgv_managePrices
+            //
+            this.dgv_managePrices.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
+            this.dgv_managePrices.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgv_managePrices.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_managePrices.Location = new System.Drawing.Point(10, 45);
+            this.dgv_managePrices.Name = "dgv_managePrices";
+            this.dgv_managePrices.Size = new System.Drawing.Size(963, 590);
+            this.dgv_managePrices.TabIndex = 1;
+            //
+            // btn_refreshPrices
+            //
+            this.btn_refreshPrices.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            this.btn_refreshPrices.Location = new System.Drawing.Point(10, 645);
+            this.btn_refreshPrices.Name = "btn_refreshPrices";
+            this.btn_refreshPrices.Size = new System.Drawing.Size(110, 32);
+            this.btn_refreshPrices.TabIndex = 2;
+            this.btn_refreshPrices.Text = "Refresh";
+            this.btn_refreshPrices.UseVisualStyleBackColor = true;
+            this.btn_refreshPrices.Click += new System.EventHandler(this.btn_refreshPrices_Click);
+            //
+            // btn_savePrices
+            //
+            this.btn_savePrices.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            this.btn_savePrices.Location = new System.Drawing.Point(130, 645);
+            this.btn_savePrices.Name = "btn_savePrices";
+            this.btn_savePrices.Size = new System.Drawing.Size(140, 32);
+            this.btn_savePrices.TabIndex = 3;
+            this.btn_savePrices.Text = "Save Changes";
+            this.btn_savePrices.UseVisualStyleBackColor = true;
+            this.btn_savePrices.Click += new System.EventHandler(this.btn_savePrices_Click);
+            //
+            // btn_deletePrice
+            //
+            this.btn_deletePrice.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            this.btn_deletePrice.Location = new System.Drawing.Point(280, 645);
+            this.btn_deletePrice.Name = "btn_deletePrice";
+            this.btn_deletePrice.Size = new System.Drawing.Size(140, 32);
+            this.btn_deletePrice.TabIndex = 8;
+            this.btn_deletePrice.Text = "Delete Selected";
+            this.btn_deletePrice.UseVisualStyleBackColor = true;
+            this.btn_deletePrice.Click += new System.EventHandler(this.btn_deletePrice_Click);
+            //
+            // btn_addItem
+            //
+            this.btn_addItem.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            this.btn_addItem.Location = new System.Drawing.Point(813, 8);
+            this.btn_addItem.Name = "btn_addItem";
+            this.btn_addItem.Size = new System.Drawing.Size(160, 30);
+            this.btn_addItem.TabIndex = 5;
+            this.btn_addItem.Text = "Add New Item...";
+            this.btn_addItem.UseVisualStyleBackColor = true;
+            this.btn_addItem.Click += new System.EventHandler(this.btn_addItem_Click);
+            //
+            // lbl_managePricesStatus
+            //
+            this.lbl_managePricesStatus.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            this.lbl_managePricesStatus.AutoSize = true;
+            this.lbl_managePricesStatus.ForeColor = System.Drawing.Color.Tomato;
+            this.lbl_managePricesStatus.Location = new System.Drawing.Point(430, 655);
+            this.lbl_managePricesStatus.Name = "lbl_managePricesStatus";
+            this.lbl_managePricesStatus.Size = new System.Drawing.Size(0, 13);
+            this.lbl_managePricesStatus.TabIndex = 4;
+            //
+            // tabPageDashboard
+            //
+            this.tabPageDashboard.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageDashboard.Location = new System.Drawing.Point(4, 22);
+            this.tabPageDashboard.Name = "tabPageDashboard";
+            this.tabPageDashboard.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageDashboard.Size = new System.Drawing.Size(983, 710);
+            this.tabPageDashboard.TabIndex = 2;
+            this.tabPageDashboard.Text = "Dashboard";
+            this.tabPageDashboard.Controls.Add(this.tlpDashboardBody);
+            this.tabPageDashboard.Controls.Add(this.lblDashboardStatus);
+            this.tabPageDashboard.Controls.Add(this.btnDashboardRefresh);
+            this.tabPageDashboard.Controls.Add(this.lblDashboardTitle);
+            //
+            // lblDashboardTitle
+            //
+            this.lblDashboardTitle.AutoSize = true;
+            this.lblDashboardTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblDashboardTitle.ForeColor = System.Drawing.Color.Teal;
+            this.lblDashboardTitle.Location = new System.Drawing.Point(10, 10);
+            this.lblDashboardTitle.Name = "lblDashboardTitle";
+            this.lblDashboardTitle.Size = new System.Drawing.Size(94, 22);
+            this.lblDashboardTitle.TabIndex = 0;
+            this.lblDashboardTitle.Text = "Dashboard";
+            //
+            // btnDashboardRefresh
+            //
+            this.btnDashboardRefresh.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            this.btnDashboardRefresh.Location = new System.Drawing.Point(883, 10);
+            this.btnDashboardRefresh.Name = "btnDashboardRefresh";
+            this.btnDashboardRefresh.Size = new System.Drawing.Size(90, 28);
+            this.btnDashboardRefresh.TabIndex = 1;
+            this.btnDashboardRefresh.Text = "Refresh";
+            this.btnDashboardRefresh.UseVisualStyleBackColor = true;
+            this.btnDashboardRefresh.Click += new System.EventHandler(this.btnDashboardRefresh_Click);
+            //
+            // lblDashboardStatus
+            //
+            this.lblDashboardStatus.AutoSize = true;
+            this.lblDashboardStatus.ForeColor = System.Drawing.Color.Tomato;
+            this.lblDashboardStatus.Location = new System.Drawing.Point(120, 16);
+            this.lblDashboardStatus.Name = "lblDashboardStatus";
+            this.lblDashboardStatus.Size = new System.Drawing.Size(0, 13);
+            this.lblDashboardStatus.TabIndex = 2;
+            //
+            // tlpDashboardBody
+            //
+            this.tlpDashboardBody.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
+            this.tlpDashboardBody.ColumnCount = 1;
+            this.tlpDashboardBody.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpDashboardBody.Controls.Add(this.tlpKpiRow, 0, 0);
+            this.tlpDashboardBody.Controls.Add(this.tlpChartGrid, 0, 1);
+            this.tlpDashboardBody.Controls.Add(this.pnlDashButtons, 0, 2);
+            this.tlpDashboardBody.Location = new System.Drawing.Point(10, 42);
+            this.tlpDashboardBody.Name = "tlpDashboardBody";
+            this.tlpDashboardBody.RowCount = 3;
+            this.tlpDashboardBody.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+            this.tlpDashboardBody.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpDashboardBody.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
+            this.tlpDashboardBody.Size = new System.Drawing.Size(963, 658);
+            this.tlpDashboardBody.TabIndex = 3;
+            //
+            // tlpKpiRow
+            //
+            this.tlpKpiRow.ColumnCount = 4;
+            this.tlpKpiRow.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tlpKpiRow.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tlpKpiRow.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tlpKpiRow.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tlpKpiRow.Controls.Add(this.pnlDashToday, 0, 0);
+            this.tlpKpiRow.Controls.Add(this.pnlDashMonth, 1, 0);
+            this.tlpKpiRow.Controls.Add(this.pnlDashStock, 2, 0);
+            this.tlpKpiRow.Controls.Add(this.pnlDashOutOfStock, 3, 0);
+            this.tlpKpiRow.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tlpKpiRow.Location = new System.Drawing.Point(0, 0);
+            this.tlpKpiRow.Margin = new System.Windows.Forms.Padding(0);
+            this.tlpKpiRow.Name = "tlpKpiRow";
+            this.tlpKpiRow.RowCount = 1;
+            this.tlpKpiRow.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpKpiRow.Size = new System.Drawing.Size(963, 100);
+            this.tlpKpiRow.TabIndex = 0;
+            //
+            // pnlDashToday
+            //
+            this.pnlDashToday.BackColor = System.Drawing.Color.MintCream;
+            this.pnlDashToday.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlDashToday.Controls.Add(this.lblDashTodaySub);
+            this.pnlDashToday.Controls.Add(this.lblDashTodayValue);
+            this.pnlDashToday.Controls.Add(this.lblDashTodayTitle);
+            this.pnlDashToday.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlDashToday.Location = new System.Drawing.Point(4, 5);
+            this.pnlDashToday.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.pnlDashToday.Name = "pnlDashToday";
+            this.pnlDashToday.Size = new System.Drawing.Size(232, 90);
+            this.pnlDashToday.TabIndex = 3;
+            //
+            // lblDashTodayTitle
+            //
+            this.lblDashTodayTitle.AutoSize = true;
+            this.lblDashTodayTitle.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold);
+            this.lblDashTodayTitle.ForeColor = System.Drawing.Color.DimGray;
+            this.lblDashTodayTitle.Location = new System.Drawing.Point(10, 8);
+            this.lblDashTodayTitle.Name = "lblDashTodayTitle";
+            this.lblDashTodayTitle.Size = new System.Drawing.Size(97, 13);
+            this.lblDashTodayTitle.TabIndex = 0;
+            this.lblDashTodayTitle.Text = "TODAY\'S SALES";
+            //
+            // lblDashTodayValue
+            //
+            this.lblDashTodayValue.AutoSize = true;
+            this.lblDashTodayValue.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
+            this.lblDashTodayValue.ForeColor = System.Drawing.Color.Teal;
+            this.lblDashTodayValue.Location = new System.Drawing.Point(8, 24);
+            this.lblDashTodayValue.Name = "lblDashTodayValue";
+            this.lblDashTodayValue.Size = new System.Drawing.Size(76, 30);
+            this.lblDashTodayValue.TabIndex = 1;
+            this.lblDashTodayValue.Text = "₱0.00";
+            //
+            // lblDashTodaySub
+            //
+            this.lblDashTodaySub.AutoSize = true;
+            this.lblDashTodaySub.Font = new System.Drawing.Font("Segoe UI", 8F);
+            this.lblDashTodaySub.ForeColor = System.Drawing.Color.Gray;
+            this.lblDashTodaySub.Location = new System.Drawing.Point(10, 62);
+            this.lblDashTodaySub.Name = "lblDashTodaySub";
+            this.lblDashTodaySub.Size = new System.Drawing.Size(75, 13);
+            this.lblDashTodaySub.TabIndex = 2;
+            this.lblDashTodaySub.Text = "0 transactions";
+            //
+            // pnlDashMonth
+            //
+            this.pnlDashMonth.BackColor = System.Drawing.Color.MintCream;
+            this.pnlDashMonth.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlDashMonth.Controls.Add(this.lblDashMonthSub);
+            this.pnlDashMonth.Controls.Add(this.lblDashMonthValue);
+            this.pnlDashMonth.Controls.Add(this.lblDashMonthTitle);
+            this.pnlDashMonth.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlDashMonth.Location = new System.Drawing.Point(244, 5);
+            this.pnlDashMonth.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.pnlDashMonth.Name = "pnlDashMonth";
+            this.pnlDashMonth.Size = new System.Drawing.Size(232, 90);
+            this.pnlDashMonth.TabIndex = 4;
+            //
+            // lblDashMonthTitle
+            //
+            this.lblDashMonthTitle.AutoSize = true;
+            this.lblDashMonthTitle.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold);
+            this.lblDashMonthTitle.ForeColor = System.Drawing.Color.DimGray;
+            this.lblDashMonthTitle.Location = new System.Drawing.Point(10, 8);
+            this.lblDashMonthTitle.Name = "lblDashMonthTitle";
+            this.lblDashMonthTitle.Size = new System.Drawing.Size(127, 13);
+            this.lblDashMonthTitle.TabIndex = 0;
+            this.lblDashMonthTitle.Text = "THIS MONTH\'S SALES";
+            //
+            // lblDashMonthValue
+            //
+            this.lblDashMonthValue.AutoSize = true;
+            this.lblDashMonthValue.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
+            this.lblDashMonthValue.ForeColor = System.Drawing.Color.Teal;
+            this.lblDashMonthValue.Location = new System.Drawing.Point(8, 24);
+            this.lblDashMonthValue.Name = "lblDashMonthValue";
+            this.lblDashMonthValue.Size = new System.Drawing.Size(76, 30);
+            this.lblDashMonthValue.TabIndex = 1;
+            this.lblDashMonthValue.Text = "₱0.00";
+            //
+            // lblDashMonthSub
+            //
+            this.lblDashMonthSub.AutoSize = true;
+            this.lblDashMonthSub.Font = new System.Drawing.Font("Segoe UI", 8F);
+            this.lblDashMonthSub.ForeColor = System.Drawing.Color.Gray;
+            this.lblDashMonthSub.Location = new System.Drawing.Point(10, 62);
+            this.lblDashMonthSub.Name = "lblDashMonthSub";
+            this.lblDashMonthSub.Size = new System.Drawing.Size(120, 13);
+            this.lblDashMonthSub.TabIndex = 2;
+            this.lblDashMonthSub.Text = "Calendar month to date";
+            //
+            // pnlDashStock
+            //
+            this.pnlDashStock.BackColor = System.Drawing.Color.MintCream;
+            this.pnlDashStock.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlDashStock.Controls.Add(this.lblDashStockSub);
+            this.pnlDashStock.Controls.Add(this.lblDashStockValue);
+            this.pnlDashStock.Controls.Add(this.lblDashStockTitle);
+            this.pnlDashStock.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlDashStock.Location = new System.Drawing.Point(484, 5);
+            this.pnlDashStock.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.pnlDashStock.Name = "pnlDashStock";
+            this.pnlDashStock.Size = new System.Drawing.Size(232, 90);
+            this.pnlDashStock.TabIndex = 5;
+            //
+            // lblDashStockTitle
+            //
+            this.lblDashStockTitle.AutoSize = true;
+            this.lblDashStockTitle.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold);
+            this.lblDashStockTitle.ForeColor = System.Drawing.Color.DimGray;
+            this.lblDashStockTitle.Location = new System.Drawing.Point(10, 8);
+            this.lblDashStockTitle.Name = "lblDashStockTitle";
+            this.lblDashStockTitle.Size = new System.Drawing.Size(89, 13);
+            this.lblDashStockTitle.TabIndex = 0;
+            this.lblDashStockTitle.Text = "ITEMS IN STOCK";
+            //
+            // lblDashStockValue
+            //
+            this.lblDashStockValue.AutoSize = true;
+            this.lblDashStockValue.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
+            this.lblDashStockValue.ForeColor = System.Drawing.Color.Teal;
+            this.lblDashStockValue.Location = new System.Drawing.Point(8, 24);
+            this.lblDashStockValue.Name = "lblDashStockValue";
+            this.lblDashStockValue.Size = new System.Drawing.Size(19, 30);
+            this.lblDashStockValue.TabIndex = 1;
+            this.lblDashStockValue.Text = "0";
+            //
+            // lblDashStockSub
+            //
+            this.lblDashStockSub.AutoSize = true;
+            this.lblDashStockSub.Font = new System.Drawing.Font("Segoe UI", 8F);
+            this.lblDashStockSub.ForeColor = System.Drawing.Color.Gray;
+            this.lblDashStockSub.Location = new System.Drawing.Point(10, 62);
+            this.lblDashStockSub.Name = "lblDashStockSub";
+            this.lblDashStockSub.Size = new System.Drawing.Size(120, 13);
+            this.lblDashStockSub.TabIndex = 2;
+            this.lblDashStockSub.Text = "Inventory value: ₱0.00";
+            //
+            // pnlDashOutOfStock
+            //
+            this.pnlDashOutOfStock.BackColor = System.Drawing.Color.MintCream;
+            this.pnlDashOutOfStock.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlDashOutOfStock.Controls.Add(this.lblDashOutOfStockSub);
+            this.pnlDashOutOfStock.Controls.Add(this.lblDashOutOfStockValue);
+            this.pnlDashOutOfStock.Controls.Add(this.lblDashOutOfStockTitle);
+            this.pnlDashOutOfStock.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlDashOutOfStock.Location = new System.Drawing.Point(724, 5);
+            this.pnlDashOutOfStock.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.pnlDashOutOfStock.Name = "pnlDashOutOfStock";
+            this.pnlDashOutOfStock.Size = new System.Drawing.Size(235, 90);
+            this.pnlDashOutOfStock.TabIndex = 6;
+            //
+            // lblDashOutOfStockTitle
+            //
+            this.lblDashOutOfStockTitle.AutoSize = true;
+            this.lblDashOutOfStockTitle.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold);
+            this.lblDashOutOfStockTitle.ForeColor = System.Drawing.Color.DimGray;
+            this.lblDashOutOfStockTitle.Location = new System.Drawing.Point(10, 8);
+            this.lblDashOutOfStockTitle.Name = "lblDashOutOfStockTitle";
+            this.lblDashOutOfStockTitle.Size = new System.Drawing.Size(76, 13);
+            this.lblDashOutOfStockTitle.TabIndex = 0;
+            this.lblDashOutOfStockTitle.Text = "OUT OF STOCK";
+            //
+            // lblDashOutOfStockValue
+            //
+            this.lblDashOutOfStockValue.AutoSize = true;
+            this.lblDashOutOfStockValue.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
+            this.lblDashOutOfStockValue.ForeColor = System.Drawing.Color.Tomato;
+            this.lblDashOutOfStockValue.Location = new System.Drawing.Point(8, 24);
+            this.lblDashOutOfStockValue.Name = "lblDashOutOfStockValue";
+            this.lblDashOutOfStockValue.Size = new System.Drawing.Size(19, 30);
+            this.lblDashOutOfStockValue.TabIndex = 1;
+            this.lblDashOutOfStockValue.Text = "0";
+            //
+            // lblDashOutOfStockSub
+            //
+            this.lblDashOutOfStockSub.AutoSize = true;
+            this.lblDashOutOfStockSub.Font = new System.Drawing.Font("Segoe UI", 8F);
+            this.lblDashOutOfStockSub.ForeColor = System.Drawing.Color.Gray;
+            this.lblDashOutOfStockSub.Location = new System.Drawing.Point(10, 62);
+            this.lblDashOutOfStockSub.Name = "lblDashOutOfStockSub";
+            this.lblDashOutOfStockSub.Size = new System.Drawing.Size(90, 13);
+            this.lblDashOutOfStockSub.TabIndex = 2;
+            this.lblDashOutOfStockSub.Text = "Need restocking";
+            //
+            // tlpChartGrid
+            //
+            this.tlpChartGrid.ColumnCount = 2;
+            this.tlpChartGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 64F));
+            this.tlpChartGrid.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 36F));
+            this.tlpChartGrid.Controls.Add(this.gbxDashChart, 0, 0);
+            this.tlpChartGrid.Controls.Add(this.gbxDashLowStock, 1, 0);
+            this.tlpChartGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tlpChartGrid.Location = new System.Drawing.Point(0, 100);
+            this.tlpChartGrid.Margin = new System.Windows.Forms.Padding(0);
+            this.tlpChartGrid.Name = "tlpChartGrid";
+            this.tlpChartGrid.RowCount = 1;
+            this.tlpChartGrid.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpChartGrid.Size = new System.Drawing.Size(963, 508);
+            this.tlpChartGrid.TabIndex = 1;
+            //
+            // gbxDashChart
+            //
+            this.gbxDashChart.BackColor = System.Drawing.Color.MintCream;
+            this.gbxDashChart.Controls.Add(this.chartDashboardSales);
+            this.gbxDashChart.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gbxDashChart.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold);
+            this.gbxDashChart.Location = new System.Drawing.Point(4, 6);
+            this.gbxDashChart.Margin = new System.Windows.Forms.Padding(4, 6, 8, 4);
+            this.gbxDashChart.Name = "gbxDashChart";
+            this.gbxDashChart.Size = new System.Drawing.Size(604, 498);
+            this.gbxDashChart.TabIndex = 7;
+            this.gbxDashChart.TabStop = false;
+            this.gbxDashChart.Text = "Sales This Year";
+            //
+            // chartDashboardSales
+            //
+            dashboardChartArea.Name = "ChartArea1";
+            this.chartDashboardSales.ChartAreas.Add(dashboardChartArea);
+            this.chartDashboardSales.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chartDashboardSales.Location = new System.Drawing.Point(3, 19);
+            this.chartDashboardSales.Name = "chartDashboardSales";
+            dashboardSeries.ChartArea = "ChartArea1";
+            dashboardSeries.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Column;
+            dashboardSeries.Name = "Sales";
+            this.chartDashboardSales.Series.Add(dashboardSeries);
+            this.chartDashboardSales.Size = new System.Drawing.Size(594, 458);
+            this.chartDashboardSales.TabIndex = 0;
+            this.chartDashboardSales.Text = "chartDashboardSales";
+            //
+            // gbxDashLowStock
+            //
+            this.gbxDashLowStock.BackColor = System.Drawing.Color.MintCream;
+            this.gbxDashLowStock.Controls.Add(this.dgvDashboardLowStock);
+            this.gbxDashLowStock.Controls.Add(this.pnlDashLowStockToolbar);
+            this.gbxDashLowStock.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gbxDashLowStock.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold);
+            this.gbxDashLowStock.Location = new System.Drawing.Point(620, 6);
+            this.gbxDashLowStock.Margin = new System.Windows.Forms.Padding(8, 6, 4, 4);
+            this.gbxDashLowStock.Name = "gbxDashLowStock";
+            this.gbxDashLowStock.Size = new System.Drawing.Size(339, 498);
+            this.gbxDashLowStock.TabIndex = 8;
+            this.gbxDashLowStock.TabStop = false;
+            this.gbxDashLowStock.Text = "Out of Stock Items";
+            //
+            // pnlDashLowStockToolbar
+            //
+            this.pnlDashLowStockToolbar.Controls.Add(this.btnPrintOutOfStock);
+            this.pnlDashLowStockToolbar.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlDashLowStockToolbar.Location = new System.Drawing.Point(3, 19);
+            this.pnlDashLowStockToolbar.Name = "pnlDashLowStockToolbar";
+            this.pnlDashLowStockToolbar.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
+            this.pnlDashLowStockToolbar.Size = new System.Drawing.Size(333, 38);
+            this.pnlDashLowStockToolbar.TabIndex = 1;
+            //
+            // btnPrintOutOfStock
+            //
+            this.btnPrintOutOfStock.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnPrintOutOfStock.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.btnPrintOutOfStock.Location = new System.Drawing.Point(233, 0);
+            this.btnPrintOutOfStock.Name = "btnPrintOutOfStock";
+            this.btnPrintOutOfStock.Size = new System.Drawing.Size(100, 32);
+            this.btnPrintOutOfStock.TabIndex = 0;
+            this.btnPrintOutOfStock.Text = "Print";
+            this.btnPrintOutOfStock.UseVisualStyleBackColor = true;
+            this.btnPrintOutOfStock.Click += new System.EventHandler(this.btnPrintOutOfStock_Click);
+            //
+            // dgvDashboardLowStock
+            //
+            this.dgvDashboardLowStock.AllowUserToAddRows = false;
+            this.dgvDashboardLowStock.AllowUserToDeleteRows = false;
+            this.dgvDashboardLowStock.AllowUserToResizeRows = false;
+            this.dgvDashboardLowStock.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvDashboardLowStock.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvDashboardLowStock.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colDashSerial,
+            this.colDashDescription,
+            this.colDashQty});
+            this.dgvDashboardLowStock.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvDashboardLowStock.Location = new System.Drawing.Point(3, 19);
+            this.dgvDashboardLowStock.Name = "dgvDashboardLowStock";
+            this.dgvDashboardLowStock.ReadOnly = true;
+            this.dgvDashboardLowStock.RowHeadersVisible = false;
+            this.dgvDashboardLowStock.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvDashboardLowStock.Size = new System.Drawing.Size(339, 458);
+            this.dgvDashboardLowStock.TabIndex = 0;
+            //
+            // colDashSerial
+            //
+            this.colDashSerial.FillWeight = 90F;
+            this.colDashSerial.HeaderText = "Serial";
+            this.colDashSerial.Name = "colDashSerial";
+            this.colDashSerial.ReadOnly = true;
+            //
+            // colDashDescription
+            //
+            this.colDashDescription.FillWeight = 180F;
+            this.colDashDescription.HeaderText = "Description";
+            this.colDashDescription.Name = "colDashDescription";
+            this.colDashDescription.ReadOnly = true;
+            //
+            // colDashQty
+            //
+            this.colDashQty.FillWeight = 60F;
+            this.colDashQty.HeaderText = "Qty";
+            this.colDashQty.Name = "colDashQty";
+            this.colDashQty.ReadOnly = true;
+            //
+            // pnlDashButtons
+            //
+            this.pnlDashButtons.Controls.Add(this.btnDashInventoryReport);
+            this.pnlDashButtons.Controls.Add(this.btnDashSalesChart);
+            this.pnlDashButtons.Controls.Add(this.btnDashPettyCash);
+            this.pnlDashButtons.Controls.Add(this.btnDashLoyalty);
+            this.pnlDashButtons.Controls.Add(this.btnDashSystemConfig);
+            this.pnlDashButtons.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlDashButtons.Location = new System.Drawing.Point(0, 608);
+            this.pnlDashButtons.Margin = new System.Windows.Forms.Padding(0);
+            this.pnlDashButtons.Name = "pnlDashButtons";
+            this.pnlDashButtons.Size = new System.Drawing.Size(963, 50);
+            this.pnlDashButtons.TabIndex = 2;
+            //
+            // btnDashInventoryReport
+            //
+            this.btnDashInventoryReport.Location = new System.Drawing.Point(0, 9);
+            this.btnDashInventoryReport.Name = "btnDashInventoryReport";
+            this.btnDashInventoryReport.Size = new System.Drawing.Size(150, 32);
+            this.btnDashInventoryReport.TabIndex = 9;
+            this.btnDashInventoryReport.Text = "Inventory Report";
+            this.btnDashInventoryReport.UseVisualStyleBackColor = true;
+            this.btnDashInventoryReport.Click += new System.EventHandler(this.btnDashInventoryReport_Click);
+            //
+            // btnDashSalesChart
+            //
+            this.btnDashSalesChart.Location = new System.Drawing.Point(160, 9);
+            this.btnDashSalesChart.Name = "btnDashSalesChart";
+            this.btnDashSalesChart.Size = new System.Drawing.Size(150, 32);
+            this.btnDashSalesChart.TabIndex = 10;
+            this.btnDashSalesChart.Text = "Sales Charts";
+            this.btnDashSalesChart.UseVisualStyleBackColor = true;
+            this.btnDashSalesChart.Click += new System.EventHandler(this.btnDashSalesChart_Click);
+            //
+            // btnDashPettyCash
+            //
+            this.btnDashPettyCash.Location = new System.Drawing.Point(320, 9);
+            this.btnDashPettyCash.Name = "btnDashPettyCash";
+            this.btnDashPettyCash.Size = new System.Drawing.Size(150, 32);
+            this.btnDashPettyCash.TabIndex = 11;
+            this.btnDashPettyCash.Text = "Petty Cash History";
+            this.btnDashPettyCash.UseVisualStyleBackColor = true;
+            this.btnDashPettyCash.Click += new System.EventHandler(this.btnDashPettyCash_Click);
+            //
+            // btnDashLoyalty
+            //
+            this.btnDashLoyalty.Location = new System.Drawing.Point(480, 9);
+            this.btnDashLoyalty.Name = "btnDashLoyalty";
+            this.btnDashLoyalty.Size = new System.Drawing.Size(150, 32);
+            this.btnDashLoyalty.TabIndex = 12;
+            this.btnDashLoyalty.Text = "Loyalty Program";
+            this.btnDashLoyalty.UseVisualStyleBackColor = true;
+            this.btnDashLoyalty.Click += new System.EventHandler(this.btnDashLoyalty_Click);
+            //
+            // btnDashSystemConfig
+            //
+            this.btnDashSystemConfig.Location = new System.Drawing.Point(640, 9);
+            this.btnDashSystemConfig.Name = "btnDashSystemConfig";
+            this.btnDashSystemConfig.Size = new System.Drawing.Size(150, 32);
+            this.btnDashSystemConfig.TabIndex = 13;
+            this.btnDashSystemConfig.Text = "System Config";
+            this.btnDashSystemConfig.UseVisualStyleBackColor = true;
+            this.btnDashSystemConfig.Click += new System.EventHandler(this.btnDashSystemConfig_Click);
+            //
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.H)));
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "Help";
+            this.helpToolStripMenuItem.Click += new System.EventHandler(this.helpToolStripMenuItem_Click);
+            //
+            // gettingStartedToolStripMenuItem
+            //
+            this.gettingStartedToolStripMenuItem.Name = "gettingStartedToolStripMenuItem";
+            this.gettingStartedToolStripMenuItem.Size = new System.Drawing.Size(100, 20);
+            this.gettingStartedToolStripMenuItem.Text = "Getting Started";
+            this.gettingStartedToolStripMenuItem.Click += new System.EventHandler(this.gettingStartedToolStripMenuItem_Click);
+            //
+            // techRequirementsToolStripMenuItem
+            //
+            this.techRequirementsToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.techRequirementsToolStripMenuItem.Name = "techRequirementsToolStripMenuItem";
+            this.techRequirementsToolStripMenuItem.Size = new System.Drawing.Size(24, 20);
+            this.techRequirementsToolStripMenuItem.Text = "?";
+            this.techRequirementsToolStripMenuItem.ToolTipText = "Technical Requirements";
+            this.techRequirementsToolStripMenuItem.Click += new System.EventHandler(this.techRequirementsToolStripMenuItem_Click);
+            //
+            // Purchases
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.FloralWhite;
+            this.ClientSize = new System.Drawing.Size(991, 760);
+            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.menuStrip1);
+            this.ForeColor = System.Drawing.Color.Blue;
+            this.MainMenuStrip = this.menuStrip1;
+            this.MaximizeBox = true;
+            this.Name = "Purchases";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Purchases";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.Activated += new System.EventHandler(this.Purchases_Activated);
+            this.Load += new System.EventHandler(this.Purchases_Load);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Purchases_KeyDown);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Purchases_KeyPress);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Purchases_KeyUp);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_items)).EndInit();
+            this.gbx_itemsearch.ResumeLayout(false);
+            this.gbx_itemsearch.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_itemSearch)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
+            this.tabControl1.ResumeLayout(false);
+            this.tabPageSales.ResumeLayout(false);
+            this.tabPageSales.PerformLayout();
+            this.tabPageManagePrices.ResumeLayout(false);
+            this.tabPageManagePrices.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv_managePrices)).EndInit();
+            this.tabPageDashboard.ResumeLayout(false);
+            this.tabPageDashboard.PerformLayout();
+            this.tlpDashboardBody.ResumeLayout(false);
+            this.tlpKpiRow.ResumeLayout(false);
+            this.pnlDashToday.ResumeLayout(false);
+            this.pnlDashToday.PerformLayout();
+            this.pnlDashMonth.ResumeLayout(false);
+            this.pnlDashMonth.PerformLayout();
+            this.pnlDashStock.ResumeLayout(false);
+            this.pnlDashStock.PerformLayout();
+            this.pnlDashOutOfStock.ResumeLayout(false);
+            this.pnlDashOutOfStock.PerformLayout();
+            this.tlpChartGrid.ResumeLayout(false);
+            this.gbxDashChart.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.chartDashboardSales)).EndInit();
+            this.gbxDashLowStock.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvDashboardLowStock)).EndInit();
+            this.pnlDashButtons.ResumeLayout(false);
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.NotifyIcon notifyIcon1;
+        private System.Windows.Forms.TextBox tbx_serialcode;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox gbx_itemsearch;
+        private System.Windows.Forms.TextBox tbx_search;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.DataGridView dgv_itemSearch;
+        private System.Windows.Forms.Label lbl_warning;
+        private System.Windows.Forms.Label counter;
+        private System.Windows.Forms.DataGridView dgv_items;
+        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox tbx_denomination;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label change;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.PrintDialog printDialog1;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label label6;
+        private System.Drawing.Printing.PrintDocument printDocument1;
+        private System.Windows.Forms.ComboBox selltype;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label teller;
+        private System.Windows.Forms.Label listing;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem salesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem vIewSalesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem myTransactionHistoryToolStripMenuItem;
+        private System.Windows.Forms.PrintPreviewDialog printPreviewDialog1;
+        private System.Drawing.Printing.PrintDocument printDocument2;
+        private System.Windows.Forms.ToolStripMenuItem generateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem barcodeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reportToolStripMenuItem;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem gettingStartedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem techRequirementsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem transactionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem holdTransactionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem resumeTransactionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem viewHeldTransactionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reportsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem inventoryReportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem salesReportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pettyCashReportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem salesChartToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dailySalesChartToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem monthlySalesChartToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem quarterlySalesChartToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem receiptsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem usersToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loyaltyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem taxConfigToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem systemConfigToolStripMenuItem;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPageSales;
+        private System.Windows.Forms.TabPage tabPageManagePrices;
+        private System.Windows.Forms.Label lbl_managePricesTitle;
+        private System.Windows.Forms.Label lbl_managePricesSearch;
+        private System.Windows.Forms.TextBox tbx_managePricesSearch;
+        private System.Windows.Forms.Label lbl_managePricesStatus;
+        private System.Windows.Forms.Button btn_refreshPrices;
+        private System.Windows.Forms.Button btn_savePrices;
+        private System.Windows.Forms.Button btn_addItem;
+        private System.Windows.Forms.Button btn_deletePrice;
+        private System.Windows.Forms.DataGridView dgv_managePrices;
+        private System.Windows.Forms.TabPage tabPageDashboard;
+        private System.Windows.Forms.Label lblDashboardTitle;
+        private System.Windows.Forms.Button btnDashboardRefresh;
+        private System.Windows.Forms.Label lblDashboardStatus;
+        private System.Windows.Forms.TableLayoutPanel tlpDashboardBody;
+        private System.Windows.Forms.TableLayoutPanel tlpKpiRow;
+        private System.Windows.Forms.Panel pnlDashToday;
+        private System.Windows.Forms.Label lblDashTodaySub;
+        private System.Windows.Forms.Label lblDashTodayValue;
+        private System.Windows.Forms.Label lblDashTodayTitle;
+        private System.Windows.Forms.Panel pnlDashMonth;
+        private System.Windows.Forms.Label lblDashMonthSub;
+        private System.Windows.Forms.Label lblDashMonthValue;
+        private System.Windows.Forms.Label lblDashMonthTitle;
+        private System.Windows.Forms.Panel pnlDashStock;
+        private System.Windows.Forms.Label lblDashStockSub;
+        private System.Windows.Forms.Label lblDashStockValue;
+        private System.Windows.Forms.Label lblDashStockTitle;
+        private System.Windows.Forms.Panel pnlDashOutOfStock;
+        private System.Windows.Forms.Label lblDashOutOfStockSub;
+        private System.Windows.Forms.Label lblDashOutOfStockValue;
+        private System.Windows.Forms.Label lblDashOutOfStockTitle;
+        private System.Windows.Forms.TableLayoutPanel tlpChartGrid;
+        private System.Windows.Forms.GroupBox gbxDashChart;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartDashboardSales;
+        private System.Windows.Forms.GroupBox gbxDashLowStock;
+        private System.Windows.Forms.Panel pnlDashLowStockToolbar;
+        private System.Windows.Forms.Button btnPrintOutOfStock;
+        private System.Windows.Forms.DataGridView dgvDashboardLowStock;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colDashSerial;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colDashDescription;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colDashQty;
+        private System.Windows.Forms.Panel pnlDashButtons;
+        private System.Windows.Forms.Button btnDashInventoryReport;
+        private System.Windows.Forms.Button btnDashSalesChart;
+        private System.Windows.Forms.Button btnDashPettyCash;
+        private System.Windows.Forms.Button btnDashLoyalty;
+        private System.Windows.Forms.Button btnDashSystemConfig;
+    }
+}
+
