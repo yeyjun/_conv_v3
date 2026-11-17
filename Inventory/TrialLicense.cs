@@ -65,6 +65,13 @@ namespace Inventory
         public static bool IsEnabled =>
             bool.TryParse(ConfigurationManager.AppSettings["TRIAL_ENABLED"], out bool enabled) && enabled;
 
+        /// <summary>Whether a running instance should close itself once the trial or an
+        /// activated license key's expiry date is reached, instead of only gating at the next
+        /// startup (see Form1's StartTrialExpiryWatcher). Off by default - existing installs that
+        /// never opted in keep today's startup-only gate.</summary>
+        public static bool AutoCloseOnExpiryEnabled =>
+            bool.TryParse(ConfigurationManager.AppSettings["TRIAL_AUTO_CLOSE_ENABLED"], out bool enabled) && enabled;
+
         public static int TrialDays =>
             int.TryParse(ConfigurationManager.AppSettings["TRIAL_DAYS"], out int days) && days > 0
                 ? days

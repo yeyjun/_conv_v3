@@ -402,6 +402,7 @@ namespace Inventory
         {
             chkTrialEnabled.Checked = TrialLicense.IsEnabled;
             nud_trialDays.Value = Math.Min(Math.Max(TrialLicense.TrialDays, nud_trialDays.Minimum), nud_trialDays.Maximum);
+            chkTrialAutoClose.Checked = TrialLicense.AutoCloseOnExpiryEnabled;
             SetTrialControlsEnabled(chkTrialEnabled.Checked);
 
             int tierIndex = cmbSubscriptionTier.Items.IndexOf(TrialLicense.SubscriptionTier);
@@ -1160,6 +1161,7 @@ namespace Inventory
 
                 SetSetting(config, "TRIAL_ENABLED", chkTrialEnabled.Checked.ToString());
                 SetSetting(config, "TRIAL_DAYS", ((int)nud_trialDays.Value).ToString());
+                SetSetting(config, "TRIAL_AUTO_CLOSE_ENABLED", chkTrialAutoClose.Checked.ToString());
 
                 SetSetting(config, "REMOTE_CONTROL_ENABLED", chkRemoteControlEnabled.Checked.ToString());
                 SetSetting(config, "REMOTE_CONTROL_PORT", ((int)nud_remotePort.Value).ToString());

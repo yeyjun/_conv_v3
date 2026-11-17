@@ -176,6 +176,8 @@ namespace Inventory
             this.btnActivateLicense = new System.Windows.Forms.Button();
             this.btnImportLicenseFile = new System.Windows.Forms.Button();
             this.openFileDialogLicense = new System.Windows.Forms.OpenFileDialog();
+            this.chkTrialAutoClose = new System.Windows.Forms.CheckBox();
+            this.lblTrialAutoCloseHint = new System.Windows.Forms.Label();
             this.tabPageDbSetup = new System.Windows.Forms.TabPage();
             this.lblDbSetupHint = new System.Windows.Forms.Label();
             this.lblNewDbName = new System.Windows.Forms.Label();
@@ -1949,6 +1951,8 @@ namespace Inventory
             // tabPageTrial
             //
             this.tabPageTrial.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageTrial.Controls.Add(this.lblTrialAutoCloseHint);
+            this.tabPageTrial.Controls.Add(this.chkTrialAutoClose);
             this.tabPageTrial.Controls.Add(this.btnImportLicenseFile);
             this.tabPageTrial.Controls.Add(this.btnActivateLicense);
             this.tabPageTrial.Controls.Add(this.cmbSubscriptionTier);
@@ -2098,6 +2102,29 @@ namespace Inventory
             this.openFileDialogLicense.DefaultExt = "tmrgo";
             this.openFileDialogLicense.Filter = "License Key File (*.tmrgo)|*.tmrgo|All files (*.*)|*.*";
             this.openFileDialogLicense.Title = "Choose License Key File";
+            //
+            // chkTrialAutoClose
+            //
+            this.chkTrialAutoClose.AutoSize = true;
+            this.chkTrialAutoClose.Location = new System.Drawing.Point(6, 285);
+            this.chkTrialAutoClose.Name = "chkTrialAutoClose";
+            this.chkTrialAutoClose.Size = new System.Drawing.Size(150, 17);
+            this.chkTrialAutoClose.TabIndex = 11;
+            this.chkTrialAutoClose.Text = "Auto-close app on expiry";
+            this.chkTrialAutoClose.UseVisualStyleBackColor = true;
+            //
+            // lblTrialAutoCloseHint
+            //
+            this.lblTrialAutoCloseHint.AutoSize = true;
+            this.lblTrialAutoCloseHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
+            this.lblTrialAutoCloseHint.ForeColor = System.Drawing.Color.Gray;
+            this.lblTrialAutoCloseHint.Location = new System.Drawing.Point(6, 305);
+            this.lblTrialAutoCloseHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblTrialAutoCloseHint.Name = "lblTrialAutoCloseHint";
+            this.lblTrialAutoCloseHint.Size = new System.Drawing.Size(101, 24);
+            this.lblTrialAutoCloseHint.TabIndex = 12;
+            this.lblTrialAutoCloseHint.Text = "If checked, a terminal already running will close itself as soon as the trial o" +
+    "r license expires, instead of waiting for the next restart.";
             //
             // tabPageDbSetup
             //
@@ -3144,6 +3171,8 @@ namespace Inventory
         private System.Windows.Forms.Button btnActivateLicense;
         private System.Windows.Forms.Button btnImportLicenseFile;
         private System.Windows.Forms.OpenFileDialog openFileDialogLicense;
+        private System.Windows.Forms.CheckBox chkTrialAutoClose;
+        private System.Windows.Forms.Label lblTrialAutoCloseHint;
         private System.Windows.Forms.TabPage tabPageDbSetup;
         private System.Windows.Forms.Label lblDbSetupHint;
         private System.Windows.Forms.Label lblNewDbName;

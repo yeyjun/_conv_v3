@@ -600,6 +600,43 @@ namespace Inventory
             this.Close();
         }
 
+        private System.Windows.Forms.Timer trialExpiryCheckTimer;
+        private const int TrialExpiryCheckPollMs = 2 * 60 * 1000;
+
+        /// <summary>
+        /// Polls TrialLicense's local, config/state-file-backed expiry checks (no DB round trip,
+        /// unlike StartMaintenanceWatcher) so a terminal left running across its trial or license
+        /// expiry date closes itself instead of only being gated at the next restart - opt-in via
+        /// TRIAL_AUTO_CLOSE_ENABLED (System Config > Trial / Licensing) since existing installs
+        /// expect today's startup-only gate by default.
+        /// </summary>
+        private void StartTrialExpiryWatcher()
+        {
+            trialExpiryCheckTimer = new System.Windows.Forms.Timer { Interval = TrialExpiryCheckPollMs };
+            trialExpiryCheckTimer.Tick += (s, e) => CheckTrialExpiry();
+            trialExpiryCheckTimer.Start();
+
+            this.FormClosed += (s, e) => trialExpiryCheckTimer.Stop();
+        }
+
+        private void CheckTrialExpiry()
+        {
+            if (!TrialLicense.AutoCloseOnExpiryEnabled)
+                return;
+
+            if (!TrialLicense.IsExpired && !TrialLicense.HasExpiredLicenseKey)
+                return;
+
+            trialExpiryCheckTimer.Stop();
+
+            ErrorDialog.Show(this,
+                "Your trial or license has expired. The application will now close.",
+                "Trial/License Expired",
+                $"IsExpired={TrialLicense.IsExpired}, HasExpiredLicenseKey={TrialLicense.HasExpiredLicenseKey}, LicenseExpiryUtc={TrialLicense.LicenseExpiryUtc}",
+                MessageBoxIcon.Warning);
+            this.Close();
+        }
+
         private System.Windows.Forms.Timer lowStockCheckTimer;
         private const int LowStockCheckPollMs = 2 * 60 * 1000;
         private DateTime _lastLowStockReminderShownUtc = DateTime.MinValue;
@@ -1079,6 +1116,7 @@ namespace Inventory
                 StartCacheReconnectWatcher();
                 StartLastSeenHeartbeat();
                 StartMaintenanceWatcher();
+                StartTrialExpiryWatcher();
                 StartLowStockReminderWatcher();
                 StartNetworkTitleBarWatcher();
                 StartIdleCartWatcher();
