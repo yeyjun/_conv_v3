@@ -12,12 +12,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using YourApp.Data;
 
-namespace _conv
+namespace Inventory
 {
 
     public partial class Login : Form
     {
-        Purchases purchasesForm = new Purchases();
         public string id = null;
         public string name = null;
         public bool IsAuthenticated { get; private set; } = false;
@@ -33,7 +32,6 @@ namespace _conv
         private void Login_Load(object sender, EventArgs e)
         {
 
-            purchasesForm.SendToBack();
         }
         public async Task con()
         {
@@ -55,12 +53,12 @@ namespace _conv
             }
             return;
         }
-        private void textBox1_Validated(object sender, EventArgs e)
+        private void tbx_login_Validated(object sender, EventArgs e)
         {
 
         }
 
-        private async void tbx_login_KeyUp(object sender, KeyEventArgs e)
+        private void tbx_login_KeyUp(object sender, KeyEventArgs e)
         {
             try
             {
@@ -70,17 +68,25 @@ namespace _conv
                     if (string.IsNullOrWhiteSpace(enteredCode))
                         return;
 
-                    // Pull the freshest credentials if the database is reachable right now. If it
-                    // isn't, DataCacheManager just keeps whatever was already cached (seeded at
-                    // startup, or from an earlier successful refresh), so login still works offline.
-                    try { DataCacheManager.Instance.RefreshTable("Users", "SELECT name, fullname FROM user_"); }
-                    catch { /* offline - fall through and use the cached copy */ }
-
-                    DataRow match = DataCacheManager.Instance.GetTable("Users").AsEnumerable()
-                        .FirstOrDefault(r => string.Equals(r.Field<string>("name"), enteredCode, StringComparison.OrdinalIgnoreCase));
+                    DataRow match = FindUserRow(enteredCode);
+                    if (match == null)
+                    {
+                        try { DataCacheManager.Instance.RefreshTable("Users", "SELECT name, fullname FROM user_"); }
+                        catch { }
+                        match = FindUserRow(enteredCode);
+                    }
+                    else
+                    {
+                        _ = Task.Run(() =>
+                        {
+                            try { DataCacheManager.Instance.RefreshTable("Users", "SELECT name, fullname FROM user_"); }
+                            catch { }
+                        });
+                    }
 
                     if (match == null)
                     {
+                        OperationLog.RecordLogin(nameof(Login), $"Login attempt with unrecognized code '{enteredCode}' failed.");
                         MessageBox.Show("Login code not recognized.", "Login Failed");
                         tbx_login.Clear();
                         return;
@@ -90,31 +96,28 @@ namespace _conv
                     name = enteredCode;
                     IsAuthenticated = true;
 
-                    string offlineNote = DataCacheManager.Instance.IsOfflineMode ? " (offline)" : "";
-                    await ActivityLog.LogAsync($"User '{enteredCode}' logged in{offlineNote}.");
-
-                    await TryStampLastSeenAsync(enteredCode);
-
                     tbx_login.Enabled = false;
-                    purchasesForm.Enabled = true;
-                    this.Close();
-                    purchasesForm.WindowState = FormWindowState.Normal;
-                    purchasesForm.BringToFront();
-
                     tbx_login.Clear();
+                    this.Close();
+
+                    string offlineNote = DataCacheManager.Instance.IsOfflineMode ? " (offline)" : "";
+                    string logText = $"User '{enteredCode}' logged in{offlineNote}.";
+                    _ = ActivityLog.LogAsync(logText);
+                    OperationLog.RecordLogin(nameof(Login), logText);
+                    _ = TryStampLastSeenAsync(enteredCode);
                 }
                 else if (e.KeyCode == Keys.Escape)
                 {
-                    purchasesForm.Close();
                     Application.Exit();
                 }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException oce)
             {
                 // A background DB call (activity log / sales-token stamp) timed out or was
                 // cancelled - treat it like any other offline hiccup rather than surfacing the
                 // raw "task was canceled" message, and leave the field ready to retry.
-                MessageBox.Show("The login check timed out. Check your connection and try again.", "Login Timed Out", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ErrorDialog.Show(this, "The login check timed out. Check your connection and try again.", "Login Timed Out", oce,
+                    MessageBoxIcon.Warning);
                 tbx_login.Clear();
             }
             catch (Exception ee)
@@ -122,6 +125,10 @@ namespace _conv
                 MessageBox.Show(ee.Message, "Login Error");
             }
         }
+
+        private static DataRow FindUserRow(string enteredCode) =>
+            DataCacheManager.Instance.GetTable("Users").AsEnumerable()
+                .FirstOrDefault(r => string.Equals(r.Field<string>("name"), enteredCode, StringComparison.OrdinalIgnoreCase));
 
         /// <summary>
         /// Best-effort: records the last-activity timestamp (UTC) in the database. Never blocks

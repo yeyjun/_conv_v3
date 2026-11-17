@@ -1,4 +1,4 @@
-namespace _conv
+namespace Inventory
 {
     partial class InventoryReport
     {
@@ -35,6 +35,7 @@ namespace _conv
             this.colRetailPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPricePerPiece = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colQuantity = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pnlButtons = new System.Windows.Forms.Panel();
             this.lblTotal = new System.Windows.Forms.Label();
             this.btnExport = new System.Windows.Forms.Button();
@@ -63,7 +64,8 @@ namespace _conv
             this.colWholesalePrice,
             this.colRetailPrice,
             this.colPricePerPiece,
-            this.colQuantity});
+            this.colQuantity,
+            this.colStatus});
             this.dgvInventory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvInventory.Location = new System.Drawing.Point(0, 0);
             this.dgvInventory.Name = "dgvInventory";
@@ -114,6 +116,13 @@ namespace _conv
             this.colQuantity.HeaderText = "Quantity";
             this.colQuantity.Name = "colQuantity";
             this.colQuantity.ReadOnly = true;
+            //
+            // colStatus
+            //
+            this.colStatus.FillWeight = 120F;
+            this.colStatus.HeaderText = "Status";
+            this.colStatus.Name = "colStatus";
+            this.colStatus.ReadOnly = true;
             //
             // pnlButtons
             //
@@ -251,6 +260,7 @@ namespace _conv
         private System.Windows.Forms.DataGridViewTextBoxColumn colRetailPrice;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPricePerPiece;
         private System.Windows.Forms.DataGridViewTextBoxColumn colQuantity;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStatus;
         private System.Windows.Forms.Panel pnlButtons;
         private System.Windows.Forms.Label lblTotal;
         private System.Windows.Forms.Button btnExport;

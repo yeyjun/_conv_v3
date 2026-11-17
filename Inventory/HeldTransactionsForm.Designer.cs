@@ -1,4 +1,4 @@
-namespace _conv
+namespace Inventory
 {
     partial class HeldTransactionsForm
     {
@@ -33,6 +33,7 @@ namespace _conv
             this.colHeldAt = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colItemCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colGrandTotal = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colRemarks = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pnlButtons = new System.Windows.Forms.Panel();
             this.btnRefresh = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -52,7 +53,8 @@ namespace _conv
             this.colTicketCode,
             this.colHeldAt,
             this.colItemCount,
-            this.colGrandTotal});
+            this.colGrandTotal,
+            this.colRemarks});
             this.dgvHeld.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvHeld.Location = new System.Drawing.Point(0, 0);
             this.dgvHeld.MultiSelect = false;
@@ -63,6 +65,7 @@ namespace _conv
             this.dgvHeld.Size = new System.Drawing.Size(420, 253);
             this.dgvHeld.TabIndex = 0;
             this.dgvHeld.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvHeld_CellDoubleClick);
+            this.dgvHeld.SelectionChanged += new System.EventHandler(this.dgvHeld_SelectionChanged);
             //
             // colTicketCode
             //
@@ -91,6 +94,15 @@ namespace _conv
             this.colGrandTotal.Name = "colGrandTotal";
             this.colGrandTotal.ReadOnly = true;
             this.colGrandTotal.Width = 90;
+            //
+            // colRemarks
+            //
+            // Blank for a manual hold - only set (by CheckIdleCart, via HoldCurrentTransaction)
+            // when a ticket was held automatically, explaining why.
+            this.colRemarks.HeaderText = "Remarks";
+            this.colRemarks.Name = "colRemarks";
+            this.colRemarks.ReadOnly = true;
+            this.colRemarks.Width = 220;
             //
             // pnlButtons
             //
@@ -138,7 +150,7 @@ namespace _conv
             this.lblEmpty.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lblEmpty.AutoSize = true;
             this.lblEmpty.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.lblEmpty.Location = new System.Drawing.Point(145, 115);
+            this.lblEmpty.Location = new System.Drawing.Point(255, 115);
             this.lblEmpty.Name = "lblEmpty";
             this.lblEmpty.Size = new System.Drawing.Size(130, 13);
             this.lblEmpty.TabIndex = 2;
@@ -149,12 +161,12 @@ namespace _conv
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(420, 297);
+            this.ClientSize = new System.Drawing.Size(640, 297);
             this.Controls.Add(this.lblEmpty);
             this.Controls.Add(this.dgvHeld);
             this.Controls.Add(this.pnlButtons);
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(320, 220);
+            this.MinimumSize = new System.Drawing.Size(460, 220);
             this.Name = "HeldTransactionsForm";
             this.ShowInTaskbar = false;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
@@ -176,6 +188,7 @@ namespace _conv
         private System.Windows.Forms.DataGridViewTextBoxColumn colHeldAt;
         private System.Windows.Forms.DataGridViewTextBoxColumn colItemCount;
         private System.Windows.Forms.DataGridViewTextBoxColumn colGrandTotal;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colRemarks;
         private System.Windows.Forms.Panel pnlButtons;
         private System.Windows.Forms.Button btnRefresh;
         private System.Windows.Forms.Button btnCancel;

@@ -7,13 +7,13 @@ using System.Text;
 namespace RemoteController
 {
     /// <summary>
-    /// Issues license keys for A10D-up installs. This tool is intentionally detached from
+    /// Issues license keys for BrewCode installs. This tool is intentionally detached from
     /// the main app's project (no shared reference, no build dependency) so it can be handed to
     /// someone who only ever needs to issue licenses, not build or run the POS app itself - but
     /// that means the key algorithm below is a deliberate copy of
-    /// _conv\TrialLicense.cs's ComputeExpectedKey, and the two MUST be changed together.
+    /// Inventory\TrialLicense.cs's ComputeExpectedKey, and the two MUST be changed together.
     /// If you rotate LicenseSalt here, every previously issued key file becomes invalid unless
-    /// _conv\TrialLicense.cs is updated with the exact same value at the same time.
+    /// Inventory\TrialLicense.cs is updated with the exact same value at the same time.
     /// </summary>
     internal static class LicenseKeyGenerator
     {
@@ -58,10 +58,13 @@ namespace RemoteController
         /// human-readable if decrypted for troubleshooting; the license key itself (which already
         /// has the expiry baked into its own hash) is what's actually checked.
         /// </summary>
-        public static void SaveLicenseFile(string filePath, string storeCode, string licenseKey, DateTime? expiryUtc)
+        public static void SaveLicenseFile(string filePath, string storeCode, string licenseKey, DateTime? expiryUtc,
+            string tier, int? monthsOfUse)
         {
             string content =
                 $"StoreCode={storeCode.Trim()}{Environment.NewLine}" +
+                $"Tier={tier}{Environment.NewLine}" +
+                $"MonthsOfUse={(monthsOfUse.HasValue ? monthsOfUse.Value.ToString() : "PERM")}{Environment.NewLine}" +
                 $"LicenseKey={licenseKey}{Environment.NewLine}" +
                 $"ExpiryUtc={(expiryUtc.HasValue ? expiryUtc.Value.ToString("o") : "PERM")}{Environment.NewLine}" +
                 $"IssuedUtc={DateTime.UtcNow:o}{Environment.NewLine}";

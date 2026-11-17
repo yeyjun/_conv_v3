@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using YourApp.Data;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Startup splash shown while <see cref="DataCacheManager.LoadAll"/> and the store

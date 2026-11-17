@@ -1,4 +1,4 @@
-namespace _conv
+namespace Inventory
 {
     partial class SplashForm
     {
@@ -21,7 +21,7 @@ namespace _conv
             this.lblTitle = new System.Windows.Forms.Label();
             this.lblSubtitle = new System.Windows.Forms.Label();
             this.lblStatus = new System.Windows.Forms.Label();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.pbLoading = new System.Windows.Forms.ProgressBar();
             ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
             this.SuspendLayout();
             //
@@ -70,14 +70,14 @@ namespace _conv
             this.lblStatus.Text = "Starting up...";
             this.lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             //
-            // progressBar1
+            // pbLoading
             //
-            this.progressBar1.Location = new System.Drawing.Point(40, 216);
-            this.progressBar1.MarqueeAnimationSpeed = 25;
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(360, 5);
-            this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
-            this.progressBar1.TabIndex = 4;
+            this.pbLoading.Location = new System.Drawing.Point(40, 216);
+            this.pbLoading.MarqueeAnimationSpeed = 25;
+            this.pbLoading.Name = "pbLoading";
+            this.pbLoading.Size = new System.Drawing.Size(360, 5);
+            this.pbLoading.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            this.pbLoading.TabIndex = 4;
             //
             // SplashForm
             //
@@ -85,7 +85,7 @@ namespace _conv
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(18, 32, 26);
             this.ClientSize = new System.Drawing.Size(440, 250);
-            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.pbLoading);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.lblSubtitle);
             this.Controls.Add(this.lblTitle);
@@ -106,6 +106,6 @@ namespace _conv
         private System.Windows.Forms.Label lblTitle;
         private System.Windows.Forms.Label lblSubtitle;
         private System.Windows.Forms.Label lblStatus;
-        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.ProgressBar pbLoading;
     }
 }

@@ -1,4 +1,4 @@
-namespace _conv
+namespace Inventory
 {
     partial class GenerateBarcode
     {
@@ -30,10 +30,10 @@ namespace _conv
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GenerateBarcode));
             this.barcoder = new System.Windows.Forms.PictureBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.printPreviewDialog1 = new System.Windows.Forms.PrintPreviewDialog();
-            this.printDocument1 = new System.Drawing.Printing.PrintDocument();
+            this.lbl_printStatus = new System.Windows.Forms.Label();
+            this.btn_print = new System.Windows.Forms.Button();
+            this.printPreviewDialogBarcode = new System.Windows.Forms.PrintPreviewDialog();
+            this.printDocumentBarcode = new System.Drawing.Printing.PrintDocument();
             this.gbx_item = new System.Windows.Forms.GroupBox();
             this.lbl_itemDescription = new System.Windows.Forms.Label();
             this.btn_findItem = new System.Windows.Forms.Button();
@@ -63,40 +63,40 @@ namespace _conv
             this.barcoder.TabIndex = 0;
             this.barcoder.TabStop = false;
             //
-            // label1
+            // lbl_printStatus
             //
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(48, 394);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(58, 22);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "label1";
-            this.label1.Visible = false;
+            this.lbl_printStatus.AutoSize = true;
+            this.lbl_printStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_printStatus.Location = new System.Drawing.Point(48, 394);
+            this.lbl_printStatus.Name = "lbl_printStatus";
+            this.lbl_printStatus.Size = new System.Drawing.Size(58, 22);
+            this.lbl_printStatus.TabIndex = 1;
+            this.lbl_printStatus.Text = "lbl_printStatus";
+            this.lbl_printStatus.Visible = false;
             //
-            // button1
+            // btn_print
             //
-            this.button1.Location = new System.Drawing.Point(289, 393);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 8;
-            this.button1.Text = "Print";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.btn_print.Location = new System.Drawing.Point(289, 393);
+            this.btn_print.Name = "btn_print";
+            this.btn_print.Size = new System.Drawing.Size(75, 23);
+            this.btn_print.TabIndex = 8;
+            this.btn_print.Text = "Print";
+            this.btn_print.UseVisualStyleBackColor = true;
+            this.btn_print.Click += new System.EventHandler(this.btn_print_Click);
             //
-            // printPreviewDialog1
+            // printPreviewDialogBarcode
             //
-            this.printPreviewDialog1.AutoScrollMargin = new System.Drawing.Size(0, 0);
-            this.printPreviewDialog1.AutoScrollMinSize = new System.Drawing.Size(0, 0);
-            this.printPreviewDialog1.ClientSize = new System.Drawing.Size(400, 300);
-            this.printPreviewDialog1.Enabled = true;
-            this.printPreviewDialog1.Icon = ((System.Drawing.Icon)(resources.GetObject("printPreviewDialog1.Icon")));
-            this.printPreviewDialog1.Name = "printPreviewDialog1";
-            this.printPreviewDialog1.Visible = false;
+            this.printPreviewDialogBarcode.AutoScrollMargin = new System.Drawing.Size(0, 0);
+            this.printPreviewDialogBarcode.AutoScrollMinSize = new System.Drawing.Size(0, 0);
+            this.printPreviewDialogBarcode.ClientSize = new System.Drawing.Size(400, 300);
+            this.printPreviewDialogBarcode.Enabled = true;
+            this.printPreviewDialogBarcode.Icon = ((System.Drawing.Icon)(resources.GetObject("printPreviewDialogBarcode.Icon")));
+            this.printPreviewDialogBarcode.Name = "printPreviewDialogBarcode";
+            this.printPreviewDialogBarcode.Visible = false;
             //
-            // printDocument1
+            // printDocumentBarcode
             //
-            this.printDocument1.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.printDocument1_PrintPage);
+            this.printDocumentBarcode.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.printDocumentBarcode_PrintPage);
             //
             // gbx_item
             //
@@ -248,8 +248,8 @@ namespace _conv
             this.ClientSize = new System.Drawing.Size(460, 430);
             this.Controls.Add(this.gbx_barcodeOptions);
             this.Controls.Add(this.gbx_item);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.btn_print);
+            this.Controls.Add(this.lbl_printStatus);
             this.Controls.Add(this.barcoder);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -273,10 +273,10 @@ namespace _conv
         #endregion
 
         private System.Windows.Forms.PictureBox barcoder;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.PrintPreviewDialog printPreviewDialog1;
-        private System.Drawing.Printing.PrintDocument printDocument1;
+        private System.Windows.Forms.Label lbl_printStatus;
+        private System.Windows.Forms.Button btn_print;
+        private System.Windows.Forms.PrintPreviewDialog printPreviewDialogBarcode;
+        private System.Drawing.Printing.PrintDocument printDocumentBarcode;
         private System.Windows.Forms.GroupBox gbx_item;
         private System.Windows.Forms.Label lbl_itemDescription;
         private System.Windows.Forms.Button btn_findItem;

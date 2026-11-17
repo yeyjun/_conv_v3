@@ -6,7 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     public partial class TellerHistoryForm : Form
     {
@@ -31,14 +31,6 @@ namespace _conv
             return table;
         }
 
-        private static string BuildConnectionString()
-        {
-            string dbsrv = ConfigurationManager.AppSettings["DB_SERVER"];
-            string dbname = ConfigurationManager.AppSettings["DB_NAME"];
-            string dbuser = ConfigurationManager.AppSettings["DB_USER"];
-            string dbpw = ConfigurationManager.AppSettings["DB_PASSWORD"];
-            return $"Server={dbsrv};user id={dbuser};password={dbpw};database={dbname};";
-        }
 
         private async void TellerHistoryForm_Load(object sender, EventArgs e)
         {
@@ -58,7 +50,7 @@ namespace _conv
         }
 
         // Builds a parameterized WHERE clause matching each day in [from, to] against the
-        // "yyyy-MMMM-dd ..." format transaction_date is stored in (see Purchases.CreateTransactionCode).
+        // "yyyy-MMMM-dd ..." format transaction_date is stored in (see Purchases.SaveSaleLineItemsAsync).
         private static void BuildDateRangeWhere(DateTime from, DateTime to, out string where, out List<MySqlParameter> parameters)
         {
             var clauses = new List<string>();
@@ -97,7 +89,7 @@ namespace _conv
 
             try
             {
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 using (var cmd = new MySqlCommand())
                 {
                     cmd.Connection = conn;
@@ -130,7 +122,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to load transaction history");
+                ErrorDialog.Show(this, "Could not load the teller's transaction history.", "Failed to Load Transaction History", ex);
             }
 
             ApplySearchFilter();

@@ -2,10 +2,10 @@ using System;
 using System.Configuration;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
-    /// Blocking gate shown whenever setting_'s MAINTENANCE_MODE flag is on - both at startup
+    /// Blocking gate shown whenever app_config_'s MAINTENANCE_MODE flag is on - both at startup
     /// (from Program.Main, before the main form ever opens) and while the app is already running
     /// (from Purchases' periodic maintenance watcher, if the flag flips on mid-session). Closing
     /// with DialogResult.OK (via a correct system admin PIN) lets the caller continue into/stay

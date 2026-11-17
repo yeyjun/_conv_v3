@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using YourApp.Data;
 
-namespace _conv
+namespace Inventory
 {
     public partial class GenerateBarcode : Form
     {
@@ -26,7 +26,7 @@ namespace _conv
 
         private void GenerateBarcode_Load(object sender, EventArgs e)
         {
-            printDocument1.PrintPage += printDocument1_PrintPage;
+            printDocumentBarcode.PrintPage += printDocumentBarcode_PrintPage;
 
             barcoder.SizeMode = PictureBoxSizeMode.StretchImage;
 
@@ -112,27 +112,27 @@ namespace _conv
                 $"&text={Uri.EscapeDataString(value)}";
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void btn_print_Click(object sender, EventArgs e)
         {
             // Anchors this label print on the same centrally configured printer (System Config >
             // Printer) as every other printable in the app, rather than falling back to whatever
             // Windows considers the default printer.
-            Purchases.ApplyReceiptPrinterSettings(printDocument1);
+            Purchases.ApplyReceiptPrinterSettings(printDocumentBarcode);
 
-            printPreviewDialog1.Document = printDocument1;
-            printPreviewDialog1.Width = 500;
-            printPreviewDialog1.Height = 500;
-            printPreviewDialog1.Document.PrintController = new System.Drawing.Printing.StandardPrintController();
+            printPreviewDialogBarcode.Document = printDocumentBarcode;
+            printPreviewDialogBarcode.Width = 500;
+            printPreviewDialogBarcode.Height = 500;
+            printPreviewDialogBarcode.Document.PrintController = new System.Drawing.Printing.StandardPrintController();
 
             // AutoZoom fits the rendered page to the preview window instead of a fixed 1.5x
             // that had no relation to the actual label size (and, combined with the old 300x90
             // window, made the preview effectively unreadable) - so whatever's on the label
             // shows at a size that actually matches what will print.
-            printPreviewDialog1.PrintPreviewControl.AutoZoom = true;
-            printPreviewDialog1.ShowDialog();
+            printPreviewDialogBarcode.PrintPreviewControl.AutoZoom = true;
+            printPreviewDialogBarcode.ShowDialog();
         }
 
-        private void printDocument1_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
+        private void printDocumentBarcode_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
         {
             e.Graphics.DrawImage(barcoder.Image, new Point(0, 0));
         }

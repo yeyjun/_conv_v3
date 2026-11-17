@@ -6,7 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Time-limited trial gate for new installs of this app. The trial clock is a local,
@@ -36,6 +36,31 @@ namespace _conv
         private static string StateFilePath => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             "App Inventory", "OfflineCache", "TrialStart.txt");
+
+        // A separate marker from TrialStart.txt/LICENSE_KEY on purpose: this one just means "the
+        // first-run Registration form has been completed on this machine", independent of whether
+        // a license was actually entered there (the store may have chosen to continue on the
+        // trial instead). Without it, a new install with TRIAL_ENABLED=false (this app's own
+        // production App.config ships that way) would never see the gate at all.
+        private static string RegisteredMarkerPath => Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            "App Inventory", "OfflineCache", "Registered.txt");
+
+        public static bool IsRegistered => File.Exists(RegisteredMarkerPath);
+
+        public static void MarkRegistered()
+        {
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(RegisteredMarkerPath));
+                File.WriteAllText(RegisteredMarkerPath, DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+            }
+            catch
+            {
+                // Best-effort, same as EnsureTrialStarted below - worst case the Registration
+                // form reappears on the next launch, which is just an extra click, not data loss.
+            }
+        }
 
         public static bool IsEnabled =>
             bool.TryParse(ConfigurationManager.AppSettings["TRIAL_ENABLED"], out bool enabled) && enabled;
@@ -102,6 +127,31 @@ namespace _conv
         /// (even if now expired) key for this store's STORE_CODE. Null for a perpetual license,
         /// an unset key, or a key that doesn't validate at all.</summary>
         public static DateTime? LicenseExpiryUtc => GetLicenseStatus().ExpiryUtc;
+
+        /// <summary>Subscription tier (Basic/Pro/Enterprise) of the most recently imported
+        /// .tmrgo file - set in TryActivateFromFile, blank for a manually-typed key (which
+        /// carries no tier) or a fresh install that's never imported one. Purely descriptive,
+        /// same as the Tier field in the file itself - nothing here gates features by tier.</summary>
+        public static string SubscriptionTier => ConfigurationManager.AppSettings["SUBSCRIPTION_TIER"] ?? "";
+
+        private static void SetSubscriptionTier(string tier)
+        {
+            try
+            {
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                if (config.AppSettings.Settings["SUBSCRIPTION_TIER"] == null)
+                    config.AppSettings.Settings.Add("SUBSCRIPTION_TIER", tier);
+                else
+                    config.AppSettings.Settings["SUBSCRIPTION_TIER"].Value = tier;
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+            catch
+            {
+                // Non-critical - worst case the tier just doesn't show up in System Config's
+                // status label, same fail-soft reasoning as EnsureTrialStarted/MarkRegistered.
+            }
+        }
 
         /// <summary>True once a license key was entered for this store and its embedded expiry
         /// date has passed - distinct from the trial simply running out, so the UI can tell a
@@ -205,6 +255,12 @@ namespace _conv
                     error = "The license key in that file isn't valid for this store.";
                     return false;
                 }
+
+                // Tier is purely descriptive (see LicenseKeyGenerator.SaveLicenseFile) - not part
+                // of what TryActivate just validated - so a file without it (e.g. one generated
+                // before this field existed) still activates fine, just without a tier to show.
+                if (values.TryGetValue("Tier", out string tier) && !string.IsNullOrWhiteSpace(tier))
+                    SetSubscriptionTier(tier.Trim());
 
                 return true;
             }

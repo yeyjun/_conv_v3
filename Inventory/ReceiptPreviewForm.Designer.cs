@@ -1,4 +1,4 @@
-namespace _conv
+namespace Inventory
 {
     partial class ReceiptPreviewForm
     {
@@ -20,6 +20,7 @@ namespace _conv
         private System.Windows.Forms.Label lblPriceOverrideValue;
         private System.Windows.Forms.Label lblPaperWidth;
         private System.Windows.Forms.ComboBox cbxPaperWidth;
+        private System.Windows.Forms.CheckBox chkPaperWidthIsDefault;
         private System.Windows.Forms.Button btnRefresh;
         private System.Windows.Forms.Panel pnlScroll;
         private DoubleBufferedPanel pnlPaper;
@@ -32,6 +33,7 @@ namespace _conv
         {
             this.pnlTop = new System.Windows.Forms.Panel();
             this.btnRefresh = new System.Windows.Forms.Button();
+            this.chkPaperWidthIsDefault = new System.Windows.Forms.CheckBox();
             this.cbxPaperWidth = new System.Windows.Forms.ComboBox();
             this.lblPaperWidth = new System.Windows.Forms.Label();
             this.lblPriceOverrideValue = new System.Windows.Forms.Label();
@@ -54,6 +56,7 @@ namespace _conv
             //
             this.pnlTop.BackColor = System.Drawing.Color.FloralWhite;
             this.pnlTop.Controls.Add(this.btnRefresh);
+            this.pnlTop.Controls.Add(this.chkPaperWidthIsDefault);
             this.pnlTop.Controls.Add(this.cbxPaperWidth);
             this.pnlTop.Controls.Add(this.lblPaperWidth);
             this.pnlTop.Controls.Add(this.lblPriceOverrideValue);
@@ -63,7 +66,7 @@ namespace _conv
             this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTop.Location = new System.Drawing.Point(0, 0);
             this.pnlTop.Name = "pnlTop";
-            this.pnlTop.Size = new System.Drawing.Size(640, 132);
+            this.pnlTop.Size = new System.Drawing.Size(640, 156);
             this.pnlTop.TabIndex = 0;
             //
             // btnRefresh
@@ -89,6 +92,16 @@ namespace _conv
             this.cbxPaperWidth.Size = new System.Drawing.Size(390, 21);
             this.cbxPaperWidth.TabIndex = 5;
             this.cbxPaperWidth.SelectedIndexChanged += new System.EventHandler(this.cbxPaperWidth_SelectedIndexChanged);
+            //
+            // chkPaperWidthIsDefault
+            //
+            this.chkPaperWidthIsDefault.AutoSize = true;
+            this.chkPaperWidthIsDefault.Location = new System.Drawing.Point(90, 105);
+            this.chkPaperWidthIsDefault.Name = "chkPaperWidthIsDefault";
+            this.chkPaperWidthIsDefault.Size = new System.Drawing.Size(184, 17);
+            this.chkPaperWidthIsDefault.TabIndex = 7;
+            this.chkPaperWidthIsDefault.Text = "Set as default paper width";
+            this.chkPaperWidthIsDefault.UseVisualStyleBackColor = true;
             //
             // lblPaperWidth
             //
@@ -140,7 +153,7 @@ namespace _conv
             this.lblHint.AutoSize = true;
             this.lblHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
             this.lblHint.ForeColor = System.Drawing.Color.Gray;
-            this.lblHint.Location = new System.Drawing.Point(12, 106);
+            this.lblHint.Location = new System.Drawing.Point(12, 130);
             this.lblHint.MaximumSize = new System.Drawing.Size(610, 0);
             this.lblHint.Name = "lblHint";
             this.lblHint.Size = new System.Drawing.Size(400, 12);
@@ -155,10 +168,10 @@ namespace _conv
             this.pnlScroll.BackColor = System.Drawing.Color.Gainsboro;
             this.pnlScroll.Controls.Add(this.pnlPaper);
             this.pnlScroll.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlScroll.Location = new System.Drawing.Point(0, 132);
+            this.pnlScroll.Location = new System.Drawing.Point(0, 156);
             this.pnlScroll.Name = "pnlScroll";
             this.pnlScroll.Padding = new System.Windows.Forms.Padding(16);
-            this.pnlScroll.Size = new System.Drawing.Size(640, 428);
+            this.pnlScroll.Size = new System.Drawing.Size(640, 404);
             this.pnlScroll.TabIndex = 1;
             //
             // pnlPaper

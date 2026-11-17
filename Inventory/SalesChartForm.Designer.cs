@@ -1,4 +1,4 @@
-namespace _conv
+namespace Inventory
 {
     partial class SalesChartForm
     {
@@ -37,12 +37,12 @@ namespace _conv
             this.lblMonth = new System.Windows.Forms.Label();
             this.numYear = new System.Windows.Forms.NumericUpDown();
             this.lblYear = new System.Windows.Forms.Label();
-            this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.chartSales = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.pnlSummary = new System.Windows.Forms.Panel();
             this.lblSummary = new System.Windows.Forms.Label();
             this.pnlControls.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numYear)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartSales)).BeginInit();
             this.pnlSummary.SuspendLayout();
             this.SuspendLayout();
             //
@@ -106,23 +106,23 @@ namespace _conv
             this.lblYear.TabIndex = 0;
             this.lblYear.Text = "Year:";
             //
-            // chart1
+            // chartSales
             //
             chartArea1.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea1);
-            this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chartSales.ChartAreas.Add(chartArea1);
+            this.chartSales.Dock = System.Windows.Forms.DockStyle.Fill;
             legend1.Name = "Legend1";
-            this.chart1.Legends.Add(legend1);
-            this.chart1.Location = new System.Drawing.Point(0, 46);
-            this.chart1.Name = "chart1";
+            this.chartSales.Legends.Add(legend1);
+            this.chartSales.Location = new System.Drawing.Point(0, 46);
+            this.chartSales.Name = "chartSales";
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Column;
             series1.Legend = "Legend1";
             series1.Name = "Sales";
-            this.chart1.Series.Add(series1);
-            this.chart1.Size = new System.Drawing.Size(900, 456);
-            this.chart1.TabIndex = 1;
-            this.chart1.Text = "chart1";
+            this.chartSales.Series.Add(series1);
+            this.chartSales.Size = new System.Drawing.Size(900, 456);
+            this.chartSales.TabIndex = 1;
+            this.chartSales.Text = "chartSales";
             //
             // pnlSummary
             //
@@ -148,7 +148,7 @@ namespace _conv
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(900, 532);
-            this.Controls.Add(this.chart1);
+            this.Controls.Add(this.chartSales);
             this.Controls.Add(this.pnlSummary);
             this.Controls.Add(this.pnlControls);
             this.MinimizeBox = false;
@@ -159,7 +159,7 @@ namespace _conv
             this.pnlControls.ResumeLayout(false);
             this.pnlControls.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numYear)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartSales)).EndInit();
             this.pnlSummary.ResumeLayout(false);
             this.pnlSummary.PerformLayout();
             this.ResumeLayout(false);
@@ -174,7 +174,7 @@ namespace _conv
         private System.Windows.Forms.Label lblMonth;
         private System.Windows.Forms.ComboBox cmbMonth;
         private System.Windows.Forms.Button btnRefresh;
-        private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartSales;
         private System.Windows.Forms.Panel pnlSummary;
         private System.Windows.Forms.Label lblSummary;
     }

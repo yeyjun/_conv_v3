@@ -9,7 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// One-way copy of the online MySQL tables into a local Microsoft Access (.accdb) file,
@@ -23,9 +23,9 @@ namespace _conv
     {
         private const string ProviderName = "Microsoft.ACE.OLEDB.12.0";
 
-        // RootNamespace (_conv) + folder + filename, dots instead of slashes - how csc names
+        // RootNamespace (Inventory) + folder + filename, dots instead of slashes - how csc names
         // embedded resources by default.
-        private const string TemplateResourceName = "_conv.Resources.AccessSyncTemplate.accdb";
+        private const string TemplateResourceName = "Inventory.Resources.AccessSyncTemplate.accdb";
 
         private sealed class ColumnSpec
         {
@@ -316,27 +316,24 @@ namespace _conv
                 {
                     mysqlConn.Open();
 
+                    // Single INSERT ... ON DUPLICATE KEY UPDATE per row instead of a separate
+                    // SELECT COUNT(*) existence check followed by a conditional UPDATE/INSERT -
+                    // halves the round trips to the remote DB (this can be ~2,500 rows).
+                    const string upsertCommandText =
+                        "INSERT INTO items_ (serial, description, price, retail_price, price_perpc, new_quantity, qty_inpc, date_of_entry) " +
+                        "VALUES (@serial, @description, @price, @retail_price, @price_perpc, @new_quantity, @qty_inpc, @date_of_entry) " +
+                        "ON DUPLICATE KEY UPDATE description=VALUES(description), price=VALUES(price), " +
+                        "retail_price=VALUES(retail_price), price_perpc=VALUES(price_perpc), new_quantity=VALUES(new_quantity), " +
+                        "qty_inpc=VALUES(qty_inpc), date_of_entry=VALUES(date_of_entry)";
+
                     foreach (DataRow row in data.Rows)
                     {
                         object serial = row["serial"];
                         if (serial == DBNull.Value)
                             continue;
 
-                        bool exists;
-                        using (var check = new MySqlCommand("SELECT COUNT(*) FROM items_ WHERE serial = @serial", mysqlConn))
-                        {
-                            check.Parameters.AddWithValue("@serial", serial);
-                            exists = Convert.ToInt32(check.ExecuteScalar()) > 0;
-                        }
-
-                        string commandText = exists
-                            ? "UPDATE items_ SET description=@description, price=@price, retail_price=@retail_price, " +
-                              "price_perpc=@price_perpc, new_quantity=@new_quantity, qty_inpc=@qty_inpc, date_of_entry=@date_of_entry " +
-                              "WHERE serial=@serial"
-                            : "INSERT INTO items_ (serial, description, price, retail_price, price_perpc, new_quantity, qty_inpc, date_of_entry) " +
-                              "VALUES (@serial, @description, @price, @retail_price, @price_perpc, @new_quantity, @qty_inpc, @date_of_entry)";
-
-                        using (var cmd = new MySqlCommand(commandText, mysqlConn))
+                        int affected;
+                        using (var cmd = new MySqlCommand(upsertCommandText, mysqlConn))
                         {
                             cmd.Parameters.AddWithValue("@serial", serial);
                             cmd.Parameters.AddWithValue("@description", row["description"]);
@@ -346,10 +343,14 @@ namespace _conv
                             cmd.Parameters.AddWithValue("@new_quantity", row["new_quantity"]);
                             cmd.Parameters.AddWithValue("@qty_inpc", row["qty_inpc"]);
                             cmd.Parameters.AddWithValue("@date_of_entry", row["date_of_entry"]);
-                            cmd.ExecuteNonQuery();
+                            affected = cmd.ExecuteNonQuery();
                         }
 
-                        if (exists) updatedCount++; else insertedCount++;
+                        // MySQL's documented ON DUPLICATE KEY UPDATE affected-rows convention:
+                        // 1 = a new row was inserted, 2 = an existing row's values changed,
+                        // 0 = an existing row already matched (still counted as "updated" here,
+                        // same as the old exists-check always counting a match as an update).
+                        if (affected == 1) insertedCount++; else updatedCount++;
                     }
                 }
 

@@ -7,7 +7,7 @@ using System.Text;
 namespace MauiRemoteController.Services;
 
 /// <summary>
-/// Talks to a running A10D-up terminal's RemoteControlServer (_conv\RemoteControlServer.cs
+/// Talks to a running BrewCode terminal's RemoteControlServer (Inventory\RemoteControlServer.cs
 /// in the POS app's repo) over TCP+TLS, using its one-request-per-connection protocol. This is a
 /// deliberate duplicate of that protocol rather than a shared library - this app has no build
 /// dependency on the POS app, same reasoning the existing WinForms RemoteController companion
@@ -98,7 +98,7 @@ public static class RemoteControlClient
     {
         // SslProtocols.None lets the OS pick the strongest protocol both sides support, rather
         // than hardcoding a version this platform's TLS stack might not actually offer - matches
-        // the server side (_conv\RemoteControlServer.cs).
+        // the server side (Inventory\RemoteControlServer.cs).
         var options = new SslClientAuthenticationOptions
         {
             TargetHost = host,

@@ -1,4 +1,4 @@
-﻿namespace _conv
+﻿namespace Inventory
 {
     partial class Purchases
     {
@@ -33,51 +33,54 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Purchases));
             System.Windows.Forms.DataVisualization.Charting.ChartArea dashboardChartArea = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Series dashboardSeries = new System.Windows.Forms.DataVisualization.Charting.Series();
-            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.trayIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.tbx_serialcode = new System.Windows.Forms.TextBox();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.gbx_itemList = new System.Windows.Forms.GroupBox();
             this.dgv_items = new System.Windows.Forms.DataGridView();
+            this.picCartLogo = new System.Windows.Forms.PictureBox();
             this.counter = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
+            this.lbl_pesoSign = new System.Windows.Forms.Label();
             this.change = new System.Windows.Forms.Label();
             this.tbx_denomination = new System.Windows.Forms.TextBox();
             this.gbx_itemsearch = new System.Windows.Forms.GroupBox();
             this.listing = new System.Windows.Forms.Label();
             this.dgv_itemSearch = new System.Windows.Forms.DataGridView();
-            this.label1 = new System.Windows.Forms.Label();
+            this.lbl_hintF7 = new System.Windows.Forms.Label();
             this.tbx_search = new System.Windows.Forms.TextBox();
             this.lbl_warning = new System.Windows.Forms.Label();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.printDialog1 = new System.Windows.Forms.PrintDialog();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.printDocument1 = new System.Drawing.Printing.PrintDocument();
+            this.timerClock = new System.Windows.Forms.Timer(this.components);
+            this.tbx_quantity = new System.Windows.Forms.TextBox();
+            this.lbl_step2 = new System.Windows.Forms.Label();
+            this.lbl_quantityCaption = new System.Windows.Forms.Label();
+            this.lbl_hintF4F9 = new System.Windows.Forms.Label();
+            this.printDialogReceipt = new System.Windows.Forms.PrintDialog();
+            this.picLogo = new System.Windows.Forms.PictureBox();
+            this.lbl_storeTitle = new System.Windows.Forms.Label();
+            this.printDocumentReceipt = new System.Drawing.Printing.PrintDocument();
             this.selltype = new System.Windows.Forms.ComboBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
+            this.lbl_step1 = new System.Windows.Forms.Label();
+            this.lbl_hintF12 = new System.Windows.Forms.Label();
+            this.lbl_quantityStatus = new System.Windows.Forms.Label();
             this.teller = new System.Windows.Forms.Label();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.menuStripMain = new System.Windows.Forms.MenuStrip();
             this.salesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.vIewSalesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.myTransactionHistoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.generateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.barcodeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.printPreviewDialog1 = new System.Windows.Forms.PrintPreviewDialog();
-            this.printDocument2 = new System.Drawing.Printing.PrintDocument();
-            this.label10 = new System.Windows.Forms.Label();
+            this.printPreviewDialogReceipt = new System.Windows.Forms.PrintPreviewDialog();
+            this.printDocumentOutOfStock = new System.Drawing.Printing.PrintDocument();
+            this.lbl_hintF1F3 = new System.Windows.Forms.Label();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gettingStartedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cachedItemsStatusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.techRequirementsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.transactionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.holdTransactionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resumeTransactionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewHeldTransactionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.transactionListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reportsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.inventoryReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.salesReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -90,8 +93,11 @@
             this.usersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.taxConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemConfigToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loyaltyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.statusStripMain = new System.Windows.Forms.StatusStrip();
+            this.lblOfflineItemsStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageSales = new System.Windows.Forms.TabPage();
             this.tabPageManagePrices = new System.Windows.Forms.TabPage();
             this.lbl_managePricesTitle = new System.Windows.Forms.Label();
@@ -103,6 +109,8 @@
             this.lbl_managePricesSearch = new System.Windows.Forms.Label();
             this.tbx_managePricesSearch = new System.Windows.Forms.TextBox();
             this.dgv_managePrices = new System.Windows.Forms.DataGridView();
+            this.gbx_managePricesHistory = new System.Windows.Forms.GroupBox();
+            this.lst_managePricesHistory = new System.Windows.Forms.ListBox();
             this.tabPageDashboard = new System.Windows.Forms.TabPage();
             this.lblDashboardTitle = new System.Windows.Forms.Label();
             this.btnDashboardRefresh = new System.Windows.Forms.Button();
@@ -141,13 +149,14 @@
             this.btnDashPettyCash = new System.Windows.Forms.Button();
             this.btnDashLoyalty = new System.Windows.Forms.Button();
             this.btnDashSystemConfig = new System.Windows.Forms.Button();
-            this.groupBox1.SuspendLayout();
+            this.gbx_itemList.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_items)).BeginInit();
             this.gbx_itemsearch.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_itemSearch)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.menuStrip1.SuspendLayout();
-            this.tabControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
+            this.menuStripMain.SuspendLayout();
+            this.statusStripMain.SuspendLayout();
+            this.tabControlMain.SuspendLayout();
             this.tabPageSales.SuspendLayout();
             this.tabPageManagePrices.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_managePrices)).BeginInit();
@@ -166,14 +175,16 @@
             this.pnlDashButtons.SuspendLayout();
             this.SuspendLayout();
             // 
-            // notifyIcon1
+            // trayIcon
             // 
-            this.notifyIcon1.Text = "notifyIcon1";
-            this.notifyIcon1.Visible = true;
+            this.trayIcon.Text = "trayIcon";
+            this.trayIcon.Visible = true;
             // 
             // tbx_serialcode
             // 
             this.tbx_serialcode.Anchor = (System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
+            this.tbx_serialcode.BackColor = System.Drawing.Color.Black;
+            this.tbx_serialcode.ForeColor = System.Drawing.Color.White;
             this.tbx_serialcode.Font = new System.Drawing.Font("Microsoft Sans Serif", 52F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tbx_serialcode.Location = new System.Drawing.Point(10, 131);
             this.tbx_serialcode.Name = "tbx_serialcode";
@@ -182,23 +193,24 @@
             this.tbx_serialcode.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.tbx_serialcode.TextChanged += new System.EventHandler(this.textchanged_tbx_serialcode);
             this.tbx_serialcode.Enter += new System.EventHandler(this.tbx_serialcode_Enter2);
+            this.tbx_serialcode.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbx_serialcode_KeyPress);
             this.tbx_serialcode.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tbx_serialcode_KeyUp);
-            this.tbx_serialcode.Validated += new System.EventHandler(this.tbx_serialcode_Validated_1);
             // 
-            // groupBox1
+            // gbx_itemList
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
-            this.groupBox1.BackColor = System.Drawing.Color.MintCream;
-            this.groupBox1.Controls.Add(this.dgv_items);
-            this.groupBox1.Controls.Add(this.counter);
-            this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.groupBox1.Location = new System.Drawing.Point(491, 243);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(481, 408);
-            this.groupBox1.TabIndex = 1;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Item List";
+            this.gbx_itemList.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
+            this.gbx_itemList.BackColor = System.Drawing.Color.MintCream;
+            this.gbx_itemList.Controls.Add(this.dgv_items);
+            this.gbx_itemList.Controls.Add(this.picCartLogo);
+            this.gbx_itemList.Controls.Add(this.counter);
+            this.gbx_itemList.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gbx_itemList.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.gbx_itemList.Location = new System.Drawing.Point(491, 243);
+            this.gbx_itemList.Name = "gbx_itemList";
+            this.gbx_itemList.Size = new System.Drawing.Size(481, 408);
+            this.gbx_itemList.TabIndex = 1;
+            this.gbx_itemList.TabStop = false;
+            this.gbx_itemList.Text = "Item List";
             // 
             // dgv_items
             // 
@@ -217,10 +229,26 @@
             this.dgv_items.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_items_CellContentClick);
             this.dgv_items.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_items_RowsAdded);
             this.dgv_items.RowsRemoved += new System.Windows.Forms.DataGridViewRowsRemovedEventHandler(this.dgv_items_RowsRemoved);
-            this.dgv_items.UserAddedRow += new System.Windows.Forms.DataGridViewRowEventHandler(this.dgv_items_UserAddedRow);
             this.dgv_items.UserDeletedRow += new System.Windows.Forms.DataGridViewRowEventHandler(this.dgv_items_UserDeletedRow);
+            this.dgv_items.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgv_items_KeyDown);
             this.dgv_items.KeyUp += new System.Windows.Forms.KeyEventHandler(this.dgv_items_KeyUp);
-            // 
+            this.dgv_items.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.dgv_items_KeyPress);
+            //
+            // picCartLogo
+            //
+            // Same bounds/anchor as dgv_items, in front of it in the Controls collection (so it
+            // paints on top) - DataGridView doesn't honor Control.BackgroundImage on its own empty
+            // area, so this overlay stands in for that. Transparent BackColor shows gbx_itemList's
+            // own background through the letterboxed edges of Zoom sizing rather than a mismatched
+            // solid block. Shown/hidden at runtime by Form1.cs based on dgv_items.Rows.Count.
+            this.picCartLogo.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
+            this.picCartLogo.BackColor = System.Drawing.Color.Transparent;
+            this.picCartLogo.Location = new System.Drawing.Point(6, 29);
+            this.picCartLogo.Name = "picCartLogo";
+            this.picCartLogo.Size = new System.Drawing.Size(469, 286);
+            this.picCartLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picCartLogo.TabStop = false;
+            //
             // counter
             // 
             this.counter.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
@@ -232,17 +260,17 @@
             this.counter.TabIndex = 1;
             this.counter.Text = "Add items on-board";
             // 
-            // label3
+            // lbl_pesoSign
             // 
-            this.label3.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.label3.Location = new System.Drawing.Point(792, 654);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(33, 31);
-            this.label3.TabIndex = 5;
-            this.label3.Text = "₱";
+            this.lbl_pesoSign.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right;
+            this.lbl_pesoSign.AutoSize = true;
+            this.lbl_pesoSign.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_pesoSign.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.lbl_pesoSign.Location = new System.Drawing.Point(792, 654);
+            this.lbl_pesoSign.Name = "lbl_pesoSign";
+            this.lbl_pesoSign.Size = new System.Drawing.Size(33, 31);
+            this.lbl_pesoSign.TabIndex = 5;
+            this.lbl_pesoSign.Text = "₱";
             // 
             // change
             // 
@@ -275,7 +303,7 @@
             this.gbx_itemsearch.BackColor = System.Drawing.SystemColors.Info;
             this.gbx_itemsearch.Controls.Add(this.listing);
             this.gbx_itemsearch.Controls.Add(this.dgv_itemSearch);
-            this.gbx_itemsearch.Controls.Add(this.label1);
+            this.gbx_itemsearch.Controls.Add(this.lbl_hintF7);
             this.gbx_itemsearch.Controls.Add(this.tbx_search);
             this.gbx_itemsearch.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.25F, System.Drawing.FontStyle.Bold);
             this.gbx_itemsearch.ForeColor = System.Drawing.SystemColors.WindowText;
@@ -315,17 +343,17 @@
             this.dgv_itemSearch.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.dgv_itemSearch_KeyPress);
             this.dgv_itemSearch.KeyUp += new System.Windows.Forms.KeyEventHandler(this.dgv_itemSearch_KeyUp);
             // 
-            // label1
+            // lbl_hintF7
             // 
-            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.Color.Tomato;
-            this.label1.Location = new System.Drawing.Point(4, 431);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(165, 15);
-            this.label1.TabIndex = 4;
-            this.label1.Text = "Select the item then press F7";
+            this.lbl_hintF7.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            this.lbl_hintF7.AutoSize = true;
+            this.lbl_hintF7.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_hintF7.ForeColor = System.Drawing.Color.Tomato;
+            this.lbl_hintF7.Location = new System.Drawing.Point(4, 431);
+            this.lbl_hintF7.Name = "lbl_hintF7";
+            this.lbl_hintF7.Size = new System.Drawing.Size(165, 15);
+            this.lbl_hintF7.TabIndex = 4;
+            this.lbl_hintF7.Text = "Select the item then press F7";
             // 
             // tbx_search
             // 
@@ -352,91 +380,91 @@
             this.lbl_warning.Text = "Welcome!";
             this.lbl_warning.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // timer1
+            // timerClock
             // 
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.timerClock.Tick += new System.EventHandler(this.timerClock_Tick);
             // 
-            // textBox1
+            // tbx_quantity
             // 
-            this.textBox1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            this.textBox1.BackColor = System.Drawing.SystemColors.InactiveCaptionText;
-            this.textBox1.Enabled = false;
-            this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 52F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox1.ForeColor = System.Drawing.SystemColors.Window;
-            this.textBox1.Location = new System.Drawing.Point(829, 131);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(142, 86);
-            this.textBox1.TabIndex = 4;
-            this.textBox1.Text = "1";
-            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
-            this.textBox1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyUp);
+            this.tbx_quantity.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            this.tbx_quantity.BackColor = System.Drawing.SystemColors.InactiveCaptionText;
+            this.tbx_quantity.Enabled = false;
+            this.tbx_quantity.Font = new System.Drawing.Font("Microsoft Sans Serif", 52F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tbx_quantity.ForeColor = System.Drawing.SystemColors.Window;
+            this.tbx_quantity.Location = new System.Drawing.Point(829, 131);
+            this.tbx_quantity.Name = "tbx_quantity";
+            this.tbx_quantity.Size = new System.Drawing.Size(142, 86);
+            this.tbx_quantity.TabIndex = 4;
+            this.tbx_quantity.Text = "1";
+            this.tbx_quantity.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.tbx_quantity.TextChanged += new System.EventHandler(this.tbx_quantity_TextChanged);
+            this.tbx_quantity.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tbx_quantity_KeyUp);
             // 
-            // label2
+            // lbl_step2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.label2.Location = new System.Drawing.Point(11, 104);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(311, 18);
-            this.label2.TabIndex = 6;
-            this.label2.Text = "2) Scan item or Select from items below";
+            this.lbl_step2.AutoSize = true;
+            this.lbl_step2.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_step2.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.lbl_step2.Location = new System.Drawing.Point(11, 104);
+            this.lbl_step2.Name = "lbl_step2";
+            this.lbl_step2.Size = new System.Drawing.Size(311, 18);
+            this.lbl_step2.TabIndex = 6;
+            this.lbl_step2.Text = "2) Scan item or Select from items below";
             // 
-            // label4
+            // lbl_quantityCaption
             // 
-            this.label4.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.label4.Location = new System.Drawing.Point(829, 113);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(70, 18);
-            this.label4.TabIndex = 7;
-            this.label4.Text = "Quantity";
+            this.lbl_quantityCaption.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            this.lbl_quantityCaption.AutoSize = true;
+            this.lbl_quantityCaption.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_quantityCaption.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.lbl_quantityCaption.Location = new System.Drawing.Point(829, 113);
+            this.lbl_quantityCaption.Name = "lbl_quantityCaption";
+            this.lbl_quantityCaption.Size = new System.Drawing.Size(70, 18);
+            this.lbl_quantityCaption.TabIndex = 7;
+            this.lbl_quantityCaption.Text = "Quantity";
             // 
-            // label5
+            // lbl_hintF4F9
             // 
-            this.label5.AutoSize = true;
-            this.label5.ForeColor = System.Drawing.Color.Tomato;
-            this.label5.Location = new System.Drawing.Point(10, 220);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(325, 13);
-            this.label5.TabIndex = 8;
-            this.label5.Text = "Press F4 to activate items below; Press F9 to activate denomination";
+            this.lbl_hintF4F9.AutoSize = true;
+            this.lbl_hintF4F9.ForeColor = System.Drawing.Color.Tomato;
+            this.lbl_hintF4F9.Location = new System.Drawing.Point(10, 220);
+            this.lbl_hintF4F9.Name = "lbl_hintF4F9";
+            this.lbl_hintF4F9.Size = new System.Drawing.Size(325, 13);
+            this.lbl_hintF4F9.TabIndex = 8;
+            this.lbl_hintF4F9.Text = "Press F4 to activate items below; Press F9 to activate denomination";
             // 
-            // printDialog1
+            // printDialogReceipt
             // 
-            this.printDialog1.UseEXDialog = true;
+            this.printDialogReceipt.UseEXDialog = true;
             // 
-            // pictureBox1
+            // picLogo
             // 
-            this.pictureBox1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
-            this.pictureBox1.Location = new System.Drawing.Point(832, 4);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(116, 105);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 9;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Tag = "Loading";
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            this.picLogo.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            this.picLogo.Location = new System.Drawing.Point(832, 4);
+            this.picLogo.Name = "picLogo";
+            this.picLogo.Size = new System.Drawing.Size(116, 105);
+            this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picLogo.TabIndex = 9;
+            this.picLogo.TabStop = false;
+            this.picLogo.Tag = "Loading";
+            this.picLogo.Click += new System.EventHandler(this.picLogo_Click);
             // 
-            // label6
+            // lbl_storeTitle
             // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Morally Serif", 30F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.ForeColor = System.Drawing.Color.Teal;
-            this.label6.Location = new System.Drawing.Point(509, 5);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(317, 44);
-            this.label6.TabIndex = 10;
-            this.label6.Text = "Baclig Minimart";
+            this.lbl_storeTitle.AutoSize = true;
+            this.lbl_storeTitle.Font = new System.Drawing.Font("Morally Serif", 30F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_storeTitle.ForeColor = System.Drawing.Color.Teal;
+            this.lbl_storeTitle.Location = new System.Drawing.Point(509, 5);
+            this.lbl_storeTitle.Name = "lbl_storeTitle";
+            this.lbl_storeTitle.Size = new System.Drawing.Size(317, 44);
+            this.lbl_storeTitle.TabIndex = 10;
+            this.lbl_storeTitle.Text = "Baclig Minimart";
             // 
-            // printDocument1
+            // printDocumentReceipt
             // 
-            this.printDocument1.BeginPrint += new System.Drawing.Printing.PrintEventHandler(this.printDocument1_BeginPrint);
-            this.printDocument1.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.PrintDocument1_PrintPage);
-            this.printDocument1.EndPrint += new System.Drawing.Printing.PrintEventHandler(this.printDocument1_EndPrint);
+            this.printDocumentReceipt.BeginPrint += new System.Drawing.Printing.PrintEventHandler(this.printDocumentReceipt_BeginPrint);
+            this.printDocumentReceipt.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.PrintDocumentReceipt_PrintPage);
+            this.printDocumentReceipt.EndPrint += new System.Drawing.Printing.PrintEventHandler(this.printDocumentReceipt_EndPrint);
             // 
             // selltype
             // 
@@ -455,36 +483,36 @@
             this.selltype.SelectedIndexChanged += new System.EventHandler(this.selltype_SelectedIndexChanged);
             this.selltype.KeyUp += new System.Windows.Forms.KeyEventHandler(this.selltype_KeyUp);
             // 
-            // label7
+            // lbl_step1
             // 
-            this.label7.AutoSize = true;
-            this.label7.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.label7.Location = new System.Drawing.Point(9, 19);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(160, 18);
-            this.label7.TabIndex = 12;
-            this.label7.Text = "1) Type of Purchase";
+            this.lbl_step1.AutoSize = true;
+            this.lbl_step1.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.lbl_step1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_step1.ForeColor = System.Drawing.SystemColors.WindowText;
+            this.lbl_step1.Location = new System.Drawing.Point(9, 19);
+            this.lbl_step1.Name = "lbl_step1";
+            this.lbl_step1.Size = new System.Drawing.Size(160, 18);
+            this.lbl_step1.TabIndex = 12;
+            this.lbl_step1.Text = "1) Type of Purchase";
             // 
-            // label8
+            // lbl_hintF12
             // 
-            this.label8.AutoSize = true;
-            this.label8.ForeColor = System.Drawing.Color.Tomato;
-            this.label8.Location = new System.Drawing.Point(341, 220);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(302, 13);
-            this.label8.TabIndex = 13;
-            this.label8.Text = "Select an item from item List then press F12 to change quantity";
+            this.lbl_hintF12.AutoSize = true;
+            this.lbl_hintF12.ForeColor = System.Drawing.Color.Tomato;
+            this.lbl_hintF12.Location = new System.Drawing.Point(341, 220);
+            this.lbl_hintF12.Name = "lbl_hintF12";
+            this.lbl_hintF12.Size = new System.Drawing.Size(302, 13);
+            this.lbl_hintF12.TabIndex = 13;
+            this.lbl_hintF12.Text = "Select an item from item List then press F12 to change quantity";
             // 
-            // label9
+            // lbl_quantityStatus
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(839, 224);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(15, 13);
-            this.label9.TabIndex = 14;
-            this.label9.Text = "**";
+            this.lbl_quantityStatus.AutoSize = true;
+            this.lbl_quantityStatus.Location = new System.Drawing.Point(839, 224);
+            this.lbl_quantityStatus.Name = "lbl_quantityStatus";
+            this.lbl_quantityStatus.Size = new System.Drawing.Size(15, 13);
+            this.lbl_quantityStatus.TabIndex = 14;
+            this.lbl_quantityStatus.Text = "**";
             // 
             // teller
             // 
@@ -497,9 +525,9 @@
             this.teller.TabIndex = 15;
             this.teller.Text = "Teller:";
             // 
-            // menuStrip1
+            // menuStripMain
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.salesToolStripMenuItem,
             this.generateToolStripMenuItem,
             this.transactionToolStripMenuItem,
@@ -509,15 +537,33 @@
             this.loyaltyToolStripMenuItem,
             this.taxConfigToolStripMenuItem,
             this.systemConfigToolStripMenuItem,
+            this.editLayoutToolStripMenuItem,
             this.helpToolStripMenuItem,
             this.gettingStartedToolStripMenuItem,
+            this.cachedItemsStatusToolStripMenuItem,
+            this.transactionListToolStripMenuItem,
             this.techRequirementsToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(983, 24);
-            this.menuStrip1.TabIndex = 16;
-            this.menuStrip1.Text = "menuStrip1";
-            // 
+            this.menuStripMain.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.menuStripMain.Location = new System.Drawing.Point(0, 0);
+            this.menuStripMain.Name = "menuStripMain";
+            this.menuStripMain.Size = new System.Drawing.Size(983, 24);
+            this.menuStripMain.TabIndex = 16;
+            this.menuStripMain.Text = "menuStripMain";
+            //
+            // statusStripMain
+            //
+            this.statusStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblOfflineItemsStatus});
+            this.statusStripMain.Location = new System.Drawing.Point(0, 738);
+            this.statusStripMain.Name = "statusStripMain";
+            this.statusStripMain.Size = new System.Drawing.Size(983, 22);
+            this.statusStripMain.TabIndex = 17;
+            //
+            // lblOfflineItemsStatus
+            //
+            this.lblOfflineItemsStatus.Name = "lblOfflineItemsStatus";
+            this.lblOfflineItemsStatus.Size = new System.Drawing.Size(0, 17);
+            //
             // salesToolStripMenuItem
             // 
             this.salesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -525,21 +571,21 @@
             this.myTransactionHistoryToolStripMenuItem});
             this.salesToolStripMenuItem.Name = "salesToolStripMenuItem";
             this.salesToolStripMenuItem.Size = new System.Drawing.Size(45, 20);
-            this.salesToolStripMenuItem.Text = "Sales";
+            this.salesToolStripMenuItem.Text = "Sales (&S)";
             this.salesToolStripMenuItem.Click += new System.EventHandler(this.salesToolStripMenuItem_Click);
             //
             // vIewSalesToolStripMenuItem
             //
             this.vIewSalesToolStripMenuItem.Name = "vIewSalesToolStripMenuItem";
             this.vIewSalesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.vIewSalesToolStripMenuItem.Text = "View Sales";
+            this.vIewSalesToolStripMenuItem.Text = "View Sales (&V)";
             this.vIewSalesToolStripMenuItem.Click += new System.EventHandler(this.vIewSalesToolStripMenuItem_Click);
             //
             // myTransactionHistoryToolStripMenuItem
             //
             this.myTransactionHistoryToolStripMenuItem.Name = "myTransactionHistoryToolStripMenuItem";
             this.myTransactionHistoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.myTransactionHistoryToolStripMenuItem.Text = "My Transaction History";
+            this.myTransactionHistoryToolStripMenuItem.Text = "My Transaction History (&M)";
             this.myTransactionHistoryToolStripMenuItem.Click += new System.EventHandler(this.myTransactionHistoryToolStripMenuItem_Click);
             //
             // generateToolStripMenuItem
@@ -549,20 +595,20 @@
             this.reportToolStripMenuItem});
             this.generateToolStripMenuItem.Name = "generateToolStripMenuItem";
             this.generateToolStripMenuItem.Size = new System.Drawing.Size(66, 20);
-            this.generateToolStripMenuItem.Text = "Generate";
+            this.generateToolStripMenuItem.Text = "Generate (&G)";
             // 
             // barcodeToolStripMenuItem
             // 
             this.barcodeToolStripMenuItem.Name = "barcodeToolStripMenuItem";
             this.barcodeToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
-            this.barcodeToolStripMenuItem.Text = "Barcode";
+            this.barcodeToolStripMenuItem.Text = "Barcode (&B)";
             this.barcodeToolStripMenuItem.Click += new System.EventHandler(this.barcodeToolStripMenuItem_Click);
             // 
             // reportToolStripMenuItem
             // 
             this.reportToolStripMenuItem.Name = "reportToolStripMenuItem";
             this.reportToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
-            this.reportToolStripMenuItem.Text = "Report";
+            this.reportToolStripMenuItem.Text = "Report (&R)";
             this.reportToolStripMenuItem.Click += new System.EventHandler(this.reportToolStripMenuItem_Click);
             //
             // transactionToolStripMenuItem
@@ -573,14 +619,14 @@
             this.viewHeldTransactionsToolStripMenuItem});
             this.transactionToolStripMenuItem.Name = "transactionToolStripMenuItem";
             this.transactionToolStripMenuItem.Size = new System.Drawing.Size(88, 20);
-            this.transactionToolStripMenuItem.Text = "Transaction";
+            this.transactionToolStripMenuItem.Text = "Transaction (&T)";
             //
             // holdTransactionToolStripMenuItem
             //
             this.holdTransactionToolStripMenuItem.Name = "holdTransactionToolStripMenuItem";
             this.holdTransactionToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
             this.holdTransactionToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
-            this.holdTransactionToolStripMenuItem.Text = "Hold Transaction";
+            this.holdTransactionToolStripMenuItem.Text = "Hold Transaction (&H)";
             this.holdTransactionToolStripMenuItem.Click += new System.EventHandler(this.holdTransactionToolStripMenuItem_Click);
             //
             // resumeTransactionToolStripMenuItem
@@ -588,15 +634,15 @@
             this.resumeTransactionToolStripMenuItem.Name = "resumeTransactionToolStripMenuItem";
             this.resumeTransactionToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F8;
             this.resumeTransactionToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
-            this.resumeTransactionToolStripMenuItem.Text = "Resume Transaction";
+            this.resumeTransactionToolStripMenuItem.Text = "Resume Transaction (&R)";
             this.resumeTransactionToolStripMenuItem.Click += new System.EventHandler(this.resumeTransactionToolStripMenuItem_Click);
             //
             // viewHeldTransactionsToolStripMenuItem
             //
             this.viewHeldTransactionsToolStripMenuItem.Name = "viewHeldTransactionsToolStripMenuItem";
-            this.viewHeldTransactionsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
+            this.viewHeldTransactionsToolStripMenuItem.ShortcutKeyDisplayString = "Num /";
             this.viewHeldTransactionsToolStripMenuItem.Size = new System.Drawing.Size(220, 22);
-            this.viewHeldTransactionsToolStripMenuItem.Text = "View Held Transactions";
+            this.viewHeldTransactionsToolStripMenuItem.Text = "View Held Transactions (&V)";
             this.viewHeldTransactionsToolStripMenuItem.Click += new System.EventHandler(this.viewHeldTransactionsToolStripMenuItem_Click);
             //
             // reportsToolStripMenuItem
@@ -608,27 +654,27 @@
             this.salesChartToolStripMenuItem});
             this.reportsToolStripMenuItem.Name = "reportsToolStripMenuItem";
             this.reportsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
-            this.reportsToolStripMenuItem.Text = "Report";
+            this.reportsToolStripMenuItem.Text = "Report (&R)";
             //
             // inventoryReportToolStripMenuItem
             //
             this.inventoryReportToolStripMenuItem.Name = "inventoryReportToolStripMenuItem";
             this.inventoryReportToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.inventoryReportToolStripMenuItem.Text = "Inventory";
+            this.inventoryReportToolStripMenuItem.Text = "Inventory (&I)";
             this.inventoryReportToolStripMenuItem.Click += new System.EventHandler(this.inventoryReportToolStripMenuItem_Click);
             //
             // salesReportToolStripMenuItem
             //
             this.salesReportToolStripMenuItem.Name = "salesReportToolStripMenuItem";
             this.salesReportToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.salesReportToolStripMenuItem.Text = "Sales";
+            this.salesReportToolStripMenuItem.Text = "Sales (&S)";
             this.salesReportToolStripMenuItem.Click += new System.EventHandler(this.salesReportToolStripMenuItem_Click);
             //
             // pettyCashReportToolStripMenuItem
             //
             this.pettyCashReportToolStripMenuItem.Name = "pettyCashReportToolStripMenuItem";
             this.pettyCashReportToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.pettyCashReportToolStripMenuItem.Text = "Petty Cash";
+            this.pettyCashReportToolStripMenuItem.Text = "Petty Cash (&P)";
             this.pettyCashReportToolStripMenuItem.Click += new System.EventHandler(this.pettyCashReportToolStripMenuItem_Click);
             //
             // salesChartToolStripMenuItem
@@ -639,55 +685,55 @@
             this.quarterlySalesChartToolStripMenuItem});
             this.salesChartToolStripMenuItem.Name = "salesChartToolStripMenuItem";
             this.salesChartToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.salesChartToolStripMenuItem.Text = "Sales Chart";
+            this.salesChartToolStripMenuItem.Text = "Sales Chart (&C)";
             //
             // dailySalesChartToolStripMenuItem
             //
             this.dailySalesChartToolStripMenuItem.Name = "dailySalesChartToolStripMenuItem";
             this.dailySalesChartToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.dailySalesChartToolStripMenuItem.Text = "Daily";
+            this.dailySalesChartToolStripMenuItem.Text = "Daily (&D)";
             this.dailySalesChartToolStripMenuItem.Click += new System.EventHandler(this.dailySalesChartToolStripMenuItem_Click);
             //
             // monthlySalesChartToolStripMenuItem
             //
             this.monthlySalesChartToolStripMenuItem.Name = "monthlySalesChartToolStripMenuItem";
             this.monthlySalesChartToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.monthlySalesChartToolStripMenuItem.Text = "Monthly";
+            this.monthlySalesChartToolStripMenuItem.Text = "Monthly (&M)";
             this.monthlySalesChartToolStripMenuItem.Click += new System.EventHandler(this.monthlySalesChartToolStripMenuItem_Click);
             //
             // quarterlySalesChartToolStripMenuItem
             //
             this.quarterlySalesChartToolStripMenuItem.Name = "quarterlySalesChartToolStripMenuItem";
             this.quarterlySalesChartToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.quarterlySalesChartToolStripMenuItem.Text = "Quarterly";
+            this.quarterlySalesChartToolStripMenuItem.Text = "Quarterly (&Q)";
             this.quarterlySalesChartToolStripMenuItem.Click += new System.EventHandler(this.quarterlySalesChartToolStripMenuItem_Click);
             //
             // receiptsToolStripMenuItem
             //
             this.receiptsToolStripMenuItem.Name = "receiptsToolStripMenuItem";
             this.receiptsToolStripMenuItem.Size = new System.Drawing.Size(65, 20);
-            this.receiptsToolStripMenuItem.Text = "Receipts";
+            this.receiptsToolStripMenuItem.Text = "Receipts (&C)";
             this.receiptsToolStripMenuItem.Click += new System.EventHandler(this.receiptsToolStripMenuItem_Click);
             //
             // usersToolStripMenuItem
             //
             this.usersToolStripMenuItem.Name = "usersToolStripMenuItem";
             this.usersToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
-            this.usersToolStripMenuItem.Text = "Users";
+            this.usersToolStripMenuItem.Text = "Users (&U)";
             this.usersToolStripMenuItem.Click += new System.EventHandler(this.usersToolStripMenuItem_Click);
             //
             // loyaltyToolStripMenuItem
             //
             this.loyaltyToolStripMenuItem.Name = "loyaltyToolStripMenuItem";
             this.loyaltyToolStripMenuItem.Size = new System.Drawing.Size(65, 20);
-            this.loyaltyToolStripMenuItem.Text = "Loyalty";
+            this.loyaltyToolStripMenuItem.Text = "Loyalty (&L)";
             this.loyaltyToolStripMenuItem.Click += new System.EventHandler(this.loyaltyToolStripMenuItem_Click);
             //
             // taxConfigToolStripMenuItem
             //
             this.taxConfigToolStripMenuItem.Name = "taxConfigToolStripMenuItem";
             this.taxConfigToolStripMenuItem.Size = new System.Drawing.Size(65, 20);
-            this.taxConfigToolStripMenuItem.Text = "Tax Config";
+            this.taxConfigToolStripMenuItem.Text = "Tax Config (&X)";
             this.taxConfigToolStripMenuItem.Click += new System.EventHandler(this.taxConfigToolStripMenuItem_Click);
             //
             // systemConfigToolStripMenuItem
@@ -696,53 +742,60 @@
             // Purchases.ProcessCmdKey, since a hidden ToolStripMenuItem's own ShortcutKeys never fires.
             this.systemConfigToolStripMenuItem.Name = "systemConfigToolStripMenuItem";
             this.systemConfigToolStripMenuItem.Size = new System.Drawing.Size(100, 20);
-            this.systemConfigToolStripMenuItem.Text = "System Config";
+            this.systemConfigToolStripMenuItem.Text = "System Config (&Y)";
             // Visibility is applied at runtime from the HIDDEN_MENUS setting (see
             // Purchases.ApplyMenuVisibility) - hidden by default, same as before this became
             // admin-configurable via System Config > Menus.
             this.systemConfigToolStripMenuItem.Click += new System.EventHandler(this.systemConfigToolStripMenuItem_Click);
             //
-            // printPreviewDialog1
+            // editLayoutToolStripMenuItem
             //
-            this.printPreviewDialog1.AutoScrollMargin = new System.Drawing.Size(0, 0);
-            this.printPreviewDialog1.AutoScrollMinSize = new System.Drawing.Size(0, 0);
-            this.printPreviewDialog1.ClientSize = new System.Drawing.Size(550, 650);
-            this.printPreviewDialog1.Enabled = true;
-            this.printPreviewDialog1.Icon = ((System.Drawing.Icon)(resources.GetObject("printPreviewDialog1.Icon")));
-            this.printPreviewDialog1.Name = "printPreviewDialog1";
-            this.printPreviewDialog1.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.printPreviewDialog1.Text = "Print Preview";
-            this.printPreviewDialog1.UseAntiAlias = true;
-            this.printPreviewDialog1.Visible = false;
-            this.printPreviewDialog1.Load += new System.EventHandler(this.printPreviewDialog1_Load);
+            this.editLayoutToolStripMenuItem.Name = "editLayoutToolStripMenuItem";
+            this.editLayoutToolStripMenuItem.Size = new System.Drawing.Size(100, 20);
+            this.editLayoutToolStripMenuItem.Text = "Edit Layout (&E)";
+            this.editLayoutToolStripMenuItem.Click += new System.EventHandler(this.editLayoutToolStripMenuItem_Click);
+            //
+            // printPreviewDialogReceipt
+            //
+            this.printPreviewDialogReceipt.AutoScrollMargin = new System.Drawing.Size(0, 0);
+            this.printPreviewDialogReceipt.AutoScrollMinSize = new System.Drawing.Size(0, 0);
+            this.printPreviewDialogReceipt.ClientSize = new System.Drawing.Size(550, 650);
+            this.printPreviewDialogReceipt.Enabled = true;
+            this.printPreviewDialogReceipt.Icon = ((System.Drawing.Icon)(resources.GetObject("printPreviewDialogReceipt.Icon")));
+            this.printPreviewDialogReceipt.Name = "printPreviewDialogReceipt";
+            this.printPreviewDialogReceipt.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.printPreviewDialogReceipt.Text = "Print Preview";
+            this.printPreviewDialogReceipt.UseAntiAlias = true;
+            this.printPreviewDialogReceipt.Visible = false;
+            this.printPreviewDialogReceipt.Load += new System.EventHandler(this.printPreviewDialogReceipt_Load);
             // 
-            // printDocument2
+            // printDocumentOutOfStock
             //
-            this.printDocument2.BeginPrint += new System.Drawing.Printing.PrintEventHandler(this.printDocument2_BeginPrint);
-            this.printDocument2.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.printDocument2_PrintPage);
+            this.printDocumentOutOfStock.BeginPrint += new System.Drawing.Printing.PrintEventHandler(this.printDocumentOutOfStock_BeginPrint);
+            this.printDocumentOutOfStock.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.printDocumentOutOfStock_PrintPage);
             //
-            // label10
+            // lbl_hintF1F3
             // 
-            this.label10.AutoSize = true;
-            this.label10.ForeColor = System.Drawing.Color.Tomato;
-            this.label10.Location = new System.Drawing.Point(10, 71);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(125, 13);
-            this.label10.TabIndex = 17;
-            this.label10.Text = "Press F1/F2/F3 to select";
+            this.lbl_hintF1F3.AutoSize = true;
+            this.lbl_hintF1F3.ForeColor = System.Drawing.Color.Tomato;
+            this.lbl_hintF1F3.Location = new System.Drawing.Point(10, 71);
+            this.lbl_hintF1F3.Name = "lbl_hintF1F3";
+            this.lbl_hintF1F3.Size = new System.Drawing.Size(125, 13);
+            this.lbl_hintF1F3.TabIndex = 17;
+            this.lbl_hintF1F3.Text = "Press F1/F2/F3 to select";
             //
-            // tabControl1
+            // tabControlMain
             //
-            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
-            this.tabControl1.Controls.Add(this.tabPageSales);
-            this.tabControl1.Controls.Add(this.tabPageManagePrices);
-            this.tabControl1.Controls.Add(this.tabPageDashboard);
-            this.tabControl1.Location = new System.Drawing.Point(0, 24);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(991, 736);
-            this.tabControl1.TabIndex = 100;
-            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
+            this.tabControlMain.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right;
+            this.tabControlMain.Controls.Add(this.tabPageSales);
+            this.tabControlMain.Controls.Add(this.tabPageManagePrices);
+            this.tabControlMain.Controls.Add(this.tabPageDashboard);
+            this.tabControlMain.Location = new System.Drawing.Point(0, 24);
+            this.tabControlMain.Name = "tabControlMain";
+            this.tabControlMain.SelectedIndex = 0;
+            this.tabControlMain.Size = new System.Drawing.Size(991, 736);
+            this.tabControlMain.TabIndex = 100;
+            this.tabControlMain.SelectedIndexChanged += new System.EventHandler(this.tabControlMain_SelectedIndexChanged);
             //
             // tabPageSales
             //
@@ -753,24 +806,24 @@
             this.tabPageSales.Size = new System.Drawing.Size(983, 710);
             this.tabPageSales.TabIndex = 0;
             this.tabPageSales.Text = "Sales";
-            this.tabPageSales.Controls.Add(this.label10);
+            this.tabPageSales.Controls.Add(this.lbl_hintF1F3);
             this.tabPageSales.Controls.Add(this.teller);
-            this.tabPageSales.Controls.Add(this.label9);
-            this.tabPageSales.Controls.Add(this.label8);
-            this.tabPageSales.Controls.Add(this.label7);
+            this.tabPageSales.Controls.Add(this.lbl_quantityStatus);
+            this.tabPageSales.Controls.Add(this.lbl_hintF12);
+            this.tabPageSales.Controls.Add(this.lbl_step1);
             this.tabPageSales.Controls.Add(this.selltype);
-            this.tabPageSales.Controls.Add(this.label6);
-            this.tabPageSales.Controls.Add(this.pictureBox1);
-            this.tabPageSales.Controls.Add(this.label3);
-            this.tabPageSales.Controls.Add(this.label5);
+            this.tabPageSales.Controls.Add(this.lbl_storeTitle);
+            this.tabPageSales.Controls.Add(this.picLogo);
+            this.tabPageSales.Controls.Add(this.lbl_pesoSign);
+            this.tabPageSales.Controls.Add(this.lbl_hintF4F9);
             this.tabPageSales.Controls.Add(this.tbx_denomination);
             this.tabPageSales.Controls.Add(this.change);
-            this.tabPageSales.Controls.Add(this.label4);
-            this.tabPageSales.Controls.Add(this.label2);
-            this.tabPageSales.Controls.Add(this.textBox1);
+            this.tabPageSales.Controls.Add(this.lbl_quantityCaption);
+            this.tabPageSales.Controls.Add(this.lbl_step2);
+            this.tabPageSales.Controls.Add(this.tbx_quantity);
             this.tabPageSales.Controls.Add(this.lbl_warning);
             this.tabPageSales.Controls.Add(this.gbx_itemsearch);
-            this.tabPageSales.Controls.Add(this.groupBox1);
+            this.tabPageSales.Controls.Add(this.gbx_itemList);
             this.tabPageSales.Controls.Add(this.tbx_serialcode);
             //
             // tabPageManagePrices
@@ -783,6 +836,7 @@
             this.tabPageManagePrices.TabIndex = 1;
             this.tabPageManagePrices.Text = "Manage Prices";
             this.tabPageManagePrices.Controls.Add(this.dgv_managePrices);
+            this.tabPageManagePrices.Controls.Add(this.gbx_managePricesHistory);
             this.tabPageManagePrices.Controls.Add(this.btn_savePrices);
             this.tabPageManagePrices.Controls.Add(this.btn_refreshPrices);
             this.tabPageManagePrices.Controls.Add(this.btn_addItem);
@@ -829,8 +883,33 @@
             this.dgv_managePrices.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv_managePrices.Location = new System.Drawing.Point(10, 45);
             this.dgv_managePrices.Name = "dgv_managePrices";
-            this.dgv_managePrices.Size = new System.Drawing.Size(963, 590);
+            this.dgv_managePrices.Size = new System.Drawing.Size(690, 590);
             this.dgv_managePrices.TabIndex = 1;
+            this.dgv_managePrices.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dgv_managePrices_CellBeginEdit);
+            this.dgv_managePrices.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_managePrices_CellEndEdit);
+            //
+            // gbx_managePricesHistory
+            //
+            this.gbx_managePricesHistory.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Right);
+            this.gbx_managePricesHistory.Controls.Add(this.lst_managePricesHistory);
+            this.gbx_managePricesHistory.Location = new System.Drawing.Point(710, 45);
+            this.gbx_managePricesHistory.Name = "gbx_managePricesHistory";
+            this.gbx_managePricesHistory.Size = new System.Drawing.Size(263, 590);
+            this.gbx_managePricesHistory.TabIndex = 9;
+            this.gbx_managePricesHistory.TabStop = false;
+            this.gbx_managePricesHistory.Text = "Recent Price Edits";
+            //
+            // lst_managePricesHistory
+            //
+            this.lst_managePricesHistory.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.lst_managePricesHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lst_managePricesHistory.ForeColor = System.Drawing.Color.Gray;
+            this.lst_managePricesHistory.IntegralHeight = false;
+            this.lst_managePricesHistory.Location = new System.Drawing.Point(3, 16);
+            this.lst_managePricesHistory.Name = "lst_managePricesHistory";
+            this.lst_managePricesHistory.SelectionMode = System.Windows.Forms.SelectionMode.None;
+            this.lst_managePricesHistory.Size = new System.Drawing.Size(257, 571);
+            this.lst_managePricesHistory.TabIndex = 0;
             //
             // btn_refreshPrices
             //
@@ -1348,24 +1427,38 @@
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.H)));
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.helpToolStripMenuItem.Text = "Help";
+            this.helpToolStripMenuItem.Text = "Help (&H)";
             this.helpToolStripMenuItem.Click += new System.EventHandler(this.helpToolStripMenuItem_Click);
             //
             // gettingStartedToolStripMenuItem
             //
             this.gettingStartedToolStripMenuItem.Name = "gettingStartedToolStripMenuItem";
             this.gettingStartedToolStripMenuItem.Size = new System.Drawing.Size(100, 20);
-            this.gettingStartedToolStripMenuItem.Text = "Getting Started";
+            this.gettingStartedToolStripMenuItem.Text = "Getting Started (&G)";
             this.gettingStartedToolStripMenuItem.Click += new System.EventHandler(this.gettingStartedToolStripMenuItem_Click);
+            //
+            // cachedItemsStatusToolStripMenuItem
+            //
+            this.cachedItemsStatusToolStripMenuItem.Name = "cachedItemsStatusToolStripMenuItem";
+            this.cachedItemsStatusToolStripMenuItem.Size = new System.Drawing.Size(120, 20);
+            this.cachedItemsStatusToolStripMenuItem.Text = "";
+            this.cachedItemsStatusToolStripMenuItem.Click += new System.EventHandler(this.cachedItemsStatusToolStripMenuItem_Click);
             //
             // techRequirementsToolStripMenuItem
             //
-            this.techRequirementsToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.techRequirementsToolStripMenuItem.Name = "techRequirementsToolStripMenuItem";
             this.techRequirementsToolStripMenuItem.Size = new System.Drawing.Size(24, 20);
             this.techRequirementsToolStripMenuItem.Text = "?";
             this.techRequirementsToolStripMenuItem.ToolTipText = "Technical Requirements";
             this.techRequirementsToolStripMenuItem.Click += new System.EventHandler(this.techRequirementsToolStripMenuItem_Click);
+            //
+            // transactionListToolStripMenuItem
+            //
+            this.transactionListToolStripMenuItem.Name = "transactionListToolStripMenuItem";
+            this.transactionListToolStripMenuItem.Size = new System.Drawing.Size(100, 20);
+            this.transactionListToolStripMenuItem.Text = "No transactions yet";
+            this.transactionListToolStripMenuItem.ToolTipText = "Last transaction code (click to view transaction list)";
+            this.transactionListToolStripMenuItem.Click += new System.EventHandler(this.transactionListToolStripMenuItem_Click);
             //
             // Purchases
             // 
@@ -1373,30 +1466,38 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FloralWhite;
             this.ClientSize = new System.Drawing.Size(991, 760);
-            this.Controls.Add(this.tabControl1);
-            this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.tabControlMain);
+            this.Controls.Add(this.statusStripMain);
+            this.Controls.Add(this.menuStripMain);
             this.ForeColor = System.Drawing.Color.Blue;
-            this.MainMenuStrip = this.menuStrip1;
+            this.MainMenuStrip = this.menuStripMain;
             this.MaximizeBox = true;
             this.Name = "Purchases";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Purchases";
+            // Sizable (not None) so the title bar - and its Minimize/Maximize/Close buttons - are
+            // actually present. Starts Maximized (restored to Normal via the title bar's own
+            // Restore button, or by the cashier double-clicking the title bar) - Purchases_Load
+            // re-asserts Maximized once login succeeds, same as this initial value.
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Activated += new System.EventHandler(this.Purchases_Activated);
             this.Load += new System.EventHandler(this.Purchases_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Purchases_KeyDown);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Purchases_KeyPress);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Purchases_KeyUp);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            this.gbx_itemList.ResumeLayout(false);
+            this.gbx_itemList.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_items)).EndInit();
             this.gbx_itemsearch.ResumeLayout(false);
             this.gbx_itemsearch.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_itemSearch)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
-            this.tabControl1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
+            this.menuStripMain.ResumeLayout(false);
+            this.menuStripMain.PerformLayout();
+            this.statusStripMain.ResumeLayout(false);
+            this.statusStripMain.PerformLayout();
+            this.tabControlMain.ResumeLayout(false);
             this.tabPageSales.ResumeLayout(false);
             this.tabPageSales.PerformLayout();
             this.tabPageManagePrices.ResumeLayout(false);
@@ -1427,51 +1528,54 @@
 
         #endregion
 
-        private System.Windows.Forms.NotifyIcon notifyIcon1;
+        private System.Windows.Forms.NotifyIcon trayIcon;
         private System.Windows.Forms.TextBox tbx_serialcode;
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox gbx_itemList;
         private System.Windows.Forms.GroupBox gbx_itemsearch;
         private System.Windows.Forms.TextBox tbx_search;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lbl_hintF7;
         private System.Windows.Forms.DataGridView dgv_itemSearch;
         private System.Windows.Forms.Label lbl_warning;
         private System.Windows.Forms.Label counter;
         private System.Windows.Forms.DataGridView dgv_items;
-        private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.PictureBox picCartLogo;
+        private System.Windows.Forms.Timer timerClock;
+        private System.Windows.Forms.TextBox tbx_quantity;
         private System.Windows.Forms.TextBox tbx_denomination;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label lbl_pesoSign;
         private System.Windows.Forms.Label change;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.PrintDialog printDialog1;
-        private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.Label label6;
-        private System.Drawing.Printing.PrintDocument printDocument1;
+        private System.Windows.Forms.Label lbl_step2;
+        private System.Windows.Forms.Label lbl_quantityCaption;
+        private System.Windows.Forms.Label lbl_hintF4F9;
+        private System.Windows.Forms.PrintDialog printDialogReceipt;
+        private System.Windows.Forms.PictureBox picLogo;
+        private System.Windows.Forms.Label lbl_storeTitle;
+        private System.Drawing.Printing.PrintDocument printDocumentReceipt;
         private System.Windows.Forms.ComboBox selltype;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label lbl_step1;
+        private System.Windows.Forms.Label lbl_hintF12;
+        private System.Windows.Forms.Label lbl_quantityStatus;
         private System.Windows.Forms.Label teller;
         private System.Windows.Forms.Label listing;
-        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.MenuStrip menuStripMain;
         private System.Windows.Forms.ToolStripMenuItem salesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem vIewSalesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem myTransactionHistoryToolStripMenuItem;
-        private System.Windows.Forms.PrintPreviewDialog printPreviewDialog1;
-        private System.Drawing.Printing.PrintDocument printDocument2;
+        private System.Windows.Forms.PrintPreviewDialog printPreviewDialogReceipt;
+        private System.Drawing.Printing.PrintDocument printDocumentOutOfStock;
         private System.Windows.Forms.ToolStripMenuItem generateToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem barcodeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reportToolStripMenuItem;
-        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label lbl_hintF1F3;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gettingStartedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cachedItemsStatusToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem techRequirementsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem transactionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem holdTransactionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem resumeTransactionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewHeldTransactionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem transactionListToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reportsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem inventoryReportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem salesReportToolStripMenuItem;
@@ -1485,7 +1589,10 @@
         private System.Windows.Forms.ToolStripMenuItem loyaltyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem taxConfigToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem systemConfigToolStripMenuItem;
-        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.ToolStripMenuItem editLayoutToolStripMenuItem;
+        private System.Windows.Forms.StatusStrip statusStripMain;
+        private System.Windows.Forms.ToolStripStatusLabel lblOfflineItemsStatus;
+        private System.Windows.Forms.TabControl tabControlMain;
         private System.Windows.Forms.TabPage tabPageSales;
         private System.Windows.Forms.TabPage tabPageManagePrices;
         private System.Windows.Forms.Label lbl_managePricesTitle;
@@ -1497,6 +1604,8 @@
         private System.Windows.Forms.Button btn_addItem;
         private System.Windows.Forms.Button btn_deletePrice;
         private System.Windows.Forms.DataGridView dgv_managePrices;
+        private System.Windows.Forms.GroupBox gbx_managePricesHistory;
+        private System.Windows.Forms.ListBox lst_managePricesHistory;
         private System.Windows.Forms.TabPage tabPageDashboard;
         private System.Windows.Forms.Label lblDashboardTitle;
         private System.Windows.Forms.Button btnDashboardRefresh;

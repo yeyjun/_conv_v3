@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 
 namespace RemoteController
@@ -13,6 +14,8 @@ namespace RemoteController
         // right before the user tweaks the duration controls still gets saved with the expiry it
         // was actually generated with.
         private DateTime? generatedExpiryUtc;
+
+        private int? generatedMonthsOfUse;
         private bool hasGeneratedKey;
 
         public MainForm()
@@ -21,6 +24,7 @@ namespace RemoteController
             tabControlMain.SelectedIndex = 0;
             txtHost.Text = "localhost";
             cmbDurationUnit.SelectedIndex = 2; // Years
+            cmbSubscriptionTier.SelectedIndex = 0;
             LoadFleet();
         }
 
@@ -35,6 +39,7 @@ namespace RemoteController
             }
 
             generatedExpiryUtc = ComputeExpiryFromDurationControls();
+            generatedMonthsOfUse = ComputeMonthsFromDurationControls();
             hasGeneratedKey = true;
             txtGeneratedKey.Text = LicenseKeyGenerator.ComputeKey(storeCode, generatedExpiryUtc);
             lblExpiryPreview.Text = generatedExpiryUtc.HasValue
@@ -56,6 +61,20 @@ namespace RemoteController
                 case "Days": return start.AddDays(amount);
                 case "Months": return start.AddMonths(amount);
                 default: return start.AddYears(amount);
+            }
+        }
+
+        private int? ComputeMonthsFromDurationControls()
+        {
+            if (chkPermanent.Checked)
+                return null;
+
+            int amount = (int)nudDuration.Value;
+            switch (cmbDurationUnit.SelectedItem as string)
+            {
+                case "Days": return Math.Max(1, (int)Math.Round(amount / 30.0));
+                case "Years": return amount * 12;
+                default: return amount;
             }
         }
 
@@ -83,13 +102,22 @@ namespace RemoteController
                 return;
             }
 
+            string tier = cmbSubscriptionTier.SelectedItem as string ?? "Basic";
+
+            string tierDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "RemoteController", "Licenses", tier);
+            try { Directory.CreateDirectory(tierDir); } catch { }
+
+            saveFileDialogLicense.InitialDirectory = tierDir;
             saveFileDialogLicense.FileName = storeCode + ".tmrgo";
             if (saveFileDialogLicense.ShowDialog(this) != DialogResult.OK)
                 return;
 
             try
             {
-                LicenseKeyGenerator.SaveLicenseFile(saveFileDialogLicense.FileName, storeCode, txtGeneratedKey.Text, generatedExpiryUtc);
+                LicenseKeyGenerator.SaveLicenseFile(saveFileDialogLicense.FileName, storeCode, txtGeneratedKey.Text,
+                    generatedExpiryUtc, tier, generatedMonthsOfUse);
                 Log($"Saved license file: {saveFileDialogLicense.FileName}");
             }
             catch (Exception ex)
@@ -336,8 +364,8 @@ namespace RemoteController
                 return;
             }
 
-            if (MessageBox.Show(this, $"Remove \"{selected.StoreName}\" from the fleet list?", "Confirm Remove",
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            if (ConfirmDialog.Show(this, $"Remove \"{selected.StoreName}\" from the fleet list? (Y/N)", "Confirm Remove",
+                MessageBoxIcon.Question) != DialogResult.Yes)
                 return;
 
             fleet.Remove(selected);

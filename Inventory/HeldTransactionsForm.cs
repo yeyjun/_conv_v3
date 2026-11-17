@@ -1,12 +1,15 @@
 using System;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     public partial class HeldTransactionsForm : Form
     {
         private readonly Purchases owner;
+
+        private bool _suppressSelectionPreview;
 
         public HeldTransactionsForm(Purchases owner)
         {
@@ -17,29 +20,66 @@ namespace _conv
             this.owner = owner;
         }
 
-        public void RefreshList()
+        public void RefreshList(bool resyncPreview = true)
         {
             string selectedTicket = SelectedTicketCode();
 
-            dgvHeld.Rows.Clear();
-            foreach (var held in owner.heldTransactions.Values.OrderBy(h => h.HeldAt))
+            _suppressSelectionPreview = true;
+            try
             {
-                dgvHeld.Rows.Add(held.TicketCode, held.HeldAt.ToString("MM/dd hh:mm tt"), held.Items.Count, held.GrandTotal.ToString("0.00"));
-            }
-
-            foreach (DataGridViewRow row in dgvHeld.Rows)
-            {
-                if (string.Equals(row.Cells[0].Value?.ToString(), selectedTicket, StringComparison.Ordinal))
+                dgvHeld.Rows.Clear();
+                foreach (var held in owner.heldTransactions.Values.OrderBy(h => h.HeldAt))
                 {
-                    row.Selected = true;
-                    break;
+                    dgvHeld.Rows.Add(held.TicketCode, held.HeldAt.ToString("MM/dd hh:mm tt"), held.Items.Count,
+                        held.GrandTotal.ToString("0.00"), held.Remarks ?? "");
                 }
+
+                foreach (DataGridViewRow row in dgvHeld.Rows)
+                {
+                    if (string.Equals(row.Cells[0].Value?.ToString(), selectedTicket, StringComparison.Ordinal))
+                    {
+                        row.Selected = true;
+                        break;
+                    }
+                }
+            }
+            finally
+            {
+                _suppressSelectionPreview = false;
             }
 
             bool hasAny = dgvHeld.Rows.Count > 0;
             btnResume.Enabled = hasAny;
             btnCancel.Enabled = hasAny;
             lblEmpty.Visible = !hasAny;
+
+            if (resyncPreview)
+                dgvHeld_SelectionChanged(this, EventArgs.Empty);
+        }
+
+        private void dgvHeld_SelectionChanged(object sender, EventArgs e)
+        {
+            if (_suppressSelectionPreview)
+                return;
+
+            string ticketCode = SelectedTicketCode();
+            if (ticketCode != null)
+            {
+                owner.PreviewHeldTransaction(ticketCode);
+
+                TopMost = true;
+                Rectangle workArea = Screen.FromControl(this).WorkingArea;
+                Point cartBoardScreenLocation = owner.GetCartBoardScreenLocation();
+                int x = Math.Max(cartBoardScreenLocation.X - Width, workArea.Left);
+                int y = Math.Min(cartBoardScreenLocation.Y, workArea.Bottom - Height);
+                y = Math.Max(y, workArea.Top);
+                Location = new Point(x, y);
+            }
+            else
+            {
+                owner.EndHeldTransactionPreview();
+                TopMost = false;
+            }
         }
 
         private string SelectedTicketCode()
@@ -75,7 +115,6 @@ namespace _conv
                 return;
             }
 
-            RefreshList();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -92,9 +131,9 @@ namespace _conv
                 return;
             }
 
-            DialogResult confirm = MessageBox.Show(
-                $"Discard held transaction \"{ticketCode}\"? This cannot be undone.",
-                "Cancel Transaction", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            DialogResult confirm = ConfirmDialog.Show(this,
+                $"Discard held transaction \"{ticketCode}\"? This cannot be undone. (Y/N)",
+                "Cancel Transaction", MessageBoxIcon.Warning);
 
             if (confirm == DialogResult.Yes)
             {
@@ -118,6 +157,17 @@ namespace _conv
             else if (e.KeyCode == Keys.F9)
             {
                 CancelSelected();
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.F4)
+            {
+                owner.ShowItemQuickSearchWindow();
+                e.Handled = true;
+            }
+            else if (e.KeyCode == Keys.Escape)
+            {
+                owner.suppressNextSerialKeyUp = true;
+                Close();
                 e.Handled = true;
             }
         }

@@ -1,4 +1,5 @@
 using System;
+using System.Configuration;
 using System.Drawing;
 using System.IO;
 using System.Net;
@@ -17,7 +18,16 @@ namespace YourApp.Data
     /// </summary>
     public static class LogoCache
     {
-        private const string LogoUrl = "https://drive.google.com/thumbnail?id=1qVDEd-pMDSposIfi8oBN4ceF7XXqdkTu";
+        private const string DefaultLogoUrl = "https://drive.google.com/thumbnail?id=1qVDEd-pMDSposIfi8oBN4ceF7XXqdkTu";
+
+        private static string LogoUrl
+        {
+            get
+            {
+                string configured = ConfigurationManager.AppSettings["LOGO_URL"];
+                return string.IsNullOrWhiteSpace(configured) ? DefaultLogoUrl : configured.Trim();
+            }
+        }
 
         private static string CachePath => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),

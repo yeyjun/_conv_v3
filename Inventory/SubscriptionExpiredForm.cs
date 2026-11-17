@@ -2,7 +2,7 @@ using System;
 using System.Configuration;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Blocking gate shown from Program.Main before the login screen ever opens, when

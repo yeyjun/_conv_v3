@@ -4,7 +4,7 @@ using System.Configuration;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Records app activity (e.g. logins) to the logs_ table when the database is reachable.

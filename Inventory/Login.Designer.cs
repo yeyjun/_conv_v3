@@ -1,4 +1,4 @@
-﻿namespace _conv
+﻿namespace Inventory
 {
     partial class Login
     {
@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             this.tbx_login = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.lblEnterAccount = new System.Windows.Forms.Label();
+            this.lblEnterHint = new System.Windows.Forms.Label();
+            this.picLogo = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
             this.SuspendLayout();
             // 
             // tbx_login
@@ -46,48 +46,48 @@
             this.tbx_login.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.tbx_login.TextChanged += new System.EventHandler(this.tbx_login_TextChanged);
             this.tbx_login.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tbx_login_KeyUp);
-            this.tbx_login.Validated += new System.EventHandler(this.textBox1_Validated);
+            this.tbx_login.Validated += new System.EventHandler(this.tbx_login_Validated);
             // 
-            // label1
+            // lblEnterAccount
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(23, 70);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(168, 17);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Enter account number";
+            this.lblEnterAccount.AutoSize = true;
+            this.lblEnterAccount.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblEnterAccount.Location = new System.Drawing.Point(23, 70);
+            this.lblEnterAccount.Name = "lblEnterAccount";
+            this.lblEnterAccount.Size = new System.Drawing.Size(168, 17);
+            this.lblEnterAccount.TabIndex = 1;
+            this.lblEnterAccount.Text = "Enter account number";
             // 
-            // label2
+            // lblEnterHint
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.SystemColors.MenuHighlight;
-            this.label2.Location = new System.Drawing.Point(23, 137);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(117, 13);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Press Enter to continue";
+            this.lblEnterHint.AutoSize = true;
+            this.lblEnterHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblEnterHint.ForeColor = System.Drawing.SystemColors.MenuHighlight;
+            this.lblEnterHint.Location = new System.Drawing.Point(23, 137);
+            this.lblEnterHint.Name = "lblEnterHint";
+            this.lblEnterHint.Size = new System.Drawing.Size(117, 13);
+            this.lblEnterHint.TabIndex = 2;
+            this.lblEnterHint.Text = "Press Enter to continue";
             // 
-            // pictureBox1
+            // picLogo
             // 
-            this.pictureBox1.ImageLocation = "https://drive.google.com/thumbnail?id=1qVDEd-pMDSposIfi8oBN4ceF7XXqdkTu";
-            this.pictureBox1.Location = new System.Drawing.Point(189, -1);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(93, 88);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 3;
-            this.pictureBox1.TabStop = false;
+            this.picLogo.ImageLocation = "https://drive.google.com/thumbnail?id=1qVDEd-pMDSposIfi8oBN4ceF7XXqdkTu";
+            this.picLogo.Location = new System.Drawing.Point(189, -1);
+            this.picLogo.Name = "picLogo";
+            this.picLogo.Size = new System.Drawing.Size(93, 88);
+            this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picLogo.TabIndex = 3;
+            this.picLogo.TabStop = false;
             // 
             // Login
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(325, 253);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.lblEnterHint);
+            this.Controls.Add(this.lblEnterAccount);
             this.Controls.Add(this.tbx_login);
-            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.picLogo);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Login";
@@ -96,16 +96,16 @@
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Login_FormClosed);
             this.Load += new System.EventHandler(this.Login_Load);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Login_KeyUp);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblEnterAccount;
         public System.Windows.Forms.TextBox tbx_login;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label lblEnterHint;
+        private System.Windows.Forms.PictureBox picLogo;
     }
 }

@@ -5,7 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Live preview of the receipt, opened from System Config > Receipt Testing. Renders the
@@ -69,7 +69,11 @@ namespace _conv
         {
             chkPriceOverride.Checked = Purchases.TestPriceOverride.HasValue;
             tbPriceOverride.Value = Math.Min(Math.Max((int)(Purchases.TestPriceOverride ?? 1m), tbPriceOverride.Minimum), tbPriceOverride.Maximum);
-            cbxPaperWidth.SelectedIndex = 0;
+
+            int configuredWidthMm = int.TryParse(ConfigurationManager.AppSettings["RECEIPT_PAPER_WIDTH_MM"], out int mm) ? mm : 58;
+            int widthIndex = Array.IndexOf(PaperWidthMmByComboIndex, configuredWidthMm == 0 ? (int?)null : configuredWidthMm);
+            cbxPaperWidth.SelectedIndex = widthIndex >= 0 ? widthIndex : Array.IndexOf(PaperWidthMmByComboIndex, (int?)58);
+            chkPaperWidthIsDefault.Checked = false;
 
             UpdatePriceOverrideState();
             RefreshPreview();
@@ -134,8 +138,11 @@ namespace _conv
                 SetSetting(config, "RECEIPT_MARGIN_RIGHT_MM", MarginOverrideToMmString(_marginRightOverride));
                 SetSetting(config, "RECEIPT_MARGIN_TOP_MM", MarginOverrideToMmString(_marginTopOverride));
 
-                int? paperWidthMm = cbxPaperWidth.SelectedIndex >= 0 ? PaperWidthMmByComboIndex[cbxPaperWidth.SelectedIndex] : null;
-                SetSetting(config, "RECEIPT_PAPER_WIDTH_MM", paperWidthMm.HasValue ? paperWidthMm.Value.ToString(CultureInfo.InvariantCulture) : "");
+                if (chkPaperWidthIsDefault.Checked)
+                {
+                    int? paperWidthMm = cbxPaperWidth.SelectedIndex >= 0 ? PaperWidthMmByComboIndex[cbxPaperWidth.SelectedIndex] : null;
+                    SetSetting(config, "RECEIPT_PAPER_WIDTH_MM", paperWidthMm.HasValue ? paperWidthMm.Value.ToString(CultureInfo.InvariantCulture) : "");
+                }
 
                 config.Save(ConfigurationSaveMode.Modified);
                 ConfigurationManager.RefreshSection("appSettings");

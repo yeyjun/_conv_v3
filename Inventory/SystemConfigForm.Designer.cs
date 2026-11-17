@@ -1,4 +1,4 @@
-namespace _conv
+namespace Inventory
 {
     partial class SystemConfigForm
     {
@@ -21,6 +21,8 @@ namespace _conv
             System.Windows.Forms.DataVisualization.Charting.Legend networkLegend = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series downloadSeries = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Series uploadSeries = new System.Windows.Forms.DataVisualization.Charting.Series();
+            this.lstConfigSections = new System.Windows.Forms.ListBox();
+            this.pnlConfigHost = new System.Windows.Forms.Panel();
             this.tabControlConfig = new System.Windows.Forms.TabControl();
             this.tabPageSettings = new System.Windows.Forms.TabPage();
             this.gbxStoreInfo = new System.Windows.Forms.GroupBox();
@@ -50,6 +52,19 @@ namespace _conv
             this.chkShowPin = new System.Windows.Forms.CheckBox();
             this.txtManagerPin = new System.Windows.Forms.TextBox();
             this.lblManagerPin = new System.Windows.Forms.Label();
+            this.gbxSalesDefaults = new System.Windows.Forms.GroupBox();
+            this.lblAutoHoldMinutes = new System.Windows.Forms.Label();
+            this.nud_autoHoldMinutes = new System.Windows.Forms.NumericUpDown();
+            this.chkAutoHoldEnabled = new System.Windows.Forms.CheckBox();
+            this.cbxDefaultSelltype = new System.Windows.Forms.ComboBox();
+            this.chkDefaultSelltype = new System.Windows.Forms.CheckBox();
+            this.chkBlockZeroPriceItems = new System.Windows.Forms.CheckBox();
+            this.gbxAlerts = new System.Windows.Forms.GroupBox();
+            this.lblAlertAutoDismissSeconds = new System.Windows.Forms.Label();
+            this.nud_alertAutoDismissSeconds = new System.Windows.Forms.NumericUpDown();
+            this.chkAlertAutoDismissEnabled = new System.Windows.Forms.CheckBox();
+            this.gbxStartup = new System.Windows.Forms.GroupBox();
+            this.chkAutoStartWithWindows = new System.Windows.Forms.CheckBox();
             this.tabPageNetwork = new System.Windows.Forms.TabPage();
             this.lblNetworkHint = new System.Windows.Forms.Label();
             this.chartNetwork = new System.Windows.Forms.DataVisualization.Charting.Chart();
@@ -64,6 +79,7 @@ namespace _conv
             this.chkSetAsSystemDefaultPrinter = new System.Windows.Forms.CheckBox();
             this.lblPaperSizeInfo = new System.Windows.Forms.Label();
             this.cbxPaperWidth = new System.Windows.Forms.ComboBox();
+            this.chkPaperWidthIsDefault = new System.Windows.Forms.CheckBox();
             this.lblPaperWidth = new System.Windows.Forms.Label();
             this.lblCounterReceiptPath = new System.Windows.Forms.Label();
             this.txtCounterReceiptPath = new System.Windows.Forms.TextBox();
@@ -85,7 +101,21 @@ namespace _conv
             this.nud_fontScalePt = new System.Windows.Forms.NumericUpDown();
             this.lblFontScaleUnit = new System.Windows.Forms.Label();
             this.lblFontScaleHint = new System.Windows.Forms.Label();
+            this.lblLogoUrl = new System.Windows.Forms.Label();
+            this.txtLogoUrl = new System.Windows.Forms.TextBox();
+            this.lblLogoUrlHint = new System.Windows.Forms.Label();
+            this.chkLayoutEditEnabled = new System.Windows.Forms.CheckBox();
+            this.lblLayoutEditHint = new System.Windows.Forms.Label();
             this.colorDialogAccent = new System.Windows.Forms.ColorDialog();
+            this.tabPageLayout = new System.Windows.Forms.TabPage();
+            this.lblLayoutRevisionHint = new System.Windows.Forms.Label();
+            this.txtLayoutRevision = new System.Windows.Forms.TextBox();
+            this.btnRefreshLayoutText = new System.Windows.Forms.Button();
+            this.btnApplyLayoutText = new System.Windows.Forms.Button();
+            this.btnLoadLayoutFile = new System.Windows.Forms.Button();
+            this.btnSaveLayoutFile = new System.Windows.Forms.Button();
+            this.openFileDialogLayout = new System.Windows.Forms.OpenFileDialog();
+            this.saveFileDialogLayout = new System.Windows.Forms.SaveFileDialog();
             this.tabPageSchedule = new System.Windows.Forms.TabPage();
             this.lblScheduleHint = new System.Windows.Forms.Label();
             this.lblFrequency = new System.Windows.Forms.Label();
@@ -129,6 +159,7 @@ namespace _conv
             this.btnSyncNow = new System.Windows.Forms.Button();
             this.lblSyncStatus = new System.Windows.Forms.Label();
             this.lblLastSync = new System.Windows.Forms.Label();
+            this.grpUpload = new System.Windows.Forms.GroupBox();
             this.btnPushToOnline = new System.Windows.Forms.Button();
             this.lblPushStatus = new System.Windows.Forms.Label();
             this.lblLastPush = new System.Windows.Forms.Label();
@@ -140,6 +171,8 @@ namespace _conv
             this.lblTrialStatus = new System.Windows.Forms.Label();
             this.lblLicenseKey = new System.Windows.Forms.Label();
             this.txtLicenseKey = new System.Windows.Forms.TextBox();
+            this.lblSubscriptionTier = new System.Windows.Forms.Label();
+            this.cmbSubscriptionTier = new System.Windows.Forms.ComboBox();
             this.btnActivateLicense = new System.Windows.Forms.Button();
             this.btnImportLicenseFile = new System.Windows.Forms.Button();
             this.openFileDialogLicense = new System.Windows.Forms.OpenFileDialog();
@@ -179,12 +212,34 @@ namespace _conv
             this.btnSaveMaintenance = new System.Windows.Forms.Button();
             this.btnRefreshMaintenance = new System.Windows.Forms.Button();
             this.lblMaintenanceStatus = new System.Windows.Forms.Label();
+            this.tabPageLowStock = new System.Windows.Forms.TabPage();
+            this.lblLowStockHint = new System.Windows.Forms.Label();
+            this.chkLowStockEnabled = new System.Windows.Forms.CheckBox();
+            this.lblLowStockThreshold = new System.Windows.Forms.Label();
+            this.nudLowStockThreshold = new System.Windows.Forms.NumericUpDown();
+            this.lblLowStockInterval = new System.Windows.Forms.Label();
+            this.nudLowStockInterval = new System.Windows.Forms.NumericUpDown();
+            this.btnSaveLowStock = new System.Windows.Forms.Button();
+            this.btnRefreshLowStock = new System.Windows.Forms.Button();
+            this.lblLowStockStatus = new System.Windows.Forms.Label();
             this.tabPageReceiptTesting = new System.Windows.Forms.TabPage();
             this.lblReceiptTestingHint = new System.Windows.Forms.Label();
             this.chkPriceOverrideEnabled = new System.Windows.Forms.CheckBox();
             this.tbPriceOverride = new System.Windows.Forms.TrackBar();
             this.lblPriceOverrideValue = new System.Windows.Forms.Label();
             this.btnPreviewReceipt = new System.Windows.Forms.Button();
+            this.tabPageItemSearch = new System.Windows.Forms.TabPage();
+            this.clbItemSearchColumns = new System.Windows.Forms.CheckedListBox();
+            this.lblItemSearchHint = new System.Windows.Forms.Label();
+            this.btnItemSearchColumnUp = new System.Windows.Forms.Button();
+            this.btnItemSearchColumnDown = new System.Windows.Forms.Button();
+            this.chkItemSearchDateSortDescending = new System.Windows.Forms.CheckBox();
+            this.chkItemSearchNameSortDescending = new System.Windows.Forms.CheckBox();
+            this.tabPageCartColumns = new System.Windows.Forms.TabPage();
+            this.clbCartColumns = new System.Windows.Forms.CheckedListBox();
+            this.lblCartColumnsHint = new System.Windows.Forms.Label();
+            this.btnCartColumnUp = new System.Windows.Forms.Button();
+            this.btnCartColumnDown = new System.Windows.Forms.Button();
             this.openFileDialogAccess = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialogCounterReceipt = new System.Windows.Forms.FolderBrowserDialog();
             this.lblStatus = new System.Windows.Forms.Label();
@@ -192,22 +247,30 @@ namespace _conv
             this.btnClose = new System.Windows.Forms.Button();
             this.lblWarningBar = new System.Windows.Forms.Label();
             this.tooltipWarnings = new System.Windows.Forms.ToolTip();
+            this.pnlConfigHost.SuspendLayout();
             this.tabControlConfig.SuspendLayout();
             this.tabPageSettings.SuspendLayout();
             this.gbxStoreInfo.SuspendLayout();
             this.gbxDatabase.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_connectionTimeout)).BeginInit();
             this.gbxSecurity.SuspendLayout();
+            this.gbxSalesDefaults.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nud_autoHoldMinutes)).BeginInit();
+            this.gbxAlerts.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nud_alertAutoDismissSeconds)).BeginInit();
+            this.gbxStartup.SuspendLayout();
             this.tabPageNetwork.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartNetwork)).BeginInit();
             this.tabPageMenus.SuspendLayout();
             this.tabPagePrinter.SuspendLayout();
             this.tabPageAppearance.SuspendLayout();
+            this.tabPageLayout.SuspendLayout();
             this.tabPageSchedule.SuspendLayout();
             this.gbxGmail.SuspendLayout();
             this.gbxSmtp.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_smtpPort)).BeginInit();
             this.tabPageDataSync.SuspendLayout();
+            this.grpUpload.SuspendLayout();
             this.tabPageTrial.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_trialDays)).BeginInit();
             this.tabPageDbSetup.SuspendLayout();
@@ -215,7 +278,12 @@ namespace _conv
             ((System.ComponentModel.ISupportInitialize)(this.nud_fontScalePt)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nud_remotePort)).BeginInit();
             this.tabPageMaintenance.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudLowStockThreshold)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudLowStockInterval)).BeginInit();
+            this.tabPageLowStock.SuspendLayout();
             this.tabPageReceiptTesting.SuspendLayout();
+            this.tabPageItemSearch.SuspendLayout();
+            this.tabPageCartColumns.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tbPriceOverride)).BeginInit();
             this.SuspendLayout();
             //
@@ -227,7 +295,7 @@ namespace _conv
             this.lblWarningBar.ForeColor = System.Drawing.Color.DarkGoldenrod;
             this.lblWarningBar.Location = new System.Drawing.Point(12, 12);
             this.lblWarningBar.Name = "lblWarningBar";
-            this.lblWarningBar.Size = new System.Drawing.Size(400, 26);
+            this.lblWarningBar.Size = new System.Drawing.Size(542, 26);
             this.lblWarningBar.TabIndex = 4;
             this.lblWarningBar.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lblWarningBar.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
@@ -239,6 +307,54 @@ namespace _conv
             this.tooltipWarnings.InitialDelay = 300;
             this.tooltipWarnings.ReshowDelay = 100;
             //
+            // lstConfigSections
+            //
+            // Replaces tabControlConfig's own tab strip with a flat, Visual Studio Options-style
+            // category list (plain text, no tab chrome) - see pnlConfigHost below for how the
+            // native strip is hidden while every existing TabPage/its controls stay untouched.
+            this.lstConfigSections.BackColor = System.Drawing.Color.White;
+            this.lstConfigSections.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.lstConfigSections.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.lstConfigSections.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular);
+            this.lstConfigSections.IntegralHeight = false;
+            this.lstConfigSections.ItemHeight = 28;
+            this.lstConfigSections.Items.AddRange(new object[] {
+            "Settings",
+            "Report Schedule",
+            "Network Monitor",
+            "Menus",
+            "Printer",
+            "Appearance",
+            "Layout",
+            "Data Sync",
+            "Trial / Licensing",
+            "Database Setup",
+            "Remote Control",
+            "Maintenance",
+            "Low Stock Reminder",
+            "Receipt Testing",
+            "Item Search",
+            "Cart Board"});
+            this.lstConfigSections.Location = new System.Drawing.Point(12, 44);
+            this.lstConfigSections.Name = "lstConfigSections";
+            this.lstConfigSections.Size = new System.Drawing.Size(134, 468);
+            this.lstConfigSections.TabIndex = 0;
+            this.lstConfigSections.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.lstConfigSections_DrawItem);
+            this.lstConfigSections.SelectedIndexChanged += new System.EventHandler(this.lstConfigSections_SelectedIndexChanged);
+            //
+            // pnlConfigHost
+            //
+            // Clips off tabControlConfig's own ~22px tab-header strip and ~4px left border - the
+            // TabControl is shifted up/left by exactly that much (see tabControlConfig.Location
+            // below) and this Panel's bounds (WinForms Panels clip children by default) crop that
+            // part away, leaving only each TabPage's content visible, flush with this panel's edges.
+            this.pnlConfigHost.BackColor = System.Drawing.Color.FloralWhite;
+            this.pnlConfigHost.Controls.Add(this.tabControlConfig);
+            this.pnlConfigHost.Location = new System.Drawing.Point(154, 44);
+            this.pnlConfigHost.Name = "pnlConfigHost";
+            this.pnlConfigHost.Size = new System.Drawing.Size(400, 468);
+            this.pnlConfigHost.TabIndex = 1;
+            //
             // tabControlConfig
             //
             this.tabControlConfig.Controls.Add(this.tabPageSettings);
@@ -247,24 +363,34 @@ namespace _conv
             this.tabControlConfig.Controls.Add(this.tabPageMenus);
             this.tabControlConfig.Controls.Add(this.tabPagePrinter);
             this.tabControlConfig.Controls.Add(this.tabPageAppearance);
+            this.tabControlConfig.Controls.Add(this.tabPageLayout);
             this.tabControlConfig.Controls.Add(this.tabPageDataSync);
             this.tabControlConfig.Controls.Add(this.tabPageTrial);
             this.tabControlConfig.Controls.Add(this.tabPageDbSetup);
             this.tabControlConfig.Controls.Add(this.tabPageRemoteControl);
             this.tabControlConfig.Controls.Add(this.tabPageMaintenance);
+            this.tabControlConfig.Controls.Add(this.tabPageLowStock);
             this.tabControlConfig.Controls.Add(this.tabPageReceiptTesting);
-            this.tabControlConfig.Location = new System.Drawing.Point(12, 44);
+            this.tabControlConfig.Controls.Add(this.tabPageItemSearch);
+            this.tabControlConfig.Controls.Add(this.tabPageCartColumns);
+            this.tabControlConfig.Location = new System.Drawing.Point(-4, -22);
             this.tabControlConfig.Name = "tabControlConfig";
             this.tabControlConfig.SelectedIndex = 0;
             this.tabControlConfig.Size = new System.Drawing.Size(400, 468);
             this.tabControlConfig.TabIndex = 0;
+            this.tabControlConfig.TabStop = false;
+            this.tabControlConfig.SelectedIndexChanged += new System.EventHandler(this.tabControlConfig_SelectedIndexChanged);
             //
             // tabPageSettings
             //
+            this.tabPageSettings.AutoScroll = true;
             this.tabPageSettings.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageSettings.Controls.Add(this.gbxSalesDefaults);
             this.tabPageSettings.Controls.Add(this.gbxStoreInfo);
             this.tabPageSettings.Controls.Add(this.gbxDatabase);
             this.tabPageSettings.Controls.Add(this.gbxSecurity);
+            this.tabPageSettings.Controls.Add(this.gbxAlerts);
+            this.tabPageSettings.Controls.Add(this.gbxStartup);
             this.tabPageSettings.Location = new System.Drawing.Point(4, 22);
             this.tabPageSettings.Name = "tabPageSettings";
             this.tabPageSettings.Padding = new System.Windows.Forms.Padding(3);
@@ -282,10 +408,10 @@ namespace _conv
             this.gbxStoreInfo.Controls.Add(this.txtStoreName);
             this.gbxStoreInfo.Controls.Add(this.lblStoreName);
             this.gbxStoreInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.gbxStoreInfo.Location = new System.Drawing.Point(6, 6);
+            this.gbxStoreInfo.Location = new System.Drawing.Point(6, 187);
             this.gbxStoreInfo.Name = "gbxStoreInfo";
             this.gbxStoreInfo.Size = new System.Drawing.Size(380, 116);
-            this.gbxStoreInfo.TabIndex = 0;
+            this.gbxStoreInfo.TabIndex = 1;
             this.gbxStoreInfo.TabStop = false;
             this.gbxStoreInfo.Text = "Store Information";
             //
@@ -356,10 +482,10 @@ namespace _conv
             this.gbxDatabase.Controls.Add(this.txtDbServer);
             this.gbxDatabase.Controls.Add(this.lblDbServer);
             this.gbxDatabase.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.gbxDatabase.Location = new System.Drawing.Point(6, 128);
+            this.gbxDatabase.Location = new System.Drawing.Point(6, 309);
             this.gbxDatabase.Name = "gbxDatabase";
             this.gbxDatabase.Size = new System.Drawing.Size(380, 192);
-            this.gbxDatabase.TabIndex = 1;
+            this.gbxDatabase.TabIndex = 2;
             this.gbxDatabase.TabStop = false;
             this.gbxDatabase.Text = "Database Connection";
             //
@@ -486,12 +612,174 @@ namespace _conv
             this.gbxSecurity.Controls.Add(this.txtManagerPin);
             this.gbxSecurity.Controls.Add(this.lblManagerPin);
             this.gbxSecurity.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.gbxSecurity.Location = new System.Drawing.Point(6, 326);
+            this.gbxSecurity.Location = new System.Drawing.Point(6, 507);
             this.gbxSecurity.Name = "gbxSecurity";
             this.gbxSecurity.Size = new System.Drawing.Size(380, 104);
-            this.gbxSecurity.TabIndex = 2;
+            this.gbxSecurity.TabIndex = 3;
             this.gbxSecurity.TabStop = false;
             this.gbxSecurity.Text = "Security";
+            //
+            // gbxSalesDefaults
+            //
+            this.gbxSalesDefaults.BackColor = System.Drawing.Color.MintCream;
+            this.gbxSalesDefaults.Controls.Add(this.lblAutoHoldMinutes);
+            this.gbxSalesDefaults.Controls.Add(this.nud_autoHoldMinutes);
+            this.gbxSalesDefaults.Controls.Add(this.chkAutoHoldEnabled);
+            this.gbxSalesDefaults.Controls.Add(this.cbxDefaultSelltype);
+            this.gbxSalesDefaults.Controls.Add(this.chkDefaultSelltype);
+            this.gbxSalesDefaults.Controls.Add(this.chkBlockZeroPriceItems);
+            this.gbxSalesDefaults.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.gbxSalesDefaults.Location = new System.Drawing.Point(6, 6);
+            this.gbxSalesDefaults.Name = "gbxSalesDefaults";
+            this.gbxSalesDefaults.Size = new System.Drawing.Size(380, 175);
+            this.gbxSalesDefaults.TabIndex = 0;
+            this.gbxSalesDefaults.TabStop = false;
+            this.gbxSalesDefaults.Text = "Sales Defaults";
+            //
+            // chkDefaultSelltype
+            //
+            this.chkDefaultSelltype.AutoSize = true;
+            this.chkDefaultSelltype.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkDefaultSelltype.Location = new System.Drawing.Point(13, 25);
+            this.chkDefaultSelltype.Name = "chkDefaultSelltype";
+            this.chkDefaultSelltype.Size = new System.Drawing.Size(220, 17);
+            this.chkDefaultSelltype.TabIndex = 0;
+            this.chkDefaultSelltype.Text = "Default purchase type at startup:";
+            this.chkDefaultSelltype.UseVisualStyleBackColor = true;
+            this.chkDefaultSelltype.CheckedChanged += new System.EventHandler(this.chkDefaultSelltype_CheckedChanged);
+            //
+            // cbxDefaultSelltype
+            //
+            this.cbxDefaultSelltype.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxDefaultSelltype.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.cbxDefaultSelltype.FormattingEnabled = true;
+            this.cbxDefaultSelltype.Items.AddRange(new object[] {
+            "Wholesale",
+            "Retail",
+            "By Piece"});
+            this.cbxDefaultSelltype.Location = new System.Drawing.Point(13, 52);
+            this.cbxDefaultSelltype.Name = "cbxDefaultSelltype";
+            this.cbxDefaultSelltype.Size = new System.Drawing.Size(150, 22);
+            this.cbxDefaultSelltype.TabIndex = 1;
+            //
+            // chkAutoHoldEnabled
+            //
+            this.chkAutoHoldEnabled.AutoSize = true;
+            this.chkAutoHoldEnabled.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkAutoHoldEnabled.Location = new System.Drawing.Point(13, 84);
+            this.chkAutoHoldEnabled.Name = "chkAutoHoldEnabled";
+            this.chkAutoHoldEnabled.Size = new System.Drawing.Size(220, 17);
+            this.chkAutoHoldEnabled.TabIndex = 2;
+            this.chkAutoHoldEnabled.Text = "Automatically hold an idle cart after:";
+            this.chkAutoHoldEnabled.UseVisualStyleBackColor = true;
+            this.chkAutoHoldEnabled.CheckedChanged += new System.EventHandler(this.chkAutoHoldEnabled_CheckedChanged);
+            //
+            // nud_autoHoldMinutes
+            //
+            this.nud_autoHoldMinutes.Location = new System.Drawing.Point(13, 111);
+            this.nud_autoHoldMinutes.Maximum = new decimal(new int[] { 180, 0, 0, 0 });
+            this.nud_autoHoldMinutes.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            this.nud_autoHoldMinutes.Name = "nud_autoHoldMinutes";
+            this.nud_autoHoldMinutes.Size = new System.Drawing.Size(70, 22);
+            this.nud_autoHoldMinutes.TabIndex = 3;
+            this.nud_autoHoldMinutes.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.nud_autoHoldMinutes.Value = new decimal(new int[] { 30, 0, 0, 0 });
+            //
+            // lblAutoHoldMinutes
+            //
+            this.lblAutoHoldMinutes.AutoSize = true;
+            this.lblAutoHoldMinutes.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblAutoHoldMinutes.Location = new System.Drawing.Point(89, 114);
+            this.lblAutoHoldMinutes.Name = "lblAutoHoldMinutes";
+            this.lblAutoHoldMinutes.Size = new System.Drawing.Size(120, 13);
+            this.lblAutoHoldMinutes.TabIndex = 4;
+            this.lblAutoHoldMinutes.Text = "minute(s) of inactivity";
+            //
+            // chkBlockZeroPriceItems
+            //
+            this.chkBlockZeroPriceItems.AutoSize = true;
+            this.chkBlockZeroPriceItems.Checked = true;
+            this.chkBlockZeroPriceItems.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkBlockZeroPriceItems.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkBlockZeroPriceItems.Location = new System.Drawing.Point(13, 137);
+            this.chkBlockZeroPriceItems.Name = "chkBlockZeroPriceItems";
+            this.chkBlockZeroPriceItems.Size = new System.Drawing.Size(340, 30);
+            this.chkBlockZeroPriceItems.TabIndex = 4;
+            this.chkBlockZeroPriceItems.Text = "Block items with no price (₱0.00) for the selected selling type\r\nfrom being add" +
+    "ed to the cart";
+            this.chkBlockZeroPriceItems.UseVisualStyleBackColor = true;
+            //
+            // gbxAlerts
+            //
+            this.gbxAlerts.BackColor = System.Drawing.Color.MintCream;
+            this.gbxAlerts.Controls.Add(this.lblAlertAutoDismissSeconds);
+            this.gbxAlerts.Controls.Add(this.nud_alertAutoDismissSeconds);
+            this.gbxAlerts.Controls.Add(this.chkAlertAutoDismissEnabled);
+            this.gbxAlerts.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.gbxAlerts.Location = new System.Drawing.Point(6, 617);
+            this.gbxAlerts.Name = "gbxAlerts";
+            this.gbxAlerts.Size = new System.Drawing.Size(380, 90);
+            this.gbxAlerts.TabIndex = 4;
+            this.gbxAlerts.TabStop = false;
+            this.gbxAlerts.Text = "Alerts";
+            //
+            // chkAlertAutoDismissEnabled
+            //
+            this.chkAlertAutoDismissEnabled.AutoSize = true;
+            this.chkAlertAutoDismissEnabled.Checked = true;
+            this.chkAlertAutoDismissEnabled.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkAlertAutoDismissEnabled.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkAlertAutoDismissEnabled.Location = new System.Drawing.Point(13, 25);
+            this.chkAlertAutoDismissEnabled.Name = "chkAlertAutoDismissEnabled";
+            this.chkAlertAutoDismissEnabled.Size = new System.Drawing.Size(280, 17);
+            this.chkAlertAutoDismissEnabled.TabIndex = 0;
+            this.chkAlertAutoDismissEnabled.Text = "Automatically dismiss confirmation dialogs after:";
+            this.chkAlertAutoDismissEnabled.UseVisualStyleBackColor = true;
+            this.chkAlertAutoDismissEnabled.CheckedChanged += new System.EventHandler(this.chkAlertAutoDismissEnabled_CheckedChanged);
+            //
+            // nud_alertAutoDismissSeconds
+            //
+            this.nud_alertAutoDismissSeconds.Location = new System.Drawing.Point(13, 52);
+            this.nud_alertAutoDismissSeconds.Maximum = new decimal(new int[] { 60, 0, 0, 0 });
+            this.nud_alertAutoDismissSeconds.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            this.nud_alertAutoDismissSeconds.Name = "nud_alertAutoDismissSeconds";
+            this.nud_alertAutoDismissSeconds.Size = new System.Drawing.Size(70, 22);
+            this.nud_alertAutoDismissSeconds.TabIndex = 1;
+            this.nud_alertAutoDismissSeconds.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.nud_alertAutoDismissSeconds.Value = new decimal(new int[] { 5, 0, 0, 0 });
+            //
+            // lblAlertAutoDismissSeconds
+            //
+            this.lblAlertAutoDismissSeconds.AutoSize = true;
+            this.lblAlertAutoDismissSeconds.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblAlertAutoDismissSeconds.Location = new System.Drawing.Point(89, 55);
+            this.lblAlertAutoDismissSeconds.Name = "lblAlertAutoDismissSeconds";
+            this.lblAlertAutoDismissSeconds.Size = new System.Drawing.Size(120, 13);
+            this.lblAlertAutoDismissSeconds.TabIndex = 2;
+            this.lblAlertAutoDismissSeconds.Text = "second(s), defaults to No";
+            //
+            // gbxStartup
+            //
+            this.gbxStartup.BackColor = System.Drawing.Color.MintCream;
+            this.gbxStartup.Controls.Add(this.chkAutoStartWithWindows);
+            this.gbxStartup.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.gbxStartup.Location = new System.Drawing.Point(6, 713);
+            this.gbxStartup.Name = "gbxStartup";
+            this.gbxStartup.Size = new System.Drawing.Size(380, 60);
+            this.gbxStartup.TabIndex = 5;
+            this.gbxStartup.TabStop = false;
+            this.gbxStartup.Text = "Startup";
+            //
+            // chkAutoStartWithWindows
+            //
+            this.chkAutoStartWithWindows.AutoSize = true;
+            this.chkAutoStartWithWindows.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkAutoStartWithWindows.Location = new System.Drawing.Point(13, 25);
+            this.chkAutoStartWithWindows.Name = "chkAutoStartWithWindows";
+            this.chkAutoStartWithWindows.Size = new System.Drawing.Size(280, 17);
+            this.chkAutoStartWithWindows.TabIndex = 0;
+            this.chkAutoStartWithWindows.Text = "Start BrewCode automatically when Windows starts";
+            this.chkAutoStartWithWindows.UseVisualStyleBackColor = true;
             //
             // lblManagerPin
             //
@@ -673,6 +961,7 @@ namespace _conv
             this.tabPagePrinter.Controls.Add(this.lblCounterReceiptHint);
             this.tabPagePrinter.Controls.Add(this.chkSaveCounterReceiptAsJpeg);
             this.tabPagePrinter.Controls.Add(this.chkSetAsSystemDefaultPrinter);
+            this.tabPagePrinter.Controls.Add(this.chkPaperWidthIsDefault);
             this.tabPagePrinter.Controls.Add(this.cbxPaperWidth);
             this.tabPagePrinter.Controls.Add(this.lblPaperWidth);
             this.tabPagePrinter.Controls.Add(this.lblPaperSizeInfo);
@@ -752,14 +1041,26 @@ namespace _conv
             this.cbxPaperWidth.Size = new System.Drawing.Size(300, 21);
             this.cbxPaperWidth.TabIndex = 5;
             //
+            // chkPaperWidthIsDefault
+            //
+            this.chkPaperWidthIsDefault.AutoSize = true;
+            this.chkPaperWidthIsDefault.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkPaperWidthIsDefault.Location = new System.Drawing.Point(6, 180);
+            this.chkPaperWidthIsDefault.Name = "chkPaperWidthIsDefault";
+            this.chkPaperWidthIsDefault.Size = new System.Drawing.Size(184, 17);
+            this.chkPaperWidthIsDefault.TabIndex = 6;
+            this.chkPaperWidthIsDefault.Text = "Set as default paper width";
+            this.chkPaperWidthIsDefault.UseVisualStyleBackColor = true;
+            this.chkPaperWidthIsDefault.CheckedChanged += new System.EventHandler(this.chkPaperWidthIsDefault_CheckedChanged);
+            //
             // chkSetAsSystemDefaultPrinter
             //
             this.chkSetAsSystemDefaultPrinter.AutoSize = true;
             this.chkSetAsSystemDefaultPrinter.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
-            this.chkSetAsSystemDefaultPrinter.Location = new System.Drawing.Point(6, 190);
+            this.chkSetAsSystemDefaultPrinter.Location = new System.Drawing.Point(6, 214);
             this.chkSetAsSystemDefaultPrinter.Name = "chkSetAsSystemDefaultPrinter";
             this.chkSetAsSystemDefaultPrinter.Size = new System.Drawing.Size(184, 17);
-            this.chkSetAsSystemDefaultPrinter.TabIndex = 6;
+            this.chkSetAsSystemDefaultPrinter.TabIndex = 7;
             this.chkSetAsSystemDefaultPrinter.Text = "Also set as Windows default printer";
             this.chkSetAsSystemDefaultPrinter.UseVisualStyleBackColor = true;
             //
@@ -767,10 +1068,10 @@ namespace _conv
             //
             this.chkSaveCounterReceiptAsJpeg.AutoSize = true;
             this.chkSaveCounterReceiptAsJpeg.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
-            this.chkSaveCounterReceiptAsJpeg.Location = new System.Drawing.Point(6, 224);
+            this.chkSaveCounterReceiptAsJpeg.Location = new System.Drawing.Point(6, 248);
             this.chkSaveCounterReceiptAsJpeg.Name = "chkSaveCounterReceiptAsJpeg";
             this.chkSaveCounterReceiptAsJpeg.Size = new System.Drawing.Size(240, 17);
-            this.chkSaveCounterReceiptAsJpeg.TabIndex = 7;
+            this.chkSaveCounterReceiptAsJpeg.TabIndex = 8;
             this.chkSaveCounterReceiptAsJpeg.Text = "Save counter\'s copy as JPEG instead of printing";
             this.chkSaveCounterReceiptAsJpeg.UseVisualStyleBackColor = true;
             this.chkSaveCounterReceiptAsJpeg.CheckedChanged += new System.EventHandler(this.chkSaveCounterReceiptAsJpeg_CheckedChanged);
@@ -780,36 +1081,36 @@ namespace _conv
             this.lblCounterReceiptHint.AutoSize = true;
             this.lblCounterReceiptHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
             this.lblCounterReceiptHint.ForeColor = System.Drawing.Color.Gray;
-            this.lblCounterReceiptHint.Location = new System.Drawing.Point(6, 248);
+            this.lblCounterReceiptHint.Location = new System.Drawing.Point(6, 272);
             this.lblCounterReceiptHint.MaximumSize = new System.Drawing.Size(370, 0);
             this.lblCounterReceiptHint.Name = "lblCounterReceiptHint";
             this.lblCounterReceiptHint.Size = new System.Drawing.Size(101, 12);
-            this.lblCounterReceiptHint.TabIndex = 8;
+            this.lblCounterReceiptHint.TabIndex = 9;
             this.lblCounterReceiptHint.Text = "The customer\'s copy always prints as normal. When checked, the counter\'s copy is saved as a JPEG to the folder below instead of using a second sheet.";
             //
             // lblCounterReceiptPath
             //
             this.lblCounterReceiptPath.AutoSize = true;
             this.lblCounterReceiptPath.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
-            this.lblCounterReceiptPath.Location = new System.Drawing.Point(6, 296);
+            this.lblCounterReceiptPath.Location = new System.Drawing.Point(6, 320);
             this.lblCounterReceiptPath.Name = "lblCounterReceiptPath";
             this.lblCounterReceiptPath.Size = new System.Drawing.Size(66, 13);
-            this.lblCounterReceiptPath.TabIndex = 9;
+            this.lblCounterReceiptPath.TabIndex = 10;
             this.lblCounterReceiptPath.Text = "Save Folder:";
             //
             // txtCounterReceiptPath
             //
-            this.txtCounterReceiptPath.Location = new System.Drawing.Point(6, 313);
+            this.txtCounterReceiptPath.Location = new System.Drawing.Point(6, 337);
             this.txtCounterReceiptPath.Name = "txtCounterReceiptPath";
             this.txtCounterReceiptPath.Size = new System.Drawing.Size(300, 22);
-            this.txtCounterReceiptPath.TabIndex = 10;
+            this.txtCounterReceiptPath.TabIndex = 11;
             //
             // btnBrowseCounterReceiptPath
             //
-            this.btnBrowseCounterReceiptPath.Location = new System.Drawing.Point(312, 312);
+            this.btnBrowseCounterReceiptPath.Location = new System.Drawing.Point(312, 336);
             this.btnBrowseCounterReceiptPath.Name = "btnBrowseCounterReceiptPath";
             this.btnBrowseCounterReceiptPath.Size = new System.Drawing.Size(74, 24);
-            this.btnBrowseCounterReceiptPath.TabIndex = 11;
+            this.btnBrowseCounterReceiptPath.TabIndex = 12;
             this.btnBrowseCounterReceiptPath.Text = "Browse...";
             this.btnBrowseCounterReceiptPath.UseVisualStyleBackColor = true;
             this.btnBrowseCounterReceiptPath.Click += new System.EventHandler(this.btnBrowseCounterReceiptPath_Click);
@@ -817,6 +1118,11 @@ namespace _conv
             // tabPageAppearance
             //
             this.tabPageAppearance.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageAppearance.Controls.Add(this.lblLayoutEditHint);
+            this.tabPageAppearance.Controls.Add(this.chkLayoutEditEnabled);
+            this.tabPageAppearance.Controls.Add(this.lblLogoUrlHint);
+            this.tabPageAppearance.Controls.Add(this.txtLogoUrl);
+            this.tabPageAppearance.Controls.Add(this.lblLogoUrl);
             this.tabPageAppearance.Controls.Add(this.lblFontScaleHint);
             this.tabPageAppearance.Controls.Add(this.lblFontScaleUnit);
             this.tabPageAppearance.Controls.Add(this.nud_fontScalePt);
@@ -972,9 +1278,151 @@ namespace _conv
             this.lblFontScaleHint.TabIndex = 12;
             this.lblFontScaleHint.Text = "0 = each window\'s own designed text size. Added to (or subtracted from) every control\'s own font size, so relative sizes (headers vs. labels, etc.) are preserved.";
             //
+            // lblLogoUrl
+            //
+            this.lblLogoUrl.AutoSize = true;
+            this.lblLogoUrl.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblLogoUrl.Location = new System.Drawing.Point(6, 256);
+            this.lblLogoUrl.Name = "lblLogoUrl";
+            this.lblLogoUrl.Size = new System.Drawing.Size(84, 13);
+            this.lblLogoUrl.TabIndex = 13;
+            this.lblLogoUrl.Text = "Logo image URL:";
+            //
+            // txtLogoUrl
+            //
+            this.txtLogoUrl.Location = new System.Drawing.Point(6, 273);
+            this.txtLogoUrl.Name = "txtLogoUrl";
+            this.txtLogoUrl.Size = new System.Drawing.Size(370, 22);
+            this.txtLogoUrl.TabIndex = 14;
+            //
+            // lblLogoUrlHint
+            //
+            this.lblLogoUrlHint.AutoSize = true;
+            this.lblLogoUrlHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
+            this.lblLogoUrlHint.ForeColor = System.Drawing.Color.Gray;
+            this.lblLogoUrlHint.Location = new System.Drawing.Point(6, 298);
+            this.lblLogoUrlHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblLogoUrlHint.Name = "lblLogoUrlHint";
+            this.lblLogoUrlHint.Size = new System.Drawing.Size(101, 12);
+            this.lblLogoUrlHint.TabIndex = 15;
+            this.lblLogoUrlHint.Text = "Direct link to a PNG/JPG shown on receipts and as the title-bar icon. Leave blank to use the default Baclig Minimart logo. Takes effect next time the app starts.";
+            //
+            // chkLayoutEditEnabled
+            //
+            this.chkLayoutEditEnabled.AutoSize = true;
+            this.chkLayoutEditEnabled.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkLayoutEditEnabled.Location = new System.Drawing.Point(6, 340);
+            this.chkLayoutEditEnabled.Name = "chkLayoutEditEnabled";
+            this.chkLayoutEditEnabled.Size = new System.Drawing.Size(230, 17);
+            this.chkLayoutEditEnabled.TabIndex = 16;
+            this.chkLayoutEditEnabled.Text = "Allow \"Edit Layout\" from the main menu";
+            this.chkLayoutEditEnabled.UseVisualStyleBackColor = true;
+            //
+            // lblLayoutEditHint
+            //
+            this.lblLayoutEditHint.AutoSize = true;
+            this.lblLayoutEditHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
+            this.lblLayoutEditHint.ForeColor = System.Drawing.Color.Gray;
+            this.lblLayoutEditHint.Location = new System.Drawing.Point(6, 359);
+            this.lblLayoutEditHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblLayoutEditHint.Name = "lblLayoutEditHint";
+            this.lblLayoutEditHint.Size = new System.Drawing.Size(101, 12);
+            this.lblLayoutEditHint.TabIndex = 17;
+            this.lblLayoutEditHint.Text = "Must be checked here before the main menu\'s Edit Layout item will work - the admin PIN is still required there too.";
+            //
             // colorDialogAccent
             //
             this.colorDialogAccent.FullOpen = true;
+            //
+            // tabPageLayout
+            //
+            this.tabPageLayout.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageLayout.Controls.Add(this.btnSaveLayoutFile);
+            this.tabPageLayout.Controls.Add(this.btnLoadLayoutFile);
+            this.tabPageLayout.Controls.Add(this.btnApplyLayoutText);
+            this.tabPageLayout.Controls.Add(this.btnRefreshLayoutText);
+            this.tabPageLayout.Controls.Add(this.txtLayoutRevision);
+            this.tabPageLayout.Controls.Add(this.lblLayoutRevisionHint);
+            this.tabPageLayout.Location = new System.Drawing.Point(4, 22);
+            this.tabPageLayout.Name = "tabPageLayout";
+            this.tabPageLayout.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageLayout.Size = new System.Drawing.Size(392, 400);
+            this.tabPageLayout.TabIndex = 11;
+            this.tabPageLayout.Text = "Layout";
+            //
+            // lblLayoutRevisionHint
+            //
+            this.lblLayoutRevisionHint.AutoSize = true;
+            this.lblLayoutRevisionHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblLayoutRevisionHint.Location = new System.Drawing.Point(6, 6);
+            this.lblLayoutRevisionHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblLayoutRevisionHint.Name = "lblLayoutRevisionHint";
+            this.lblLayoutRevisionHint.Size = new System.Drawing.Size(300, 39);
+            this.lblLayoutRevisionHint.TabIndex = 0;
+            this.lblLayoutRevisionHint.Text = "The main screen\'s saved control positions and sizes as text. Copy this out as " +
+    "a backup before a risky edit, hand-edit it, or load/save whole revisions as files.";
+            //
+            // txtLayoutRevision
+            //
+            this.txtLayoutRevision.Font = new System.Drawing.Font("Consolas", 8.25F);
+            this.txtLayoutRevision.Location = new System.Drawing.Point(6, 48);
+            this.txtLayoutRevision.Multiline = true;
+            this.txtLayoutRevision.Name = "txtLayoutRevision";
+            this.txtLayoutRevision.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtLayoutRevision.Size = new System.Drawing.Size(370, 260);
+            this.txtLayoutRevision.TabIndex = 1;
+            this.txtLayoutRevision.WordWrap = false;
+            //
+            // btnRefreshLayoutText
+            //
+            this.btnRefreshLayoutText.Location = new System.Drawing.Point(6, 314);
+            this.btnRefreshLayoutText.Name = "btnRefreshLayoutText";
+            this.btnRefreshLayoutText.Size = new System.Drawing.Size(120, 28);
+            this.btnRefreshLayoutText.TabIndex = 2;
+            this.btnRefreshLayoutText.Text = "Refresh";
+            this.btnRefreshLayoutText.UseVisualStyleBackColor = true;
+            this.btnRefreshLayoutText.Click += new System.EventHandler(this.btnRefreshLayoutText_Click);
+            //
+            // btnApplyLayoutText
+            //
+            this.btnApplyLayoutText.Location = new System.Drawing.Point(132, 314);
+            this.btnApplyLayoutText.Name = "btnApplyLayoutText";
+            this.btnApplyLayoutText.Size = new System.Drawing.Size(120, 28);
+            this.btnApplyLayoutText.TabIndex = 3;
+            this.btnApplyLayoutText.Text = "Apply";
+            this.btnApplyLayoutText.UseVisualStyleBackColor = true;
+            this.btnApplyLayoutText.Click += new System.EventHandler(this.btnApplyLayoutText_Click);
+            //
+            // btnLoadLayoutFile
+            //
+            this.btnLoadLayoutFile.Location = new System.Drawing.Point(6, 348);
+            this.btnLoadLayoutFile.Name = "btnLoadLayoutFile";
+            this.btnLoadLayoutFile.Size = new System.Drawing.Size(120, 28);
+            this.btnLoadLayoutFile.TabIndex = 4;
+            this.btnLoadLayoutFile.Text = "Load from File...";
+            this.btnLoadLayoutFile.UseVisualStyleBackColor = true;
+            this.btnLoadLayoutFile.Click += new System.EventHandler(this.btnLoadLayoutFile_Click);
+            //
+            // btnSaveLayoutFile
+            //
+            this.btnSaveLayoutFile.Location = new System.Drawing.Point(132, 348);
+            this.btnSaveLayoutFile.Name = "btnSaveLayoutFile";
+            this.btnSaveLayoutFile.Size = new System.Drawing.Size(120, 28);
+            this.btnSaveLayoutFile.TabIndex = 5;
+            this.btnSaveLayoutFile.Text = "Save to File...";
+            this.btnSaveLayoutFile.UseVisualStyleBackColor = true;
+            this.btnSaveLayoutFile.Click += new System.EventHandler(this.btnSaveLayoutFile_Click);
+            //
+            // openFileDialogLayout
+            //
+            this.openFileDialogLayout.DefaultExt = "xml";
+            this.openFileDialogLayout.Filter = "Layout files (*.xml)|*.xml|All files (*.*)|*.*";
+            //
+            // saveFileDialogLayout
+            //
+            this.saveFileDialogLayout.DefaultExt = "xml";
+            this.saveFileDialogLayout.FileName = "MainLayout.xml";
+            this.saveFileDialogLayout.Filter = "Layout files (*.xml)|*.xml|All files (*.*)|*.*";
             //
             // tabPageSchedule
             //
@@ -1365,9 +1813,7 @@ namespace _conv
             // tabPageDataSync
             //
             this.tabPageDataSync.BackColor = System.Drawing.Color.FloralWhite;
-            this.tabPageDataSync.Controls.Add(this.lblLastPush);
-            this.tabPageDataSync.Controls.Add(this.lblPushStatus);
-            this.tabPageDataSync.Controls.Add(this.btnPushToOnline);
+            this.tabPageDataSync.Controls.Add(this.grpUpload);
             this.tabPageDataSync.Controls.Add(this.lblLastSync);
             this.tabPageDataSync.Controls.Add(this.lblSyncStatus);
             this.tabPageDataSync.Controls.Add(this.btnSyncNow);
@@ -1455,10 +1901,10 @@ namespace _conv
             //
             // btnPushToOnline
             //
-            this.btnPushToOnline.Location = new System.Drawing.Point(6, 237);
+            this.btnPushToOnline.Location = new System.Drawing.Point(10, 25);
             this.btnPushToOnline.Name = "btnPushToOnline";
             this.btnPushToOnline.Size = new System.Drawing.Size(220, 32);
-            this.btnPushToOnline.TabIndex = 7;
+            this.btnPushToOnline.TabIndex = 0;
             this.btnPushToOnline.Text = "Push Offline Items to Online";
             this.btnPushToOnline.UseVisualStyleBackColor = true;
             this.btnPushToOnline.Click += new System.EventHandler(this.btnPushToOnline_Click);
@@ -1468,29 +1914,45 @@ namespace _conv
             this.lblPushStatus.AutoSize = true;
             this.lblPushStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
             this.lblPushStatus.ForeColor = System.Drawing.Color.Gray;
-            this.lblPushStatus.Location = new System.Drawing.Point(6, 277);
-            this.lblPushStatus.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblPushStatus.Location = new System.Drawing.Point(10, 63);
+            this.lblPushStatus.MaximumSize = new System.Drawing.Size(360, 0);
             this.lblPushStatus.Name = "lblPushStatus";
             this.lblPushStatus.Size = new System.Drawing.Size(0, 12);
-            this.lblPushStatus.TabIndex = 8;
+            this.lblPushStatus.TabIndex = 1;
             //
             // lblLastPush
             //
             this.lblLastPush.AutoSize = true;
             this.lblLastPush.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
             this.lblLastPush.ForeColor = System.Drawing.Color.Gray;
-            this.lblLastPush.Location = new System.Drawing.Point(6, 297);
-            this.lblLastPush.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblLastPush.Location = new System.Drawing.Point(10, 83);
+            this.lblLastPush.MaximumSize = new System.Drawing.Size(360, 0);
             this.lblLastPush.Name = "lblLastPush";
             this.lblLastPush.Size = new System.Drawing.Size(101, 12);
-            this.lblLastPush.TabIndex = 9;
+            this.lblLastPush.TabIndex = 2;
             this.lblLastPush.Text = "Last push: never";
+            //
+            // grpUpload
+            //
+            this.grpUpload.BackColor = System.Drawing.Color.White;
+            this.grpUpload.Controls.Add(this.btnPushToOnline);
+            this.grpUpload.Controls.Add(this.lblPushStatus);
+            this.grpUpload.Controls.Add(this.lblLastPush);
+            this.grpUpload.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.grpUpload.Location = new System.Drawing.Point(6, 225);
+            this.grpUpload.Name = "grpUpload";
+            this.grpUpload.Size = new System.Drawing.Size(380, 108);
+            this.grpUpload.TabIndex = 7;
+            this.grpUpload.TabStop = false;
+            this.grpUpload.Text = "Upload to Online Database";
             //
             // tabPageTrial
             //
             this.tabPageTrial.BackColor = System.Drawing.Color.FloralWhite;
             this.tabPageTrial.Controls.Add(this.btnImportLicenseFile);
             this.tabPageTrial.Controls.Add(this.btnActivateLicense);
+            this.tabPageTrial.Controls.Add(this.cmbSubscriptionTier);
+            this.tabPageTrial.Controls.Add(this.lblSubscriptionTier);
             this.tabPageTrial.Controls.Add(this.txtLicenseKey);
             this.tabPageTrial.Controls.Add(this.lblLicenseKey);
             this.tabPageTrial.Controls.Add(this.lblTrialStatus);
@@ -1589,22 +2051,44 @@ namespace _conv
             this.txtLicenseKey.Size = new System.Drawing.Size(300, 22);
             this.txtLicenseKey.TabIndex = 6;
             //
+            // lblSubscriptionTier
+            //
+            this.lblSubscriptionTier.AutoSize = true;
+            this.lblSubscriptionTier.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblSubscriptionTier.Location = new System.Drawing.Point(6, 212);
+            this.lblSubscriptionTier.Name = "lblSubscriptionTier";
+            this.lblSubscriptionTier.Size = new System.Drawing.Size(96, 13);
+            this.lblSubscriptionTier.TabIndex = 7;
+            this.lblSubscriptionTier.Text = "Subscription Tier:";
+            //
+            // cmbSubscriptionTier
+            //
+            // Only used to pick which Documents\App Inventory\Licenses\<Tier> subfolder
+            // btnImportLicenseFile_Click opens into below - the tier itself comes from the
+            // imported file's own Tier field (see TrialLicense.TryActivateFromFile).
+            this.cmbSubscriptionTier.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbSubscriptionTier.Items.AddRange(new object[] { "Basic", "Pro", "Enterprise" });
+            this.cmbSubscriptionTier.Location = new System.Drawing.Point(120, 208);
+            this.cmbSubscriptionTier.Name = "cmbSubscriptionTier";
+            this.cmbSubscriptionTier.Size = new System.Drawing.Size(150, 23);
+            this.cmbSubscriptionTier.TabIndex = 8;
+            //
             // btnActivateLicense
             //
-            this.btnActivateLicense.Location = new System.Drawing.Point(6, 218);
+            this.btnActivateLicense.Location = new System.Drawing.Point(6, 245);
             this.btnActivateLicense.Name = "btnActivateLicense";
             this.btnActivateLicense.Size = new System.Drawing.Size(180, 30);
-            this.btnActivateLicense.TabIndex = 7;
+            this.btnActivateLicense.TabIndex = 9;
             this.btnActivateLicense.Text = "Activate";
             this.btnActivateLicense.UseVisualStyleBackColor = true;
             this.btnActivateLicense.Click += new System.EventHandler(this.btnActivateLicense_Click);
             //
             // btnImportLicenseFile
             //
-            this.btnImportLicenseFile.Location = new System.Drawing.Point(192, 218);
+            this.btnImportLicenseFile.Location = new System.Drawing.Point(192, 245);
             this.btnImportLicenseFile.Name = "btnImportLicenseFile";
             this.btnImportLicenseFile.Size = new System.Drawing.Size(180, 30);
-            this.btnImportLicenseFile.TabIndex = 8;
+            this.btnImportLicenseFile.TabIndex = 10;
             this.btnImportLicenseFile.Text = "Import License File...";
             this.btnImportLicenseFile.UseVisualStyleBackColor = true;
             this.btnImportLicenseFile.Click += new System.EventHandler(this.btnImportLicenseFile_Click);
@@ -2033,6 +2517,137 @@ namespace _conv
             this.lblMaintenanceStatus.Size = new System.Drawing.Size(101, 24);
             this.lblMaintenanceStatus.TabIndex = 6;
             //
+            // tabPageLowStock
+            //
+            this.tabPageLowStock.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageLowStock.Controls.Add(this.lblLowStockStatus);
+            this.tabPageLowStock.Controls.Add(this.btnRefreshLowStock);
+            this.tabPageLowStock.Controls.Add(this.btnSaveLowStock);
+            this.tabPageLowStock.Controls.Add(this.nudLowStockInterval);
+            this.tabPageLowStock.Controls.Add(this.lblLowStockInterval);
+            this.tabPageLowStock.Controls.Add(this.nudLowStockThreshold);
+            this.tabPageLowStock.Controls.Add(this.lblLowStockThreshold);
+            this.tabPageLowStock.Controls.Add(this.chkLowStockEnabled);
+            this.tabPageLowStock.Controls.Add(this.lblLowStockHint);
+            this.tabPageLowStock.Location = new System.Drawing.Point(4, 22);
+            this.tabPageLowStock.Name = "tabPageLowStock";
+            this.tabPageLowStock.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageLowStock.Size = new System.Drawing.Size(392, 400);
+            this.tabPageLowStock.TabIndex = 11;
+            this.tabPageLowStock.Text = "Low Stock Reminder";
+            //
+            // lblLowStockHint
+            //
+            this.lblLowStockHint.AutoSize = true;
+            this.lblLowStockHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblLowStockHint.Location = new System.Drawing.Point(6, 6);
+            this.lblLowStockHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblLowStockHint.Name = "lblLowStockHint";
+            this.lblLowStockHint.Size = new System.Drawing.Size(370, 52);
+            this.lblLowStockHint.TabIndex = 0;
+            this.lblLowStockHint.Text = "When enabled, a centered popup lists items at or below the threshold below, on " +
+    "a timer, on every terminal that shares this database.";
+            //
+            // chkLowStockEnabled
+            //
+            this.chkLowStockEnabled.AutoSize = true;
+            this.chkLowStockEnabled.Location = new System.Drawing.Point(6, 70);
+            this.chkLowStockEnabled.Name = "chkLowStockEnabled";
+            this.chkLowStockEnabled.Size = new System.Drawing.Size(160, 17);
+            this.chkLowStockEnabled.TabIndex = 1;
+            this.chkLowStockEnabled.Text = "Enable low stock reminder";
+            this.chkLowStockEnabled.UseVisualStyleBackColor = true;
+            //
+            // lblLowStockThreshold
+            //
+            this.lblLowStockThreshold.AutoSize = true;
+            this.lblLowStockThreshold.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblLowStockThreshold.Location = new System.Drawing.Point(6, 97);
+            this.lblLowStockThreshold.Name = "lblLowStockThreshold";
+            this.lblLowStockThreshold.Size = new System.Drawing.Size(150, 13);
+            this.lblLowStockThreshold.TabIndex = 2;
+            this.lblLowStockThreshold.Text = "Remind when quantity is at or below:";
+            //
+            // nudLowStockThreshold
+            //
+            this.nudLowStockThreshold.Location = new System.Drawing.Point(6, 114);
+            this.nudLowStockThreshold.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+            this.nudLowStockThreshold.Name = "nudLowStockThreshold";
+            this.nudLowStockThreshold.Size = new System.Drawing.Size(120, 20);
+            this.nudLowStockThreshold.TabIndex = 3;
+            this.nudLowStockThreshold.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            //
+            // lblLowStockInterval
+            //
+            this.lblLowStockInterval.AutoSize = true;
+            this.lblLowStockInterval.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblLowStockInterval.Location = new System.Drawing.Point(6, 145);
+            this.lblLowStockInterval.Name = "lblLowStockInterval";
+            this.lblLowStockInterval.Size = new System.Drawing.Size(150, 13);
+            this.lblLowStockInterval.TabIndex = 4;
+            this.lblLowStockInterval.Text = "Remind again every (minutes):";
+            //
+            // nudLowStockInterval
+            //
+            this.nudLowStockInterval.Location = new System.Drawing.Point(6, 162);
+            this.nudLowStockInterval.Maximum = new decimal(new int[] {
+            1440,
+            0,
+            0,
+            0});
+            this.nudLowStockInterval.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.nudLowStockInterval.Name = "nudLowStockInterval";
+            this.nudLowStockInterval.Size = new System.Drawing.Size(120, 20);
+            this.nudLowStockInterval.TabIndex = 5;
+            this.nudLowStockInterval.Value = new decimal(new int[] {
+            30,
+            0,
+            0,
+            0});
+            //
+            // btnSaveLowStock
+            //
+            this.btnSaveLowStock.Location = new System.Drawing.Point(6, 192);
+            this.btnSaveLowStock.Name = "btnSaveLowStock";
+            this.btnSaveLowStock.Size = new System.Drawing.Size(180, 30);
+            this.btnSaveLowStock.TabIndex = 6;
+            this.btnSaveLowStock.Text = "Save Low Stock Setting";
+            this.btnSaveLowStock.UseVisualStyleBackColor = true;
+            this.btnSaveLowStock.Click += new System.EventHandler(this.btnSaveLowStock_Click);
+            //
+            // btnRefreshLowStock
+            //
+            this.btnRefreshLowStock.Location = new System.Drawing.Point(192, 192);
+            this.btnRefreshLowStock.Name = "btnRefreshLowStock";
+            this.btnRefreshLowStock.Size = new System.Drawing.Size(180, 30);
+            this.btnRefreshLowStock.TabIndex = 7;
+            this.btnRefreshLowStock.Text = "Refresh Status";
+            this.btnRefreshLowStock.UseVisualStyleBackColor = true;
+            this.btnRefreshLowStock.Click += new System.EventHandler(this.btnRefreshLowStock_Click);
+            //
+            // lblLowStockStatus
+            //
+            this.lblLowStockStatus.AutoSize = true;
+            this.lblLowStockStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
+            this.lblLowStockStatus.ForeColor = System.Drawing.Color.Gray;
+            this.lblLowStockStatus.Location = new System.Drawing.Point(6, 230);
+            this.lblLowStockStatus.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblLowStockStatus.Name = "lblLowStockStatus";
+            this.lblLowStockStatus.Size = new System.Drawing.Size(101, 24);
+            this.lblLowStockStatus.TabIndex = 8;
+            //
             // tabPageReceiptTesting
             //
             this.tabPageReceiptTesting.BackColor = System.Drawing.Color.FloralWhite;
@@ -2106,6 +2721,143 @@ namespace _conv
             this.btnPreviewReceipt.UseVisualStyleBackColor = true;
             this.btnPreviewReceipt.Click += new System.EventHandler(this.btnPreviewReceipt_Click);
             //
+            // tabPageItemSearch
+            //
+            this.tabPageItemSearch.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageItemSearch.Controls.Add(this.clbItemSearchColumns);
+            this.tabPageItemSearch.Controls.Add(this.btnItemSearchColumnUp);
+            this.tabPageItemSearch.Controls.Add(this.btnItemSearchColumnDown);
+            this.tabPageItemSearch.Controls.Add(this.chkItemSearchDateSortDescending);
+            this.tabPageItemSearch.Controls.Add(this.chkItemSearchNameSortDescending);
+            this.tabPageItemSearch.Controls.Add(this.lblItemSearchHint);
+            this.tabPageItemSearch.Location = new System.Drawing.Point(4, 22);
+            this.tabPageItemSearch.Name = "tabPageItemSearch";
+            this.tabPageItemSearch.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageItemSearch.Size = new System.Drawing.Size(392, 400);
+            this.tabPageItemSearch.TabIndex = 12;
+            this.tabPageItemSearch.Text = "Item Search";
+            //
+            // lblItemSearchHint
+            //
+            this.lblItemSearchHint.AutoSize = true;
+            this.lblItemSearchHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblItemSearchHint.Location = new System.Drawing.Point(6, 6);
+            this.lblItemSearchHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblItemSearchHint.Name = "lblItemSearchHint";
+            this.lblItemSearchHint.Size = new System.Drawing.Size(300, 26);
+            this.lblItemSearchHint.TabIndex = 0;
+            this.lblItemSearchHint.Text = "Uncheck a column to hide it, or select one and use Move Up/Down to reorder it. " +
+    "The checkboxes below set sort direction for the item search results on the mai" +
+    "n POS screen.";
+            //
+            // clbItemSearchColumns
+            //
+            this.clbItemSearchColumns.CheckOnClick = true;
+            this.clbItemSearchColumns.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular);
+            this.clbItemSearchColumns.FormattingEnabled = true;
+            this.clbItemSearchColumns.IntegralHeight = false;
+            this.clbItemSearchColumns.Location = new System.Drawing.Point(6, 40);
+            this.clbItemSearchColumns.Name = "clbItemSearchColumns";
+            this.clbItemSearchColumns.Size = new System.Drawing.Size(300, 290);
+            this.clbItemSearchColumns.TabIndex = 1;
+            //
+            // btnItemSearchColumnUp
+            //
+            this.btnItemSearchColumnUp.Location = new System.Drawing.Point(312, 40);
+            this.btnItemSearchColumnUp.Name = "btnItemSearchColumnUp";
+            this.btnItemSearchColumnUp.Size = new System.Drawing.Size(74, 30);
+            this.btnItemSearchColumnUp.TabIndex = 2;
+            this.btnItemSearchColumnUp.Text = "Move Up";
+            this.btnItemSearchColumnUp.UseVisualStyleBackColor = true;
+            this.btnItemSearchColumnUp.Click += new System.EventHandler(this.btnItemSearchColumnUp_Click);
+            //
+            // btnItemSearchColumnDown
+            //
+            this.btnItemSearchColumnDown.Location = new System.Drawing.Point(312, 76);
+            this.btnItemSearchColumnDown.Name = "btnItemSearchColumnDown";
+            this.btnItemSearchColumnDown.Size = new System.Drawing.Size(74, 30);
+            this.btnItemSearchColumnDown.TabIndex = 3;
+            this.btnItemSearchColumnDown.Text = "Move Down";
+            this.btnItemSearchColumnDown.UseVisualStyleBackColor = true;
+            this.btnItemSearchColumnDown.Click += new System.EventHandler(this.btnItemSearchColumnDown_Click);
+            //
+            // chkItemSearchDateSortDescending
+            //
+            this.chkItemSearchDateSortDescending.AutoSize = true;
+            this.chkItemSearchDateSortDescending.Location = new System.Drawing.Point(6, 336);
+            this.chkItemSearchDateSortDescending.Name = "chkItemSearchDateSortDescending";
+            this.chkItemSearchDateSortDescending.Size = new System.Drawing.Size(300, 17);
+            this.chkItemSearchDateSortDescending.TabIndex = 4;
+            this.chkItemSearchDateSortDescending.Text = "Enter-to-search results: newest first (descending)";
+            this.chkItemSearchDateSortDescending.UseVisualStyleBackColor = true;
+            //
+            // chkItemSearchNameSortDescending
+            //
+            this.chkItemSearchNameSortDescending.AutoSize = true;
+            this.chkItemSearchNameSortDescending.Location = new System.Drawing.Point(6, 360);
+            this.chkItemSearchNameSortDescending.Name = "chkItemSearchNameSortDescending";
+            this.chkItemSearchNameSortDescending.Size = new System.Drawing.Size(300, 17);
+            this.chkItemSearchNameSortDescending.TabIndex = 5;
+            this.chkItemSearchNameSortDescending.Text = "Browse/refresh results: descending (Z-A)";
+            this.chkItemSearchNameSortDescending.UseVisualStyleBackColor = true;
+            //
+            // tabPageCartColumns
+            //
+            this.tabPageCartColumns.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageCartColumns.Controls.Add(this.clbCartColumns);
+            this.tabPageCartColumns.Controls.Add(this.btnCartColumnUp);
+            this.tabPageCartColumns.Controls.Add(this.btnCartColumnDown);
+            this.tabPageCartColumns.Controls.Add(this.lblCartColumnsHint);
+            this.tabPageCartColumns.Location = new System.Drawing.Point(4, 22);
+            this.tabPageCartColumns.Name = "tabPageCartColumns";
+            this.tabPageCartColumns.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageCartColumns.Size = new System.Drawing.Size(392, 372);
+            this.tabPageCartColumns.TabIndex = 13;
+            this.tabPageCartColumns.Text = "Cart Board";
+            //
+            // lblCartColumnsHint
+            //
+            this.lblCartColumnsHint.AutoSize = true;
+            this.lblCartColumnsHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblCartColumnsHint.Location = new System.Drawing.Point(6, 6);
+            this.lblCartColumnsHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblCartColumnsHint.Name = "lblCartColumnsHint";
+            this.lblCartColumnsHint.Size = new System.Drawing.Size(300, 26);
+            this.lblCartColumnsHint.TabIndex = 0;
+            this.lblCartColumnsHint.Text = "Uncheck a column to hide it, or select one and use Move Up/Down to reorder it -" +
+    " applies to the cart board on the main POS screen.";
+            //
+            // clbCartColumns
+            //
+            this.clbCartColumns.CheckOnClick = true;
+            this.clbCartColumns.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular);
+            this.clbCartColumns.FormattingEnabled = true;
+            this.clbCartColumns.IntegralHeight = false;
+            this.clbCartColumns.Location = new System.Drawing.Point(6, 40);
+            this.clbCartColumns.Name = "clbCartColumns";
+            this.clbCartColumns.Size = new System.Drawing.Size(300, 326);
+            this.clbCartColumns.TabIndex = 1;
+            //
+            // btnCartColumnUp
+            //
+            this.btnCartColumnUp.Location = new System.Drawing.Point(312, 40);
+            this.btnCartColumnUp.Name = "btnCartColumnUp";
+            this.btnCartColumnUp.Size = new System.Drawing.Size(74, 30);
+            this.btnCartColumnUp.TabIndex = 2;
+            this.btnCartColumnUp.Text = "Move Up";
+            this.btnCartColumnUp.UseVisualStyleBackColor = true;
+            this.btnCartColumnUp.Click += new System.EventHandler(this.btnCartColumnUp_Click);
+            //
+            // btnCartColumnDown
+            //
+            this.btnCartColumnDown.Location = new System.Drawing.Point(312, 76);
+            this.btnCartColumnDown.Name = "btnCartColumnDown";
+            this.btnCartColumnDown.Size = new System.Drawing.Size(74, 30);
+            this.btnCartColumnDown.TabIndex = 3;
+            this.btnCartColumnDown.Text = "Move Down";
+            this.btnCartColumnDown.UseVisualStyleBackColor = true;
+            this.btnCartColumnDown.Click += new System.EventHandler(this.btnCartColumnDown_Click);
+            //
             // openFileDialogAccess
             //
             this.openFileDialogAccess.CheckFileExists = false;
@@ -2152,11 +2904,12 @@ namespace _conv
             this.AcceptButton = this.btnSave;
             this.BackColor = System.Drawing.Color.FloralWhite;
             this.CancelButton = this.btnClose;
-            this.ClientSize = new System.Drawing.Size(424, 582);
+            this.ClientSize = new System.Drawing.Size(564, 582);
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.lblStatus);
-            this.Controls.Add(this.tabControlConfig);
+            this.Controls.Add(this.pnlConfigHost);
+            this.Controls.Add(this.lstConfigSections);
             this.Controls.Add(this.lblWarningBar);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -2166,6 +2919,7 @@ namespace _conv
             this.Text = "System Configuration";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SystemConfigForm_FormClosed);
             this.Load += new System.EventHandler(this.SystemConfigForm_Load);
+            this.pnlConfigHost.ResumeLayout(false);
             this.tabControlConfig.ResumeLayout(false);
             this.tabPageSettings.ResumeLayout(false);
             this.gbxStoreInfo.ResumeLayout(false);
@@ -2175,6 +2929,14 @@ namespace _conv
             ((System.ComponentModel.ISupportInitialize)(this.nud_connectionTimeout)).EndInit();
             this.gbxSecurity.ResumeLayout(false);
             this.gbxSecurity.PerformLayout();
+            this.gbxSalesDefaults.ResumeLayout(false);
+            this.gbxSalesDefaults.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nud_autoHoldMinutes)).EndInit();
+            this.gbxAlerts.ResumeLayout(false);
+            this.gbxAlerts.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nud_alertAutoDismissSeconds)).EndInit();
+            this.gbxStartup.ResumeLayout(false);
+            this.gbxStartup.PerformLayout();
             this.tabPageNetwork.ResumeLayout(false);
             this.tabPageNetwork.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartNetwork)).EndInit();
@@ -2184,6 +2946,8 @@ namespace _conv
             this.tabPagePrinter.PerformLayout();
             this.tabPageAppearance.ResumeLayout(false);
             this.tabPageAppearance.PerformLayout();
+            this.tabPageLayout.ResumeLayout(false);
+            this.tabPageLayout.PerformLayout();
             this.tabPageSchedule.ResumeLayout(false);
             this.tabPageSchedule.PerformLayout();
             this.gbxGmail.ResumeLayout(false);
@@ -2193,6 +2957,8 @@ namespace _conv
             ((System.ComponentModel.ISupportInitialize)(this.nud_smtpPort)).EndInit();
             this.tabPageDataSync.ResumeLayout(false);
             this.tabPageDataSync.PerformLayout();
+            this.grpUpload.ResumeLayout(false);
+            this.grpUpload.PerformLayout();
             this.tabPageTrial.ResumeLayout(false);
             this.tabPageTrial.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_trialDays)).EndInit();
@@ -2204,9 +2970,17 @@ namespace _conv
             ((System.ComponentModel.ISupportInitialize)(this.nud_remotePort)).EndInit();
             this.tabPageMaintenance.ResumeLayout(false);
             this.tabPageMaintenance.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudLowStockThreshold)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudLowStockInterval)).EndInit();
+            this.tabPageLowStock.ResumeLayout(false);
+            this.tabPageLowStock.PerformLayout();
             this.tabPageReceiptTesting.ResumeLayout(false);
             this.tabPageReceiptTesting.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tbPriceOverride)).EndInit();
+            this.tabPageItemSearch.ResumeLayout(false);
+            this.tabPageItemSearch.PerformLayout();
+            this.tabPageCartColumns.ResumeLayout(false);
+            this.tabPageCartColumns.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2214,6 +2988,8 @@ namespace _conv
 
         #endregion
 
+        private System.Windows.Forms.ListBox lstConfigSections;
+        private System.Windows.Forms.Panel pnlConfigHost;
         private System.Windows.Forms.TabControl tabControlConfig;
         private System.Windows.Forms.TabPage tabPageSettings;
         private System.Windows.Forms.GroupBox gbxStoreInfo;
@@ -2243,6 +3019,19 @@ namespace _conv
         private System.Windows.Forms.Label lblAdminPin;
         private System.Windows.Forms.TextBox txtAdminPin;
         private System.Windows.Forms.CheckBox chkShowAdminPin;
+        private System.Windows.Forms.GroupBox gbxSalesDefaults;
+        private System.Windows.Forms.CheckBox chkDefaultSelltype;
+        private System.Windows.Forms.ComboBox cbxDefaultSelltype;
+        private System.Windows.Forms.CheckBox chkAutoHoldEnabled;
+        private System.Windows.Forms.NumericUpDown nud_autoHoldMinutes;
+        private System.Windows.Forms.Label lblAutoHoldMinutes;
+        private System.Windows.Forms.CheckBox chkBlockZeroPriceItems;
+        private System.Windows.Forms.GroupBox gbxAlerts;
+        private System.Windows.Forms.CheckBox chkAlertAutoDismissEnabled;
+        private System.Windows.Forms.NumericUpDown nud_alertAutoDismissSeconds;
+        private System.Windows.Forms.Label lblAlertAutoDismissSeconds;
+        private System.Windows.Forms.GroupBox gbxStartup;
+        private System.Windows.Forms.CheckBox chkAutoStartWithWindows;
         private System.Windows.Forms.TabPage tabPageNetwork;
         private System.Windows.Forms.Button btnToggleMonitor;
         private System.Windows.Forms.Label lblNetworkStatus;
@@ -2258,6 +3047,7 @@ namespace _conv
         private System.Windows.Forms.Label lblPaperSizeInfo;
         private System.Windows.Forms.Label lblPaperWidth;
         private System.Windows.Forms.ComboBox cbxPaperWidth;
+        private System.Windows.Forms.CheckBox chkPaperWidthIsDefault;
         private System.Windows.Forms.Label lblCounterReceiptPath;
         private System.Windows.Forms.TextBox txtCounterReceiptPath;
         private System.Windows.Forms.Button btnBrowseCounterReceiptPath;
@@ -2279,7 +3069,21 @@ namespace _conv
         private System.Windows.Forms.NumericUpDown nud_fontScalePt;
         private System.Windows.Forms.Label lblFontScaleUnit;
         private System.Windows.Forms.Label lblFontScaleHint;
+        private System.Windows.Forms.Label lblLogoUrl;
+        private System.Windows.Forms.TextBox txtLogoUrl;
+        private System.Windows.Forms.Label lblLogoUrlHint;
+        private System.Windows.Forms.CheckBox chkLayoutEditEnabled;
+        private System.Windows.Forms.Label lblLayoutEditHint;
         private System.Windows.Forms.ColorDialog colorDialogAccent;
+        private System.Windows.Forms.TabPage tabPageLayout;
+        private System.Windows.Forms.Label lblLayoutRevisionHint;
+        private System.Windows.Forms.TextBox txtLayoutRevision;
+        private System.Windows.Forms.Button btnRefreshLayoutText;
+        private System.Windows.Forms.Button btnApplyLayoutText;
+        private System.Windows.Forms.Button btnLoadLayoutFile;
+        private System.Windows.Forms.Button btnSaveLayoutFile;
+        private System.Windows.Forms.OpenFileDialog openFileDialogLayout;
+        private System.Windows.Forms.SaveFileDialog saveFileDialogLayout;
         private System.Windows.Forms.TabPage tabPageSchedule;
         private System.Windows.Forms.Label lblScheduleHint;
         private System.Windows.Forms.Label lblFrequency;
@@ -2326,6 +3130,7 @@ namespace _conv
         private System.Windows.Forms.Button btnPushToOnline;
         private System.Windows.Forms.Label lblPushStatus;
         private System.Windows.Forms.Label lblLastPush;
+        private System.Windows.Forms.GroupBox grpUpload;
         private System.Windows.Forms.TabPage tabPageTrial;
         private System.Windows.Forms.Label lblTrialHint;
         private System.Windows.Forms.CheckBox chkTrialEnabled;
@@ -2334,6 +3139,8 @@ namespace _conv
         private System.Windows.Forms.Label lblTrialStatus;
         private System.Windows.Forms.Label lblLicenseKey;
         private System.Windows.Forms.TextBox txtLicenseKey;
+        private System.Windows.Forms.Label lblSubscriptionTier;
+        private System.Windows.Forms.ComboBox cmbSubscriptionTier;
         private System.Windows.Forms.Button btnActivateLicense;
         private System.Windows.Forms.Button btnImportLicenseFile;
         private System.Windows.Forms.OpenFileDialog openFileDialogLicense;
@@ -2373,12 +3180,34 @@ namespace _conv
         private System.Windows.Forms.Button btnSaveMaintenance;
         private System.Windows.Forms.Button btnRefreshMaintenance;
         private System.Windows.Forms.Label lblMaintenanceStatus;
+        private System.Windows.Forms.TabPage tabPageLowStock;
+        private System.Windows.Forms.Label lblLowStockHint;
+        private System.Windows.Forms.CheckBox chkLowStockEnabled;
+        private System.Windows.Forms.Label lblLowStockThreshold;
+        private System.Windows.Forms.NumericUpDown nudLowStockThreshold;
+        private System.Windows.Forms.Label lblLowStockInterval;
+        private System.Windows.Forms.NumericUpDown nudLowStockInterval;
+        private System.Windows.Forms.Button btnSaveLowStock;
+        private System.Windows.Forms.Button btnRefreshLowStock;
+        private System.Windows.Forms.Label lblLowStockStatus;
         private System.Windows.Forms.TabPage tabPageReceiptTesting;
         private System.Windows.Forms.Label lblReceiptTestingHint;
         private System.Windows.Forms.CheckBox chkPriceOverrideEnabled;
         private System.Windows.Forms.TrackBar tbPriceOverride;
         private System.Windows.Forms.Label lblPriceOverrideValue;
         private System.Windows.Forms.Button btnPreviewReceipt;
+        private System.Windows.Forms.TabPage tabPageItemSearch;
+        private System.Windows.Forms.CheckedListBox clbItemSearchColumns;
+        private System.Windows.Forms.Label lblItemSearchHint;
+        private System.Windows.Forms.Button btnItemSearchColumnUp;
+        private System.Windows.Forms.Button btnItemSearchColumnDown;
+        private System.Windows.Forms.CheckBox chkItemSearchDateSortDescending;
+        private System.Windows.Forms.CheckBox chkItemSearchNameSortDescending;
+        private System.Windows.Forms.TabPage tabPageCartColumns;
+        private System.Windows.Forms.CheckedListBox clbCartColumns;
+        private System.Windows.Forms.Label lblCartColumnsHint;
+        private System.Windows.Forms.Button btnCartColumnUp;
+        private System.Windows.Forms.Button btnCartColumnDown;
         private System.Windows.Forms.OpenFileDialog openFileDialogAccess;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Button btnSave;

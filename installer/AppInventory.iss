@@ -1,12 +1,21 @@
-; Inno Setup script for A10D-up (Baclig Minimart POS)
-; Build the Release configuration first (msbuild _conv\_conv.csproj /p:Configuration=Release),
+; Inno Setup script for Baclig Minimart's app suite (Inventory POS + Remittancce +
+; InfraMonitor + Launcher).
+; Build the Release configuration of all four first:
+;   msbuild _conv.sln /p:Configuration=Release
 ; then compile this script with ISCC.exe (Inno Setup 6).
+;
+; Installed layout keeps each app in its own subfolder under {app} - Launcher.exe discovers
+; its sibling apps at {app}\<ProjectFolder>\<exe> (see LauncherForm.FindExePath), so don't
+; flatten these into one folder.
 
-#define MyAppName "A10D-up"
+#define MyAppName "Baclig Minimart"
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "Baclig Minimart"
-#define MyAppExeName "A10D-up.exe"
-#define MyBuildDir "..\_conv\bin\Release"
+#define MyLauncherExeName "Launcher.exe"
+#define MyInventoryBuildDir "..\Inventory\bin\Release"
+#define MyRemittanceBuildDir "..\Remittancce\bin\Release"
+#define MyInfraMonitorBuildDir "..\InfraMonitor\bin\Release"
+#define MyLauncherBuildDir "..\Launcher\bin\Release"
 
 [Setup]
 ; Fixed AppId so future versions upgrade in place instead of side-by-side installing.
@@ -19,8 +28,8 @@ DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputDir=Output
 OutputBaseFilename=AppInventory-Setup-{#MyAppVersion}
-SetupIconFile=..\_conv\Resources\AppLogo.ico
-UninstallDisplayIcon={app}\{#MyAppExeName}
+SetupIconFile=..\Inventory\Resources\AppLogo.ico
+UninstallDisplayIcon={app}\Launcher\{#MyLauncherExeName}
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
@@ -34,18 +43,25 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
-; Ship everything from the Release build output except ClickOnce artifacts,
-; PDB debug symbols, and XML IntelliSense docs (not needed at runtime).
-Source: "{#MyBuildDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; \
+; Ship everything from each project's Release build output except ClickOnce artifacts,
+; PDB debug symbols, and XML IntelliSense docs (not needed at runtime). Each app keeps its
+; own subfolder so Launcher.exe can find its siblings at {app}\<ProjectFolder>\<exe>.
+Source: "{#MyInventoryBuildDir}\*"; DestDir: "{app}\Inventory"; Flags: ignoreversion recursesubdirs createallsubdirs; \
+    Excludes: "*.pdb,*.xml,*.application,*.exe.manifest,app.publish\*,app.publish"
+Source: "{#MyRemittanceBuildDir}\*"; DestDir: "{app}\Remittancce"; Flags: ignoreversion recursesubdirs createallsubdirs; \
+    Excludes: "*.pdb,*.xml,*.application,*.exe.manifest,app.publish\*,app.publish"
+Source: "{#MyInfraMonitorBuildDir}\*"; DestDir: "{app}\InfraMonitor"; Flags: ignoreversion recursesubdirs createallsubdirs; \
+    Excludes: "*.pdb,*.xml,*.application,*.exe.manifest,app.publish\*,app.publish"
+Source: "{#MyLauncherBuildDir}\*"; DestDir: "{app}\Launcher"; Flags: ignoreversion recursesubdirs createallsubdirs; \
     Excludes: "*.pdb,*.xml,*.application,*.exe.manifest,app.publish\*,app.publish"
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\Launcher\{#MyLauncherExeName}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\Launcher\{#MyLauncherExeName}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\Launcher\{#MyLauncherExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [Code]
 function IsDotNet472OrNewer: Boolean;

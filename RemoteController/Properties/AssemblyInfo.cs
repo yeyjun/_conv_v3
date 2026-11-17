@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("RemoteController")]
-[assembly: AssemblyDescription("Companion tool for A10D-up - license key generation and remote status/activation.")]
+[assembly: AssemblyDescription("Companion tool for BrewCode - license key generation and remote status/activation.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("RemoteController")]

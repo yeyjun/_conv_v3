@@ -20,8 +20,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YourApp.Data;
+using static Inventory.DataRowConvert;
 
-namespace _conv
+namespace Inventory
 {
     public partial class Purchases : Form
     {
@@ -30,7 +31,12 @@ namespace _conv
         int total_row = 0;
         public string text_in_serial;
         public string transactioncode;
-        public int purchaseState = 0;
+
+        private const string QtyStateColumnName = "qtyState";
+        private const int QtyStateColumnIndex = 5;
+        private const int QtyStatePerPiece = 1;
+        private const int QtyStateBulk = 2;
+
         public static int countcells = 0;
         public static string log_in = "";
         private static string _loggedInCode;
@@ -41,7 +47,6 @@ namespace _conv
         string dbname, dbpw, connection_timeout, dbuser, dbsrv;
 
         /// <summary>
-        /// Every top-level menuStrip1 item that can be hidden/shown from System Config > Menus,
         /// paired with the label shown in that screen. Name must match the ToolStripMenuItem's
         /// designer Name so <see cref="ApplyMenuVisibility"/> and SystemConfigForm can look it up.
         /// </summary>
@@ -56,33 +61,37 @@ namespace _conv
             ("loyaltyToolStripMenuItem", "Loyalty"),
             ("taxConfigToolStripMenuItem", "Tax Config"),
             ("systemConfigToolStripMenuItem", "System Config"),
+            ("editLayoutToolStripMenuItem", "Edit Layout"),
             ("helpToolStripMenuItem", "Help"),
+            ("gettingStartedToolStripMenuItem", "Getting Started"),
         };
 
+        private LayoutEditMessageFilter _layoutEditFilter;
+
+        private readonly TransactionShortcutFilter _transactionShortcutFilter = new TransactionShortcutFilter();
+
         /// <summary>Default HIDDEN_MENUS value when the setting is missing from App.config - hides
-        /// System Config, Loyalty, Tax Config, and Receipts from the menu bar until enabled explicitly.</summary>
-        public const string DefaultHiddenMenus = "systemConfigToolStripMenuItem,loyaltyToolStripMenuItem,taxConfigToolStripMenuItem,receiptsToolStripMenuItem";
+        public const string DefaultHiddenMenus = "systemConfigToolStripMenuItem,loyaltyToolStripMenuItem,taxConfigToolStripMenuItem,receiptsToolStripMenuItem,editLayoutToolStripMenuItem";
 
         /// <summary>
         /// Shows/hides each top-level menu per the HIDDEN_MENUS appSetting (comma-separated
         /// ToolStripMenuItem names, edited from System Config > Menus). Called on load and again
         /// after System Config closes so a change takes effect immediately, no restart needed.
         /// </summary>
-        /// <summary>Pops a Windows tray balloon off notifyIcon1 - used by SystemConfigForm to
         /// surface its configuration warnings even after the window that raised them closes.</summary>
         public void ShowTrayNotification(string title, string message, ToolTipIcon icon = ToolTipIcon.Warning)
         {
-            notifyIcon1.BalloonTipTitle = title;
-            notifyIcon1.BalloonTipText = message;
-            notifyIcon1.BalloonTipIcon = icon;
-            notifyIcon1.ShowBalloonTip(8000);
+            trayIcon.BalloonTipTitle = title;
+            trayIcon.BalloonTipText = message;
+            trayIcon.BalloonTipIcon = icon;
+            trayIcon.ShowBalloonTip(8000);
         }
 
         public void ApplyMenuVisibility()
         {
             var configurableNames = new HashSet<string>(ConfigurableMenuItems.Select(m => m.Name));
 
-            foreach (ToolStripItem item in menuStrip1.Items)
+            foreach (ToolStripItem item in menuStripMain.Items)
             {
                 if (configurableNames.Contains(item.Name))
                     item.Visible = !IsMenuHidden(item.Name);
@@ -101,35 +110,108 @@ namespace _conv
                 .Select(s => s.Trim())
                 .Contains(menuItemName, StringComparer.OrdinalIgnoreCase);
         }
-        private string pendingReceiptText;
-        private string pendingReceiptCode;
 
-        // Every receipt prints one of these, in order, as separate pages of the same print job.
-        private static readonly string[] ReceiptCopyLabels = { "CUSTOMER'S COPY", "COUNTER'S COPY" };
-        private int receiptCopyIndex;
+        public static readonly (string Name, string Label)[] ItemSearchColumns = new[]
+        {
+            ("serial", "Serial"),
+            ("description", "Particular"),
+            ("price", "Price"),
+            ("qty", "Stock/Qty"),
+        };
 
-        // True while printing just one receipt copy instead of looping through every
-        // ReceiptCopyLabels entry - used when the counter's copy is being rendered to a JPEG
-        // instead of the printer, so only the customer's copy goes to physical paper.
-        private bool printSingleReceiptCopyOnly;
+        public const string DefaultHiddenItemSearchColumns = "qty";
 
-        // How many rows of dgvDashboardLowStock printDocument2_PrintPage has drawn so far -
-        // reset to 0 before each print job, advanced across pages via HasMorePages.
-        private int outOfStockPrintRowIndex;
+        public static bool IsItemSearchColumnHidden(string columnName)
+        {
+            string raw = ConfigurationManager.AppSettings["ITEM_SEARCH_HIDDEN_COLUMNS"] ?? DefaultHiddenItemSearchColumns;
+            return raw.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Contains(columnName, StringComparer.OrdinalIgnoreCase);
+        }
 
-        // Set from System Config > Receipt Testing's slider, live (not persisted to App.config -
-        // this is a per-session testing knob, not a store setting). When set, every item on the
-        // printed/previewed receipt shows this unit price instead of its real one (line total and
-        // the subtotal/tax/grand total below it are recomputed from it too, so the whole receipt
-        // stays internally consistent) - lets a tester see how the layout holds up with very small
-        // or very large price values without editing real item data.
-        internal static decimal? TestPriceOverride;
+        private static (string Name, string Label)[] OrderColumns((string Name, string Label)[] columns, string rawOrder)
+        {
+            if (string.IsNullOrWhiteSpace(rawOrder))
+                return columns;
 
-        // Y-position PrintDocument1_PrintPage's last page reached, i.e. the receipt's actual
-        // content height - captured so SaveCounterReceiptAsJpeg can crop its (generously tall,
-        // since receipt length varies with item count) scratch bitmap down to just the receipt.
-        private float lastReceiptContentHeight;
+            var byName = columns.ToDictionary(c => c.Name, StringComparer.OrdinalIgnoreCase);
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var result = new List<(string Name, string Label)>(columns.Length);
 
+            foreach (var name in rawOrder.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()))
+            {
+                if (byName.TryGetValue(name, out var col) && seen.Add(name))
+                    result.Add(col);
+            }
+            foreach (var col in columns)
+            {
+                if (seen.Add(col.Name))
+                    result.Add(col);
+            }
+            return result.ToArray();
+        }
+
+        public static (string Name, string Label)[] GetOrderedItemSearchColumns() =>
+            OrderColumns(ItemSearchColumns, ConfigurationManager.AppSettings["ITEM_SEARCH_COLUMN_ORDER"]);
+
+        public static (string Name, string Label)[] GetOrderedCartColumns() =>
+            OrderColumns(CartColumns, ConfigurationManager.AppSettings["CART_COLUMN_ORDER"]);
+
+        public void ApplyItemSearchColumnVisibility()
+        {
+            var ordered = GetOrderedItemSearchColumns();
+            for (int i = 0; i < ordered.Length; i++)
+            {
+                var col = ordered[i];
+                if (dgv_itemSearch.Columns.Contains(col.Name))
+                {
+                    dgv_itemSearch.Columns[col.Name].Visible = !IsItemSearchColumnHidden(col.Name);
+                    dgv_itemSearch.Columns[col.Name].DisplayIndex = i;
+                }
+            }
+        }
+
+        public static bool ItemSearchDateSortDescending =>
+            !string.Equals(ConfigurationManager.AppSettings["ITEM_SEARCH_DATE_SORT_DESCENDING"], "false", StringComparison.OrdinalIgnoreCase);
+
+        public static bool ItemSearchNameSortDescending =>
+            string.Equals(ConfigurationManager.AppSettings["ITEM_SEARCH_NAME_SORT_DESCENDING"], "true", StringComparison.OrdinalIgnoreCase);
+
+        private static IOrderedEnumerable<DataRow> OrderRows<TKey>(IEnumerable<DataRow> rows, Func<DataRow, TKey> keySelector, bool descending) =>
+            descending ? rows.OrderByDescending(keySelector) : rows.OrderBy(keySelector);
+
+        public static readonly (string Name, string Label)[] CartColumns = new[]
+        {
+            ("serial", "Serial"),
+            ("description", "Particular"),
+            ("quantity", "Qty"),
+            ("uprice", "Unit Price"),
+            ("price", "Price"),
+        };
+
+        public const string DefaultHiddenCartColumns = "";
+
+        public static bool IsCartColumnHidden(string columnName)
+        {
+            string raw = ConfigurationManager.AppSettings["CART_HIDDEN_COLUMNS"] ?? DefaultHiddenCartColumns;
+            return raw.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Contains(columnName, StringComparer.OrdinalIgnoreCase);
+        }
+
+        public void ApplyCartColumnVisibility()
+        {
+            var ordered = GetOrderedCartColumns();
+            for (int i = 0; i < ordered.Length; i++)
+            {
+                var col = ordered[i];
+                if (dgv_items.Columns.Contains(col.Name))
+                {
+                    dgv_items.Columns[col.Name].Visible = !IsCartColumnHidden(col.Name);
+                    dgv_items.Columns[col.Name].DisplayIndex = i;
+                }
+            }
+        }
         internal class HeldTransaction
         {
             public string TicketCode;
@@ -139,25 +221,95 @@ namespace _conv
             public string CounterText;
             public DateTime HeldAt;
             public List<object[]> Items;
+
+            public string Remarks;
         }
         internal readonly Dictionary<string, HeldTransaction> heldTransactions = new Dictionary<string, HeldTransaction>();
         private HeldTransactionsForm heldTransactionsWindow;
+        private ItemQuickSearchForm itemQuickSearchWindow;
+
+        internal Point GetCartBoardScreenLocation() => gbx_itemList.PointToScreen(Point.Empty);
+
+        internal void ShowItemQuickSearchWindow()
+        {
+            if (itemQuickSearchWindow == null || itemQuickSearchWindow.IsDisposed)
+            {
+                itemQuickSearchWindow = new ItemQuickSearchForm();
+                itemQuickSearchWindow.FormClosed += (s, e) => itemQuickSearchWindow = null;
+            }
+
+            itemQuickSearchWindow.StartPosition = FormStartPosition.Manual;
+
+            Rectangle workArea = Screen.FromControl(this).WorkingArea;
+            Point anchor = heldTransactionsWindow != null && !heldTransactionsWindow.IsDisposed
+                ? heldTransactionsWindow.Location
+                : GetCartBoardScreenLocation();
+            int x = Math.Max(anchor.X - itemQuickSearchWindow.Width, workArea.Left);
+            int y = Math.Min(anchor.Y, workArea.Bottom - itemQuickSearchWindow.Height);
+            y = Math.Max(y, workArea.Top);
+            itemQuickSearchWindow.Location = new Point(x, y);
+
+            itemQuickSearchWindow.Show();
+            itemQuickSearchWindow.Activate();
+            itemQuickSearchWindow.FocusSearchBox();
+        }
+
+        private sealed class CartSnapshot
+        {
+            public List<object[]> Items;
+            public decimal GrandTotal;
+            public string CounterText;
+            public string TransactionCode;
+        }
+        private CartSnapshot _preHeldPreviewSnapshot;
+        private string _previewedTicketCode;
 
         // When a MessageBox opened from a shortcut key (e.g. F6) is dismissed with Enter,
         // Windows delivers that Enter's key-up to whatever control regains focus afterward.
         // This suppresses the one resulting KeyUp on tbx_serialcode so it isn't misread as
-        // the user pressing Enter with an empty serial code.
-        private bool suppressNextSerialKeyUp;
+        internal bool suppressNextSerialKeyUp;
+
+        private bool pendingCartRowSelection;
+        private string pendingCartRowSelectionText;
+
+        private const int SelltypeSelectIndex = 3;
+
+        private const int ScannerBurstThresholdMs = 100;
+        private readonly System.Windows.Forms.Timer _serialManualKeyTimer = new System.Windows.Forms.Timer { Interval = ScannerBurstThresholdMs };
+        private char _pendingManualChar;
+        private bool _serialBurstConfirmed;
 
         public Purchases()
         {
             InitializeComponent();
+
+            _serialManualKeyTimer.Tick += SerialManualKeyTimer_Tick;
+
+            tabControlMain.Visible = false;
+            statusStripMain.Visible = false;
+            menuStripMain.Visible = false;
+
             LogoCache.ApplyTo(this);
             AppTheme.ApplyTo(this);
             AppFontScale.ApplyTo(this);
+            FormClosed += (s, e) =>
+            {
+                if (_layoutEditFilter != null)
+                    Application.RemoveMessageFilter(_layoutEditFilter);
+                Application.RemoveMessageFilter(_transactionShortcutFilter);
+            };
 
-            notifyIcon1.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath) ?? SystemIcons.Application;
-            notifyIcon1.Text = "BrewCode Innovations";
+            _transactionShortcutFilter.Triggered += (s, e) => ShowHeldTransactionsWindow();
+            Application.AddMessageFilter(_transactionShortcutFilter);
+
+            trayIcon.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath) ?? SystemIcons.Application;
+            trayIcon.Text = "BrewCode Innovations";
+
+            statusStripMain.BringToFront();
+            void ResizeTabControlAboveStatusBar() =>
+                tabControlMain.Height = Math.Max(0, this.ClientSize.Height - tabControlMain.Top - statusStripMain.Height);
+            ResizeTabControlAboveStatusBar();
+            this.Resize += (s, e) => ResizeTabControlAboveStatusBar();
 
             // Controls are anchored to grow with the window; below this size they'd start
             // overlapping, so don't let the window shrink past its original designed size.
@@ -166,8 +318,8 @@ namespace _conv
             // Use the embedded copy of Morally Serif so the store name renders correctly
             // on machines where the font isn't installed. GDI text rendering can't see
             // memory fonts, so this label must use GDI+ (compatible text rendering).
-            label6.UseCompatibleTextRendering = true;
-            label6.Font = new Font(AppFonts.MorallySerif, 30F, FontStyle.Bold);
+            lbl_storeTitle.UseCompatibleTextRendering = true;
+            lbl_storeTitle.Font = new Font(AppFonts.MorallySerif, 30F, FontStyle.Bold);
 
             ApplyStoreIdentity();
 
@@ -201,7 +353,7 @@ namespace _conv
         {
             L_DEFAULTNAME = ConfigurationManager.AppSettings["STORE_NAME"] ?? "Baclig Minimart";
             S_DEFAULTNAME = ConfigurationManager.AppSettings["STORE_CODE"] ?? "BCLGMNM";
-            label6.Text = L_DEFAULTNAME;
+            lbl_storeTitle.Text = L_DEFAULTNAME;
         }
         public MySqlConnection connect_db;
 
@@ -237,6 +389,103 @@ namespace _conv
             }
 
             return serial != null && _itemsBySerial.TryGetValue(serial, out var found) ? found : null;
+        }
+
+        private string _baseTitleBar;
+
+        private const int NetworkTitleBarRefreshMs = 15 * 60 * 1000;
+        private System.Windows.Forms.Timer networkTitleBarTimer;
+
+        private async Task RefreshNetworkTitleBarAsync()
+        {
+            _baseTitleBar = $"POSXX1 - {S_DEFAULTNAME}::{await netTesting()}";
+            UpdateTitleBar();
+        }
+
+        private void StartNetworkTitleBarWatcher()
+        {
+            networkTitleBarTimer = new System.Windows.Forms.Timer { Interval = NetworkTitleBarRefreshMs };
+            networkTitleBarTimer.Tick += async (s, e) => await RefreshNetworkTitleBarAsync();
+            networkTitleBarTimer.Start();
+
+            this.FormClosed += (s, e) => networkTitleBarTimer.Stop();
+        }
+
+        private async Task RunNetworkDiagnosticsAsync()
+        {
+            await RefreshNetworkTitleBarAsync();
+
+            string dbServerSetting = ConfigurationManager.AppSettings["DB_SERVER"]?.Trim();
+            if (lastPingRoundtripMs == null)
+            {
+                ErrorDialog.Show(this,
+                    "Cannot reach the database server. Check your internet connection before proceeding - login, scanning, and payments will likely fail.",
+                    "Network Warning", $"DB_SERVER={dbServerSetting}\nPing: no reply within timeout.", MessageBoxIcon.Warning);
+            }
+            else if (lastPingRoundtripMs > SlowPingThresholdMs)
+            {
+                ErrorDialog.Show(this,
+                    $"Network connection to the database is slow ({lastPingRoundtripMs}ms). Item lookups and checkout may lag.",
+                    "Network Warning", $"DB_SERVER={dbServerSetting}\nRound-trip time: {lastPingRoundtripMs}ms (threshold: {SlowPingThresholdMs}ms).", MessageBoxIcon.Warning);
+            }
+        }
+
+        private void UpdateTitleBar()
+        {
+            if (string.IsNullOrEmpty(_baseTitleBar))
+                return;
+
+            string title = _baseTitleBar;
+
+            if (DataCacheManager.Instance.IsOfflineMode)
+            {
+                DateTime? lastUpdated = DataCacheManager.Instance.GetLastUpdated("Items");
+                title += lastUpdated.HasValue
+                    ? $" [OFFLINE - items as of {lastUpdated:MMMM dd, yyyy hh:mm tt}]"
+                    : " [OFFLINE]";
+            }
+
+            if (TrialLicense.IsEnabled && !TrialLicense.IsLicensed)
+                title += $" [TRIAL - {TrialLicense.DaysRemaining} day(s) left]";
+
+            this.Text = title;
+        }
+
+        private const int StaleCacheHours = 24;
+
+        private void UpdateCachedItemsStatusMenu()
+        {
+            int count;
+            try
+            {
+                count = DataCacheManager.Instance.GetTable("Items").Rows.Count;
+            }
+            catch (KeyNotFoundException)
+            {
+                return;
+            }
+
+            DateTime? asOf = DataCacheManager.Instance.GetLastUpdated("Items");
+            string itemWord = count == 1 ? "item" : "items";
+
+            bool isStale = asOf.HasValue && DateTime.Now - asOf.Value > TimeSpan.FromHours(StaleCacheHours);
+            int issueCount = DataCacheManager.Instance.CountItemIntegrityIssues();
+            bool hasWarning = isStale || issueCount > 0;
+
+            string text = asOf.HasValue
+                ? $"{count:N0} {itemWord} · {asOf:MMM d, h:mm tt}"
+                : $"{count:N0} {itemWord} offline";
+            cachedItemsStatusToolStripMenuItem.Text = hasWarning ? text + " ⚠" : text;
+            cachedItemsStatusToolStripMenuItem.ForeColor = hasWarning ? Color.Firebrick : SystemColors.ControlText;
+
+            string tooltip = asOf.HasValue
+                ? $"{count:N0} item(s) available for offline use - last refreshed {asOf:MMMM dd, yyyy hh:mm tt}."
+                : $"{count:N0} item(s) available for offline use.";
+            if (isStale)
+                tooltip += $" This data is more than {StaleCacheHours} hour(s) old - prices/stock may no longer be accurate.";
+            if (issueCount > 0)
+                tooltip += $" {issueCount} item(s) are missing a serial or a usable price and may not scan or sell correctly - click to review them.";
+            cachedItemsStatusToolStripMenuItem.ToolTipText = tooltip;
         }
 
         private System.Windows.Forms.Timer cacheReconnectTimer;
@@ -308,7 +557,7 @@ namespace _conv
         private bool _maintenanceOverridden;
 
         /// <summary>
-        /// Polls setting_'s MAINTENANCE_MODE flag (via AppConfigService, which is a live DB
+        /// Polls app_config_'s MAINTENANCE_MODE flag (via AppConfigService, which is a live DB
         /// read, not the startup-only DataCacheManager snapshot) so a store-wide maintenance
         /// toggle flipped on from another terminal's System Config reaches this one without a
         /// restart - not just the startup gate in Program.cs. Skipped for the rest of this
@@ -345,10 +594,112 @@ namespace _conv
                 }
             }
 
-            MessageBox.Show(
+            ErrorDialog.Show(this,
                 "Maintenance mode is now active and no admin override was entered. The application will now close.",
-                "Maintenance Mode", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                "Maintenance Mode", $"Maintenance message from server: \"{message}\"", MessageBoxIcon.Warning);
             this.Close();
+        }
+
+        private System.Windows.Forms.Timer lowStockCheckTimer;
+        private const int LowStockCheckPollMs = 2 * 60 * 1000;
+        private DateTime _lastLowStockReminderShownUtc = DateTime.MinValue;
+
+        /// <summary>
+        /// Polls app_config_'s low-stock reminder settings (via AppConfigService, same reasoning
+        /// as StartMaintenanceWatcher - a live DB read so a threshold/interval change from
+        /// another terminal's System Config takes effect here without a restart). Checked every
+        /// LowStockCheckPollMs, but the popup itself only actually shows once per the admin's
+        /// configured reminder interval (_lastLowStockReminderShownUtc), not on every poll.
+        /// </summary>
+        private void StartLowStockReminderWatcher()
+        {
+            lowStockCheckTimer = new System.Windows.Forms.Timer { Interval = LowStockCheckPollMs };
+            lowStockCheckTimer.Tick += async (s, e) => await CheckLowStockReminderAsync();
+            lowStockCheckTimer.Start();
+
+            this.FormClosed += (s, e) => lowStockCheckTimer.Stop();
+
+            // Also check shortly after login, so staff starting a shift see it then rather than
+            // waiting out the first poll interval.
+            _ = CheckLowStockReminderAsync();
+        }
+
+        private async Task CheckLowStockReminderAsync()
+        {
+            (bool enabled, int threshold, int intervalMinutes) = await AppConfigService.GetLowStockReminderSettingsAsync();
+            if (!enabled)
+                return;
+
+            if (DateTime.UtcNow - _lastLowStockReminderShownUtc < TimeSpan.FromMinutes(intervalMinutes))
+                return;
+
+            var lowStockItems = GetLowStockItems(threshold);
+            if (lowStockItems.Count == 0)
+                return;
+
+            _lastLowStockReminderShownUtc = DateTime.UtcNow;
+
+            using (var reminderForm = new LowStockReminderForm(lowStockItems, threshold))
+            {
+                reminderForm.ShowDialog(this);
+            }
+        }
+
+        /// <summary>
+        /// Reads from the already-cached Items table (DataCacheManager), same as the existing
+        /// "Out of Stock Items" dashboard panel's query at LoadDashboardSalesAsync - no extra DB
+        /// round trip, and it's kept fresh by the same post-sale RefreshItemsCache() calls that
+        /// panel relies on.
+        /// </summary>
+        private List<LowStockItemInfo> GetLowStockItems(int threshold)
+        {
+            var items = DataCacheManager.Instance.GetTable("Items");
+            if (items == null)
+                return new List<LowStockItemInfo>();
+
+            return items.AsEnumerable()
+                .Select(row => new LowStockItemInfo
+                {
+                    Serial = row["serial"]?.ToString() ?? "",
+                    Description = row["description"]?.ToString() ?? "",
+                    Quantity = row["new_quantity"] == DBNull.Value ? 0 : Convert.ToInt32(row["new_quantity"]),
+                })
+                .Where(i => i.Quantity <= threshold)
+                .OrderBy(i => i.Quantity)
+                .ThenBy(i => i.Description)
+                .ToList();
+        }
+
+        private System.Windows.Forms.Timer idleCartCheckTimer;
+        private const int IdleCartPollMs = 60 * 1000;
+        private DateTime _lastCartActivity = DateTime.Now;
+
+        private void StartIdleCartWatcher()
+        {
+            idleCartCheckTimer = new System.Windows.Forms.Timer { Interval = IdleCartPollMs };
+            idleCartCheckTimer.Tick += (s, e) => CheckIdleCart();
+            idleCartCheckTimer.Start();
+
+            this.FormClosed += (s, e) => idleCartCheckTimer.Stop();
+        }
+
+        private void CheckIdleCart()
+        {
+            if (dgv_items.Rows.Count == 0)
+                return;
+
+            if (_preHeldPreviewSnapshot != null)
+                return;
+
+            bool enabled = string.Equals(ConfigurationManager.AppSettings["AUTO_HOLD_IDLE_ENABLED"], "true", StringComparison.OrdinalIgnoreCase);
+            if (!enabled)
+                return;
+
+            int minutes = int.TryParse(ConfigurationManager.AppSettings["AUTO_HOLD_IDLE_MINUTES"], out int m) && m > 0 ? m : 30;
+            if (DateTime.Now - _lastCartActivity < TimeSpan.FromMinutes(minutes))
+                return;
+
+            HoldCurrentTransaction($"Auto-held after {minutes} minute(s) of inactivity.", silent: true);
         }
 
         private async Task StampLastSeenIfOnlineAsync()
@@ -394,6 +745,20 @@ namespace _conv
                 : $"Grand Total: {total:0.00}\n{itemsLine}";
         }
 
+        private void RecomputeCartTotals()
+        {
+            grandTotal = 0;
+            count = 0;
+
+            for (int i = 0; i < dgv_items.Rows.Count; i++)
+            {
+                grandTotal += ToDecimal(dgv_items.Rows[i].Cells[4].Value);
+                count += ToInt(dgv_items.Rows[i].Cells[2].Value);
+            }
+
+            counter.Text = BuildCounterText(grandTotal, $"Total Items: {count}");
+        }
+
         /// <summary>
         /// Applies a stock change directly to the in-memory items reference (the same
         /// DataTable every lookup/search/price check reads from). Used when the database
@@ -407,6 +772,8 @@ namespace _conv
                 return;
 
             row["new_quantity"] = ToLong(row["new_quantity"]) + delta;
+
+            PendingItemStore.AdjustQuantityIfPending(serial, delta);
         }
 
         /// <summary>Same as <see cref="AdjustCachedQuantity"/> but sets an absolute value instead of a delta.</summary>
@@ -417,6 +784,7 @@ namespace _conv
                 return;
 
             row["new_quantity"] = value;
+            PendingItemStore.SetQuantityIfPending(serial, value);
         }
 
         /// <summary>
@@ -451,6 +819,8 @@ namespace _conv
         {
             if (string.IsNullOrEmpty(transactionCode) || lineItems == null || lineItems.Count == 0)
                 return;
+
+            OperationLog.RecordSale(nameof(Purchases), transactionCode, log_in, grandTotal, lineItems);
 
             try
             {
@@ -511,15 +881,6 @@ namespace _conv
         private static bool Contains(object field, string search) =>
             field.ToString().IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0;
 
-        private static int ToInt(object value) =>
-            value == null || value == DBNull.Value ? 0 : Convert.ToInt32(value);
-
-        private static long ToLong(object value) =>
-            value == null || value == DBNull.Value ? 0L : Convert.ToInt64(value);
-
-        private static decimal ToDecimal(object value) =>
-            value == null || value == DBNull.Value ? 0m : Convert.ToDecimal(value);
-
         private static DateTime ToDate(object value) =>
             value == null || value == DBNull.Value ? DateTime.MinValue : Convert.ToDateTime(value);
 
@@ -530,7 +891,6 @@ namespace _conv
             dbuser = ConfigurationManager.AppSettings["DB_USER"];
             dbpw = ConfigurationManager.AppSettings["DB_PASSWORD"];
             connection_timeout = ConfigurationManager.AppSettings["CONNECTION_TIMEOUT"];
-
 
             try
             {
@@ -554,15 +914,15 @@ namespace _conv
         {
             var row = FindItemRow(itemcode);
 
-
-
             String item_description = row != null ? row["description"].ToString() : "";
 
             return item_description.Split(',');
         }
-        public int GetItemPrice(String itemcode)
+        private static bool BlockZeroPriceItemsEnabled =>
+            !string.Equals(ConfigurationManager.AppSettings["BLOCK_ZERO_PRICE_ITEMS"], "false", StringComparison.OrdinalIgnoreCase);
+        public decimal GetItemPrice(String itemcode)
         {
-            int price_value = 0;
+            decimal price_value = 0;
 
             var row = FindItemRow(itemcode);
             if (row == null)
@@ -570,15 +930,15 @@ namespace _conv
 
             if (selltype.SelectedIndex == 0)
             {
-                price_value = ToInt(row["price"]);
+                price_value = ToDecimal(row["price"]);
             }
             else if (selltype.SelectedIndex == 1)
             {
-                price_value = ToInt(row["retail_price"]);
+                price_value = ToDecimal(row["retail_price"]);
             }
             else if (selltype.SelectedIndex == 2)
             {
-                price_value = ToInt(row["price_perpc"]);
+                price_value = ToDecimal(row["price_perpc"]);
             }
             return price_value;
         }
@@ -588,47 +948,103 @@ namespace _conv
 
             lbl_warning.Font = new System.Drawing.Font("Arial", 15, System.Drawing.FontStyle.Italic);
         }
-        private async void Purchases_Load(object sender, EventArgs e)
+
+        private void UpdateLastTransactionCodeMenu(string transactionCode)
+        {
+            transactionListToolStripMenuItem.Text = string.IsNullOrEmpty(transactionCode)
+                ? "No transactions yet"
+                : transactionCode;
+        }
+
+        private async Task LoadLastTransactionCodeAsync()
+        {
+            try
+            {
+                await ConnectDb();
+                if (connect_db == null || connect_db.State != ConnectionState.Open)
+                    return;
+
+                try
+                {
+                    using (var cmd = new MySqlCommand(
+                        "SELECT transaction_code FROM sales_ ORDER BY id DESC LIMIT 1", connect_db))
+                    {
+                        object result = await cmd.ExecuteScalarAsync();
+                        if (result != null && result != DBNull.Value)
+                            UpdateLastTransactionCodeMenu(StripLineItemSuffix(result.ToString()));
+                    }
+                }
+                finally
+                {
+                    connect_db?.Close();
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private static string StripLineItemSuffix(string salesRowTransactionCode)
+        {
+            int dash = salesRowTransactionCode.LastIndexOf('-');
+            if (dash > 0 && int.TryParse(salesRowTransactionCode.Substring(dash + 1), out _))
+                return salesRowTransactionCode.Substring(0, dash);
+            return salesRowTransactionCode;
+        }
+
+        private void UpdateOfflineItemsStatus()
+        {
+            DateTime? lastUpdated = YourApp.Data.PendingItemStore.GetLastUpdated();
+            if (lastUpdated == null)
+            {
+                lblOfflineItemsStatus.Text = "";
+                return;
+            }
+
+            int pendingCount = YourApp.Data.PendingItemStore.GetPendingCount();
+            string itemWord = pendingCount == 1 ? "item" : "items";
+            lblOfflineItemsStatus.Text =
+                $"Offline {itemWord} pending sync: {pendingCount} - last updated {lastUpdated:MMMM dd, yyyy hh:mm tt}";
+        }
+        private void Purchases_Load(object sender, EventArgs e)
         {
 
             try
             {
                 ApplyMenuVisibility();
+                UpdateCachedItemsStatusMenu();
+                UpdateLastTransactionCodeMenu(null);
 
-                this.Text = $"POSXX1 - {S_DEFAULTNAME}::{await netTesting()}";
+                _ = RunNetworkDiagnosticsAsync();
 
-                if (lastPingRoundtripMs == null)
-                {
-                    MessageBox.Show(
-                        "Cannot reach the database server. Check your internet connection before proceeding - login, scanning, and payments will likely fail.",
-                        "Network Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-                else if (lastPingRoundtripMs > SlowPingThresholdMs)
-                {
-                    MessageBox.Show(
-                        $"Network connection to the database is slow ({lastPingRoundtripMs}ms). Item lookups and checkout may lag.",
-                        "Network Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+                _ = LoadLastTransactionCodeAsync();
 
                 Login login = new Login();
 
                 this.WindowState = FormWindowState.Maximized;
+
+                MainLayoutStore.ApplyTo(this);
+
                 this.Enabled = false;
 
                 login.ShowDialog(this);
 
                 if (!login.IsAuthenticated)
                 {
-                    MessageBox.Show("Login failed or cancelled. The application will now close.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    ErrorDialog.Show(this, "Login failed or cancelled. The application will now close.", "Access Denied",
+                        $"Login dialog closed with IsAuthenticated=false at {DateTime.Now:G} on {Environment.MachineName}.", MessageBoxIcon.Warning);
                     this.Close();
                     return;
                 }
 
                 this.Enabled = true;
 
+                tabControlMain.Visible = true;
+                statusStripMain.Visible = true;
+                menuStripMain.Visible = true;
+
                 if (TrialLicense.IsEnabled && !TrialLicense.IsLicensed)
                 {
-                    this.Text += $" [TRIAL - {TrialLicense.DaysRemaining} day(s) left]";
                     ShowTrayNotification("Trial Mode",
                         $"{TrialLicense.DaysRemaining} day(s) remaining in your trial. Enter a license key in System Config > Trial / Licensing to activate.");
                 }
@@ -647,31 +1063,42 @@ namespace _conv
 
                 dgv_items.ReadOnly = true;
 
-                timer1 = new System.Windows.Forms.Timer();
+                timerClock = new System.Windows.Forms.Timer();
 
-                timer1.Interval = 1000;
+                timerClock.Interval = 1000;
 
-                timer1.Tick += timer1_Tick;
-
+                timerClock.Tick += timerClock_Tick;
 
                 gbx_itemsearch.Enabled = true;
 
                 UpdateTime();
+                UpdateOfflineItemsStatus();
 
-                timer1.Start();
+                timerClock.Start();
 
                 StartCacheReconnectWatcher();
                 StartLastSeenHeartbeat();
                 StartMaintenanceWatcher();
+                StartLowStockReminderWatcher();
+                StartNetworkTitleBarWatcher();
+                StartIdleCartWatcher();
+                RestoreHeldTransactions();
+                RestoreManagePricesHistory();
 
                 this.Width = 1000;
 
                 this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+
+                dgv_itemSearch.SuspendLayout();
+
                 dgv_itemSearch.Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Bold);
+
+                dgv_itemSearch.AllowUserToAddRows = false;
 
                 dgv_itemSearch.Columns.Add("serial", "Serial");
                 dgv_itemSearch.Columns.Add("description", "Particular");
                 dgv_itemSearch.Columns.Add("price", "Price");
+                dgv_itemSearch.Columns.Add("qty", "Stock/Qty");
 
                 dataTable.Columns.Add("serial");
                 dataTable.Columns.Add("description");
@@ -680,17 +1107,25 @@ namespace _conv
                 dgv_itemSearch.Columns[2].DefaultCellStyle.Format = "0.00";
                 dgv_itemSearch.Columns[0].Width = 100;
                 dgv_itemSearch.Columns[1].Width = 200;
+                dgv_itemSearch.Columns[3].Width = 70;
 
-                this.Show();
+                ApplyItemSearchColumnVisibility();
 
-                _ = LoadReceiptLogoAsync();
+                dgv_itemSearch.ResumeLayout();
+
+                dgv_items.SuspendLayout();
 
                 dgv_items.Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Bold);
+
+                dgv_items.AllowUserToAddRows = false;
+
                 dgv_items.Columns.Add("serial", "Serial");
                 dgv_items.Columns.Add("description", "Particular");
                 dgv_items.Columns.Add("quantity", "Qty");
                 dgv_items.Columns.Add("uprice", "Unit Price");
                 dgv_items.Columns.Add("price", "Price");
+                dgv_items.Columns.Add(QtyStateColumnName, "QtyState");
+                dgv_items.Columns[QtyStateColumnIndex].Visible = false;
                 dgv_items.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
                 dgv_items.Columns[0].FillWeight = 100; // Serial
                 dgv_items.Columns[1].FillWeight = 100; // Particular
@@ -699,6 +1134,12 @@ namespace _conv
                 dgv_items.Columns[4].FillWeight = 100; // Price
                 dgv_items.Columns[3].DefaultCellStyle.Format = "0.00"; // Unit Price
                 dgv_items.Columns[4].DefaultCellStyle.Format = "0.00"; // Price
+
+                ApplyCartColumnVisibility();
+
+                dgv_items.ResumeLayout();
+
+                UpdateCartEmptyLogo();
 
                 ContextMenuStrip strip = new ContextMenuStrip();
                 ToolStripMenuItem SaveToPNG = new ToolStripMenuItem("Save As PNG");
@@ -709,11 +1150,23 @@ namespace _conv
                 strip.Items.Add(Print);
                 dgv_itemSearch.ContextMenuStrip = strip;
 
+                this.Show();
+
+                _ = LoadReceiptLogoAsync();
+
                 tbx_search.Enabled = false;
 
                 tbx_serialcode.Enabled = true;
 
                 tbx_serialcode.Focus();
+
+                if (string.IsNullOrEmpty(selltype.Text) &&
+                    string.Equals(ConfigurationManager.AppSettings["DEFAULT_SELLTYPE_ENABLED"], "true", StringComparison.OrdinalIgnoreCase) &&
+                    int.TryParse(ConfigurationManager.AppSettings["DEFAULT_SELLTYPE_INDEX"], out int defaultSelltypeIndex) &&
+                    defaultSelltypeIndex >= 0 && defaultSelltypeIndex <= 2)
+                {
+                    selltype.SelectedIndex = defaultSelltypeIndex;
+                }
 
                 if (!TutorialState.HasBeenShown)
                 {
@@ -726,7 +1179,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Database refused!");
+                ErrorDialog.Show(this, "Could not connect to the database. The application will now close.", "Database Connection Failed", ex);
                 this.Close();
             }
 
@@ -766,14 +1219,8 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Could not save barcode: " + ex.Message, "Save Barcode");
+                ErrorDialog.Show(this, "Could not save the barcode image. Check your internet connection and try again.", "Save Barcode", ex);
             }
-        }
-        public static Task<List<string>> StoredData()
-        {
-            List<string> data = new List<string>();
-
-            return Task.FromResult(data);
         }
         private void Print_Click(object sender, EventArgs e)
         {
@@ -783,7 +1230,76 @@ namespace _conv
         }
         private void textchanged_tbx_serialcode(object sender, EventArgs e)
         {
+            pendingCartRowSelection = false;
 
+            if (string.IsNullOrEmpty(tbx_serialcode.Text))
+                _serialBurstConfirmed = false;
+        }
+
+        private void tbx_serialcode_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (char.IsControl(e.KeyChar))
+                return;
+
+            e.Handled = true;
+
+            if (char.IsLetter(e.KeyChar))
+            {
+                bool hadPending = _serialManualKeyTimer.Enabled;
+                char pendingChar = _pendingManualChar;
+                _serialManualKeyTimer.Stop();
+
+                tbx_search.Focus();
+                tbx_search.Text += hadPending ? $"{pendingChar}{e.KeyChar}" : e.KeyChar.ToString();
+                tbx_search.SelectionStart = tbx_search.Text.Length;
+                return;
+            }
+
+            if (_serialBurstConfirmed || !string.IsNullOrEmpty(tbx_serialcode.Text))
+            {
+                _serialManualKeyTimer.Stop();
+                _serialBurstConfirmed = true;
+                InsertIntoSerialCode(e.KeyChar);
+                return;
+            }
+
+            if (_serialManualKeyTimer.Enabled)
+            {
+                _serialManualKeyTimer.Stop();
+                _serialBurstConfirmed = true;
+                InsertIntoSerialCode(_pendingManualChar);
+                InsertIntoSerialCode(e.KeyChar);
+                return;
+            }
+
+            _pendingManualChar = e.KeyChar;
+            _serialManualKeyTimer.Start();
+        }
+
+        private void InsertIntoSerialCode(char c)
+        {
+            int start = tbx_serialcode.SelectionStart;
+            int len = tbx_serialcode.SelectionLength;
+            tbx_serialcode.Text = tbx_serialcode.Text.Remove(start, len).Insert(start, c.ToString());
+            tbx_serialcode.SelectionStart = start + 1;
+        }
+
+        private void SerialManualKeyTimer_Tick(object sender, EventArgs e)
+        {
+            _serialManualKeyTimer.Stop();
+
+            if (!tbx_serialcode.Focused)
+                return;
+
+            if (selltype.SelectedIndex < 0 || selltype.SelectedIndex == SelltypeSelectIndex)
+            {
+                msgbox("Please select a type of purchase first.");
+                return;
+            }
+
+            tbx_search.Focus();
+            tbx_search.Text = _pendingManualChar.ToString();
+            tbx_search.SelectionStart = tbx_search.Text.Length;
         }
 
         private void tbx_serialcode_KeyUp(object sender, KeyEventArgs e)
@@ -806,6 +1322,32 @@ namespace _conv
                 {
                     dgv_items.Focus();
                 }
+                else if ((e.KeyCode == Keys.Up || e.KeyCode == Keys.Down) && dgv_items.Rows.Count > 0)
+                {
+                    int lastIndex = dgv_items.Rows.Count - 1;
+                    int currentIndex = dgv_items.CurrentCell?.RowIndex ?? -1;
+
+                    int targetIndex = currentIndex < 0
+                        ? lastIndex
+                        : e.KeyCode == Keys.Down
+                            ? Math.Min(currentIndex + 1, lastIndex)
+                            : Math.Max(currentIndex - 1, 0);
+
+                    dgv_items.CurrentCell = dgv_items.Rows[targetIndex].Cells[0];
+
+                    pendingCartRowSelection = true;
+                    pendingCartRowSelectionText = tbx_serialcode.Text;
+
+                    tbx_serialcode.Focus();
+                }
+                else if (e.KeyCode == Keys.Back && pendingCartRowSelection && dgv_items.CurrentRow != null)
+                {
+                    dgv_items.Rows.RemoveAt(dgv_items.CurrentRow.Index);
+
+                    pendingCartRowSelection = false;
+
+                    tbx_serialcode.Focus();
+                }
                 else if (e.KeyCode == Keys.F5)
                 {
                     MessageBox.Show("Application will restart", "Restarting...");
@@ -821,8 +1363,9 @@ namespace _conv
                         count += 1;
                         if (!string.IsNullOrEmpty(row["serial"].ToString()))
                             dgv_itemSearch.Rows.Add(row["serial"].ToString(),
-                            row["description"].ToString(),
-                            ToDecimal(row["price"]));
+                            row["description"].ToString().ToUpper(),
+                            ToDecimal(row["price"]),
+                            ToLong(row["new_quantity"]));
                     }
 
                     Application.Restart();
@@ -838,7 +1381,7 @@ namespace _conv
 
                     selltype.SelectedIndex = 0;
 
-                    groupBox1.Text = $"Item List for {S_DEFAULTNAME}-{TransactionCode}";
+                    gbx_itemList.Text = $"Item List for {S_DEFAULTNAME}-{TransactionCode}";
 
                     RefreshItemSearchList(); //Wholesale
 
@@ -849,7 +1392,7 @@ namespace _conv
 
                     //dgv_itemSearch.Rows.Clear();
 
-                    groupBox1.Text = $"Item List for {S_DEFAULTNAME}-{TransactionCode}";
+                    gbx_itemList.Text = $"Item List for {S_DEFAULTNAME}-{TransactionCode}";
 
                     RefreshItemSearchList(); // By-piece
                 }
@@ -859,15 +1402,25 @@ namespace _conv
 
                     //dgv_itemSearch.Rows.Clear();
 
-                    groupBox1.Text = $"Item List for {S_DEFAULTNAME}-{TransactionCode}";
+                    gbx_itemList.Text = $"Item List for {S_DEFAULTNAME}-{TransactionCode}";
 
                     RefreshItemSearchList(); //Retail
                 }
                 else if (e.KeyValue == (char)Keys.F10)
                 {
-                    using (var pettyCashEntry = new PettyCashEntryForm())
+                    if (dgv_items.Rows.Count > 0)
                     {
-                        pettyCashEntry.ShowDialog(this);
+                        using (var calculator = new CalculatorForm(grandTotal))
+                        {
+                            calculator.ShowDialog(this);
+                        }
+                    }
+                    else
+                    {
+                        using (var pettyCashEntry = new PettyCashEntryForm())
+                        {
+                            pettyCashEntry.ShowDialog(this);
+                        }
                     }
                 }
                 else if (e.KeyValue == (char)Keys.F9)
@@ -881,10 +1434,27 @@ namespace _conv
                 {
                     if (!string.IsNullOrEmpty(tbx_serialcode.Text))
                     {
-                        dgv_items.Rows.Add(tbx_serialcode.Text, getItem(tbx_serialcode.Text), textBox1.Text, GetItemPrice(tbx_serialcode.Text));
-                        text_in_serial = tbx_serialcode.Text;
-                        tbx_serialcode.Clear();
+                        decimal itemPrice = GetItemPrice(tbx_serialcode.Text);
+                        string f7ItemName = getItem(tbx_serialcode.Text)[0].ToUpperInvariant();
 
+                        if (BlockZeroPriceItemsEnabled && itemPrice <= 0)
+                        {
+                            suppressNextSerialKeyUp = true;
+                            msgbox($"'{f7ItemName}' has no price set for the selected selling type and cannot be added to the cart.");
+                        }
+                        else
+                        {
+                            dgv_items.Rows.Add(
+                                tbx_serialcode.Text,
+                                f7ItemName,
+                                tbx_quantity.Text,
+                                itemPrice,
+                                itemPrice * Convert.ToInt32(tbx_quantity.Text),
+                                QtyStateBulk);
+                            OperationLog.RecordRead(nameof(Purchases), $"Item '{tbx_serialcode.Text}' ({f7ItemName}) scanned into cart.");
+                            text_in_serial = tbx_serialcode.Text;
+                            tbx_serialcode.Clear();
+                        }
                     }
                     else
                     {
@@ -892,42 +1462,58 @@ namespace _conv
                         msgbox("Please enter a valid serial code.");
                     }
 
-
                 }
                 else if (e.KeyCode == Keys.Enter)
                 {
-                    if (!string.IsNullOrEmpty(tbx_serialcode.Text))
+                    DataGridViewRow selectedCartRow = dgv_items.CurrentRow;
+
+                    bool untouchedSinceNavigation = pendingCartRowSelection && selectedCartRow != null
+                        && tbx_serialcode.Text == pendingCartRowSelectionText;
+                    bool matchesSelectedRowsOwnCode = selectedCartRow != null && !string.IsNullOrEmpty(tbx_serialcode.Text)
+                        && string.Equals(selectedCartRow.Cells[0].Value?.ToString(), tbx_serialcode.Text, StringComparison.Ordinal);
+
+                    if (untouchedSinceNavigation || matchesSelectedRowsOwnCode)
                     {
+                        pendingCartRowSelection = false;
+                        PrepareQuantityEditForRow(selectedCartRow);
+                    }
+                    else if (!string.IsNullOrEmpty(tbx_serialcode.Text))
+                    {
+                        pendingCartRowSelection = false;
+
                         // Scanner sends the barcode digits then Enter - this is the actual
                         // per-scan hot path. Look the item up once and reuse it, instead of the
                         // 2-3 separate FindItemRow lookups the two branches used to do.
                         string scannedCode = tbx_serialcode.Text;
                         string itemName = getItem(scannedCode)[0].ToUpperInvariant();
-                        int itemPrice = GetItemPrice(scannedCode);
+                        decimal itemPrice = GetItemPrice(scannedCode);
+                        decimal rowPrice = scannedCode == "01282026-085944" ? Isolated(scannedCode) : itemPrice;
 
-                        if (scannedCode == "01282026-085944")
+                        if (BlockZeroPriceItemsEnabled && rowPrice <= 0)
                         {
-                            dgv_items.Rows.Add(
-                                    scannedCode,
-                                    itemName,
-                                    textBox1.Text,
-                                    Isolated(scannedCode),
-                                    Convert.ToInt64(itemPrice) * Convert.ToInt64(textBox1.Text)
-                                );
+                            suppressNextSerialKeyUp = true;
+                            msgbox($"'{itemName}' has no price set for the selected selling type and cannot be added to the cart.");
                         }
                         else
                         {
                             dgv_items.Rows.Add(
                                     scannedCode,
                                     itemName,
-                                    textBox1.Text,
-                                    itemPrice,
-                                    Convert.ToInt64(itemPrice) * Convert.ToInt64(textBox1.Text)
+                                    tbx_quantity.Text,
+                                    rowPrice,
+                                    rowPrice * Convert.ToInt32(tbx_quantity.Text),
+                                    QtyStateBulk
                                 );
+                            OperationLog.RecordRead(nameof(Purchases), $"Item '{scannedCode}' ({itemName}) scanned into cart.");
+                            text_in_serial = scannedCode;
+                            tbx_serialcode.Clear();
+                            tbx_serialcode.Focus();
                         }
-                        text_in_serial = scannedCode;
-                        tbx_serialcode.Clear();
-                        tbx_serialcode.Focus();
+                    }
+                    else if (selectedCartRow != null)
+                    {
+                        pendingCartRowSelection = false;
+                        PrepareQuantityEditForRow(selectedCartRow);
                     }
                     else
                     {
@@ -937,7 +1523,23 @@ namespace _conv
                 }
                 else if (e.KeyCode == Keys.Escape)
                 {
+                    if (heldTransactionsWindow != null && !heldTransactionsWindow.IsDisposed && heldTransactionsWindow.Visible)
+                    {
+                        heldTransactionsWindow.Activate();
+                        return;
+                    }
+
+                    if (dgv_items.Rows.Count > 0)
+                    {
+                        var confirm = ConfirmDialog.Show(this, "Clear the entire cart? This cannot be undone. (Y/N)",
+                            "Clear Cart", MessageBoxIcon.Question);
+                        if (confirm != DialogResult.Yes)
+                            return;
+                    }
+
                     selltype.SelectedIndex = 3;
+
+                    gbx_itemList.Text = "Item List";
                     //if (MessageBox.Show("Are you sure you want to exit?", "Exit Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                     //{
                     //    return;
@@ -950,13 +1552,12 @@ namespace _conv
             catch (Exception exs) { MessageBox.Show($"Press OK to continue \n {exs.Message}"); }
         }
 
-
         private void Purchases_KeyPress(object sender, KeyPressEventArgs e)
         {
 
         }
 
-        private void tbx_search_KeyUp(object sender, KeyEventArgs e)
+        private async void tbx_search_KeyUp(object sender, KeyEventArgs e)
         {
             try
             {
@@ -971,11 +1572,17 @@ namespace _conv
                 {
                     string search = tbx_search.Text ?? "";
 
+                    // Logged once per submitted search (Enter), not per keystroke like the old
+                    // AddToLogs call in tbx_search_TextChanged used to - that opened a fresh DB
+                    // connection on every character typed.
+                    if (!string.IsNullOrWhiteSpace(search))
+                        await ActivityLog.LogAsync($"User searched for: {search}");
+
                     if (selltype.SelectedIndex == 0)
                     {
-                        var rows = ItemsTable.AsEnumerable()
-                            .Where(r => (ToInt(r["price"]) != 0 && Contains(r["description"], search)) || Contains(r["serial"], search))
-                            .OrderByDescending(r => ToDate(r["date_of_entry"]))
+                        var rows = OrderRows(ItemsTable.AsEnumerable()
+                            .Where(r => (ToInt(r["price"]) != 0 && Contains(r["description"], search)) || Contains(r["serial"], search)),
+                            r => ToDate(r["date_of_entry"]), ItemSearchDateSortDescending)
                             .Take(10);
 
                         dgv_itemSearch.Rows.Clear();
@@ -985,15 +1592,15 @@ namespace _conv
                             if (!string.IsNullOrEmpty(r["serial"].ToString()))
                             {
                                 if (!string.IsNullOrEmpty(r["price"].ToString()))
-                                    dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["price"]));
+                                    dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["price"]), ToLong(r["new_quantity"]));
                             }
                         }
                     }
                     else if (selltype.SelectedIndex == 1)
                     {
-                        var rows = ItemsTable.AsEnumerable()
-                            .Where(r => (ToInt(r["retail_price"]) != 0 && Contains(r["description"], search)) || Contains(r["serial"], search))
-                            .OrderByDescending(r => ToDate(r["date_of_entry"]))
+                        var rows = OrderRows(ItemsTable.AsEnumerable()
+                            .Where(r => (ToInt(r["retail_price"]) != 0 && Contains(r["description"], search)) || Contains(r["serial"], search)),
+                            r => ToDate(r["date_of_entry"]), ItemSearchDateSortDescending)
                             .Take(10);
 
                         dgv_itemSearch.Rows.Clear();
@@ -1002,15 +1609,15 @@ namespace _conv
                         {
                             if (!string.IsNullOrEmpty(r["serial"].ToString()))
                             {
-                                dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["retail_price"]));
+                                dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["retail_price"]), ToLong(r["new_quantity"]));
                             }
                         }
                     }
                     else if (selltype.SelectedIndex == 2)
                     {
-                        var rows = ItemsTable.AsEnumerable()
-                            .Where(r => Contains(r["description"], search) || (Contains(r["serial"], search) && ToInt(r["price_perpc"]) != 0))
-                            .OrderByDescending(r => ToDate(r["date_of_entry"]))
+                        var rows = OrderRows(ItemsTable.AsEnumerable()
+                            .Where(r => Contains(r["description"], search) || (Contains(r["serial"], search) && ToInt(r["price_perpc"]) != 0)),
+                            r => ToDate(r["date_of_entry"]), ItemSearchDateSortDescending)
                             .Take(10);
 
                         dgv_itemSearch.Rows.Clear();
@@ -1019,7 +1626,7 @@ namespace _conv
                         {
                             if (!string.IsNullOrEmpty(r["serial"].ToString()))
                             {
-                                dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["retail_price"]));
+                                dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["retail_price"]), ToLong(r["new_quantity"]));
                             }
                         }
                     }
@@ -1028,17 +1635,16 @@ namespace _conv
                 {
                     dgv_itemSearch.Focus();
                 }
+                else if (e.KeyCode == Keys.Down && !string.IsNullOrEmpty(tbx_search.Text) && dgv_itemSearch.Rows.Count > 0)
+                {
+                    if (dgv_itemSearch.CurrentCell == null)
+                        dgv_itemSearch.CurrentCell = dgv_itemSearch.Rows[0].Cells[0];
+
+                    dgv_itemSearch.Focus();
+                }
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
+            catch (Exception ex) { ErrorDialog.Show(this, "Something went wrong while searching for items.", "Item Search", ex); }
         }
-        /*
-         * Add a loading station for mobile phones
-         * Add a log file that will be contained by a folder which is named by month
-         * Reduce the message alerts when a single purchasing transaction is done.
-         * When the internet has restored, make sure to update the prices and item details stored in the cache memory
-         * 
-         
-         */
         //qtyState = 1, if selling per piece, 2, if selling bulk
         /// <summary>
         /// Applies one line item's quantity change on <paramref name="conn"/> (shared/reused by
@@ -1048,7 +1654,7 @@ namespace _conv
         /// exactly as before - this is the deliberate per-row offline-degradation path, so each
         /// line item still succeeds or degrades independently of the others.
         /// </summary>
-        public async Task<bool> inventory_update(MySqlConnection conn, string serial, int quantity, int qtyState = 1)
+        public async Task<bool> inventory_update(MySqlConnection conn, string serial, int quantity, int qtyState = QtyStateBulk)
         {
             try
             {
@@ -1056,7 +1662,7 @@ namespace _conv
                 {
                     cmd.Connection = conn;
 
-                    if (purchaseState == 2)
+                    if (qtyState == QtyStateBulk)
                     {
                         cmd.CommandText = $"UPDATE items_ SET new_quantity = new_quantity - @quantity WHERE serial = @serial";
 
@@ -1064,7 +1670,7 @@ namespace _conv
 
                         cmd.Parameters.AddWithValue("@serial", serial);
                     }
-                    else if (purchaseState == 1)
+                    else if (qtyState == QtyStatePerPiece)
                     {
                         cmd.CommandText = $"UPDATE items_ SET new_quantity = qty_inpc - @quantity WHERE serial = @serial";
 
@@ -1081,12 +1687,12 @@ namespace _conv
                 // Offline (or the DB write otherwise failed): the sale still has to go through
                 // at the register, so apply the same quantity change to the cached reference
                 // directly and record it for manual reconciliation once back online.
-                if (purchaseState == 2)
+                if (qtyState == QtyStateBulk)
                 {
                     AdjustCachedQuantity(serial, -quantity);
                     LogPendingStockAdjustment(serial, -quantity, "sale (bulk) while offline");
                 }
-                else if (purchaseState == 1)
+                else if (qtyState == QtyStatePerPiece)
                 {
                     var row = FindItemRow(serial);
                     long qtyInPc = row != null ? ToLong(row["qty_inpc"]) : 0;
@@ -1104,50 +1710,51 @@ namespace _conv
             try
             {
 
-
                 if (e.KeyCode == Keys.F7)
                 {
 
                     tbx_serialcode.Text = dgv_itemSearch.CurrentRow.Cells[0].Value.ToString();
 
-                    //CreateTransactionCode(tbx_serialcode.Text);
+                    string searchItemName = getItem(tbx_serialcode.Text)[0].ToUpperInvariant();
+                    decimal rowPrice = tbx_serialcode.Text == "01282026-085944"
+                        ? Isolated(tbx_serialcode.Text, Convert.ToInt32(tbx_quantity.Text))
+                        : GetItemPrice(tbx_serialcode.Text);
 
-                    if (tbx_serialcode.Text == "01282026-085944")
+                    if (BlockZeroPriceItemsEnabled && rowPrice <= 0)
                     {
-                        int quantity_exception = Convert.ToInt32(textBox1.Text);
-
-                        dgv_items.Rows.Add(
-                            tbx_serialcode.Text,
-                            getItem(tbx_serialcode.Text)[0].ToUpperInvariant(),
-                            textBox1.Text,
-                            Isolated(tbx_serialcode.Text, quantity_exception),
-                            Convert.ToInt64(Isolated(tbx_serialcode.Text, quantity_exception)) * Convert.ToInt64(textBox1.Text)
-                            );
+                        msgbox($"'{searchItemName}' has no price set for the selected selling type and cannot be added to the cart.");
                     }
                     else
                     {
                         dgv_items.Rows.Add(
                             tbx_serialcode.Text,
-                            getItem(tbx_serialcode.Text)[0].ToUpperInvariant(),
-                            textBox1.Text,
-                            GetItemPrice(tbx_serialcode.Text),
-                            Convert.ToInt64(GetItemPrice(tbx_serialcode.Text)) * Convert.ToInt32(textBox1.Text)
+                            searchItemName,
+                            tbx_quantity.Text,
+                            rowPrice,
+                            rowPrice * Convert.ToInt32(tbx_quantity.Text),
+                            QtyStateBulk
                             );
+
+                        tbx_serialcode.Clear();
+
+                        tbx_search.Clear();
+
+                        tbx_serialcode.Focus();
                     }
-                    tbx_serialcode.Clear();
-
-                    tbx_serialcode.Focus();
-
                 }
                 else if (e.KeyCode == Keys.Escape)
                 {
                     tbx_serialcode.Focus();
                 }
+                else if (e.KeyCode == Keys.Back)
+                {
+                    tbx_search.Focus();
+                }
                 else if (e.KeyCode == Keys.F1)
                 {
                     selltype.SelectedIndex = 2; // By-piece
 
-                    groupBox1.Text = $"Item List for {S_DEFAULTNAME}-{TransactionCode}";
+                    gbx_itemList.Text = $"Item List for {S_DEFAULTNAME}-{TransactionCode}";
 
                     RefreshItemSearchList();
                 }
@@ -1155,7 +1762,7 @@ namespace _conv
                 {
                     selltype.SelectedIndex = 0; // Wholesale
 
-                    groupBox1.Text = $"Item List for {S_DEFAULTNAME}-{TransactionCode}";
+                    gbx_itemList.Text = $"Item List for {S_DEFAULTNAME}-{TransactionCode}";
 
                     RefreshItemSearchList();
                 }
@@ -1163,7 +1770,7 @@ namespace _conv
                 {
                     selltype.SelectedIndex = 1; // Retail
 
-                    groupBox1.Text = $"Item List for {S_DEFAULTNAME}-{TransactionCode}";
+                    gbx_itemList.Text = $"Item List for {S_DEFAULTNAME}-{TransactionCode}";
 
                     RefreshItemSearchList();
                 }
@@ -1172,11 +1779,6 @@ namespace _conv
             {
                 MessageBox.Show(xe.Message, "Error occurred while processing the data.");
             }
-
-        }
-
-        private void btn_searchitem_Click(object sender, EventArgs e)
-        {
 
         }
 
@@ -1193,11 +1795,6 @@ namespace _conv
 
         }
 
-        private void chkbx_list_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void Purchases_Activated(object sender, EventArgs e)
         {
 
@@ -1207,10 +1804,50 @@ namespace _conv
         {
 
         }
-        public int PurchaseState(int qtyState)
+        private void PrepareQuantityEditForRow(DataGridViewRow row)
         {
-            return purchaseState = qtyState;
+            dgv_items.CurrentCell = row.Cells[0];
+
+            lbl_quantityStatus.Text = "***";
+
+            tbx_serialcode.Text = row.Cells[0].Value.ToString();
+
+            tbx_serialcode.ReadOnly = true;
+
+            tbx_serialcode.Enabled = false;
+
+            tbx_quantity.Enabled = true;
+
+            tbx_quantity.Text = row.Cells[2].Value?.ToString() ?? "1";
+
+            tbx_quantity.Focus();
+
+            tbx_quantity.SelectAll();
+
+            tbx_quantity.TextAlign = HorizontalAlignment.Center;
         }
+
+        private void dgv_items_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        private void dgv_items_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (char.IsControl(e.KeyChar))
+                return;
+
+            tbx_serialcode.Focus();
+            tbx_serialcode.Text = e.KeyChar.ToString();
+            tbx_serialcode.SelectionStart = tbx_serialcode.Text.Length;
+
+            e.Handled = true;
+        }
+
         private void dgv_items_KeyUp(object sender, KeyEventArgs e)
         {
             try
@@ -1223,73 +1860,70 @@ namespace _conv
                 // total the next time an item is scanned.
                 if (e.KeyValue == (char)Keys.Escape)
                 {
+                    if (dgv_items.Rows.Count == 0)
+                    {
+                        tbx_serialcode.Focus();
+                        return;
+                    }
+
+                    var confirm = ConfirmDialog.Show(this, "Clear the entire cart? This cannot be undone. (Y/N)",
+                        "Clear Cart", MessageBoxIcon.Question);
+                    if (confirm != DialogResult.Yes)
+                        return;
+
                     dgv_items.Rows.Clear();
                     grandTotal = 0;
                     count = 0;
+
+                    gbx_itemList.Text = "Item List";
 
                     tbx_serialcode.Focus();
                 }
                 else if (e.KeyValue == (char)Keys.Back)
                 {
-
                     dgv_items.Rows.RemoveAt(dgv_items.CurrentRow.Index);
-
-                    count = 0;
-                    grandTotal = 0;
-                    for (int i = 0; i < (dgv_items.Rows.Count - 1); i++)
-                    {
-                        count += Convert.ToInt32(dgv_items.Rows[i].Cells[2].Value);
-
-                        grandTotal += Convert.ToInt32(dgv_items.Rows[i].Cells[4].Value);
-                    }
-
-                    counter.Text = BuildCounterText(grandTotal, $"Total Items: {count}");
 
                     tbx_serialcode.Focus();
                 }
                 else if (e.KeyValue == (char)Keys.F12)
                 {
-                    label9.Text = "***";
-
-                    PurchaseState(2);
-
-                    tbx_serialcode.Text = dgv_items.CurrentRow.Cells[0].Value.ToString();
-
-                    tbx_serialcode.ReadOnly = true;
-
-                    tbx_serialcode.Enabled = false;
-
-                    textBox1.Enabled = true;
-
-                    textBox1.Focus();
-
-                    textBox1.TextAlign = HorizontalAlignment.Center;
+                    if (dgv_items.Rows.Count > 0)
+                        PrepareQuantityEditForRow(dgv_items.Rows[dgv_items.Rows.Count - 1]);
+                }
+                else if (e.KeyValue == (char)Keys.Enter)
+                {
+                    if (dgv_items.CurrentRow != null)
+                        PrepareQuantityEditForRow(dgv_items.CurrentRow);
                 }
                 else if (e.KeyValue == (char)Keys.F11)
                 {
                     tbx_serialcode.Text = dgv_items.CurrentRow.Cells[0].Value.ToString();
 
-                    dgv_items.CurrentRow.Cells[3].Value = Convert.ToInt64(Itemprice_InPcs(tbx_serialcode.Text));
+                    dgv_items.CurrentRow.Cells[3].Value = Itemprice_InPcs(tbx_serialcode.Text);
 
-                    dgv_items.CurrentRow.Cells[4].Value = Convert.ToInt32(dgv_items.CurrentRow.Cells[3].Value) * Convert.ToInt64(dgv_items.CurrentRow.Cells[2].Value);
+                    dgv_items.CurrentRow.Cells[4].Value = Convert.ToDecimal(dgv_items.CurrentRow.Cells[3].Value) * Convert.ToInt32(dgv_items.CurrentRow.Cells[2].Value);
 
-                    PurchaseState(1);
+                    dgv_items.CurrentRow.Cells[QtyStateColumnIndex].Value = QtyStatePerPiece;
 
                     tbx_serialcode.ReadOnly = true;
 
                     tbx_serialcode.Enabled = false;
 
-                    label9.Text = "Quantity (in pieces activated)";
+                    lbl_quantityStatus.Text = "Quantity (in pieces activated)";
 
-                    label9.Font = new Font("Arial", 7, FontStyle.Bold);
+                    lbl_quantityStatus.Font = new Font("Arial", 7, FontStyle.Bold);
 
-                    label9.ForeColor = Color.Red;
+                    lbl_quantityStatus.ForeColor = Color.Red;
 
-                    textBox1.Enabled = true;
+                    tbx_quantity.Enabled = true;
 
-                    textBox1.Focus();
+                    tbx_quantity.Text = dgv_items.CurrentRow.Cells[2].Value?.ToString() ?? "1";
 
-                    textBox1.TextAlign = HorizontalAlignment.Center;
+                    tbx_quantity.Focus();
+
+                    tbx_quantity.SelectAll();
+
+                    tbx_quantity.TextAlign = HorizontalAlignment.Center;
                 }
                 else if (e.KeyCode == Keys.F4)
                 {
@@ -1315,49 +1949,38 @@ namespace _conv
 
         private void dgv_items_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
+            _lastCartActivity = DateTime.Now;
+
             try
             {
                 // Fires on every single scan, so this has to stay O(1) per add. Only fold the
                 // newly-inserted row(s) into the running totals instead of re-summing the whole
                 // cart from scratch every time (that was O(n) per add, i.e. O(n^2) building a
                 // full cart) - relies on grandTotal/count being correctly zeroed everywhere the
-                // grid is cleared (see the Clear() call sites) rather than self-healing here.
-                // AllowUserToAddRows keeps one blank template row at the end; never sum that one.
-                int lastDataRowIndex = dgv_items.Rows.Count - 2;
+                int lastDataRowIndex = dgv_items.Rows.Count - 1;
                 for (int i = e.RowIndex; i < e.RowIndex + e.RowCount && i <= lastDataRowIndex; i++)
                 {
-                    grandTotal += Convert.ToDecimal(dgv_items.Rows[i].Cells[4].Value);
-                    count += Convert.ToInt32(dgv_items.Rows[i].Cells[2].Value);
+                    grandTotal += ToDecimal(dgv_items.Rows[i].Cells[4].Value);
+                    count += ToInt(dgv_items.Rows[i].Cells[2].Value);
                 }
 
                 total_row = dgv_items.Rows.Count - 1;
 
-                if (dgv_items.Rows.Count > 1)
+                if (dgv_items.Rows.Count > 0)
                     counter.Text = BuildCounterText(grandTotal, $"Total Items: {count}");
+
+                UpdateCartEmptyLogo();
             }
             catch (Exception)
             {
-                throw;
+                RecomputeCartTotals();
             }
-        }
-
-        private static string Logs(string eventname)
-        {
-            DataTable dt = new DataTable();
-            dt.TableName = eventname;
-            dt.Columns.Add("date");
-            dt.Columns.Add("event");
-            dt.Rows.Add(DateTime.Now.ToString("yyyy-MM-dd H:mm:ss"), eventname);
-            return eventname;
-        }
-
-        private void dgv_items_UserAddedRow(object sender, DataGridViewRowEventArgs e)
-        {
-            tbx_serialcode.SelectAll();
         }
 
         private void dgv_items_RowsRemoved(object sender, DataGridViewRowsRemovedEventArgs e)
         {
+            _lastCartActivity = DateTime.Now;
+
             // Removal is rare/manual (not the per-scan hot path), so a full recompute here is
             // fine - the removed row's own values aren't available from the event args, so an
             // incremental subtract isn't possible anyway. This is the single place that keeps
@@ -1366,22 +1989,16 @@ namespace _conv
             // this bug used to be masked by RowsAdded always rebuilding from scratch on the next
             // scan; it no longer does, so this handler has to actually run instead of quietly
             // never firing). Note this previously wrote into a local that shadowed the class
-            // field, so it never actually updated grandTotal despite looking like it did.
-            grandTotal = 0;
-            count = 0;
-
-            for (int i = 0; i < dgv_items.Rows.Count - 1; i++)
-            {
-                grandTotal += Convert.ToDecimal(dgv_items.Rows[i].Cells[4].Value);
-                count += Convert.ToInt32(dgv_items.Rows[i].Cells[2].Value);
-            }
-
-            counter.Text = BuildCounterText(grandTotal, $"Total Items: {count}");
+            RecomputeCartTotals();
+            UpdateCartEmptyLogo();
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void timerClock_Tick(object sender, EventArgs e)
         {
             UpdateTime();
+            UpdateOfflineItemsStatus();
+            UpdateTitleBar();
+            UpdateCachedItemsStatusMenu();
         }
         private async void tbx_denomination_KeyUp(object sender, KeyEventArgs e)
         {
@@ -1396,10 +2013,10 @@ namespace _conv
                 {
                     if (!string.IsNullOrEmpty(tbx_denomination.Text))
                     {
-                        printDocument1.PrintPage -= PrintDocument1_PrintPage;
-                        printDocument1.PrintPage += PrintDocument1_PrintPage;
+                        printDocumentReceipt.PrintPage -= PrintDocumentReceipt_PrintPage;
+                        printDocumentReceipt.PrintPage += PrintDocumentReceipt_PrintPage;
 
-                        ApplyReceiptPrinterSettings(printDocument1);
+                        ApplyReceiptPrinterSettings(printDocumentReceipt);
 
                         // No preview gate here - once the receipt printer is configured, the
                         // receipt must go straight to it instead of waiting on a dialog first.
@@ -1410,7 +2027,7 @@ namespace _conv
                             printSingleReceiptCopyOnly = true;
                             try
                             {
-                                printDocument1.Print();
+                                printDocumentReceipt.Print();
                             }
                             finally
                             {
@@ -1421,12 +2038,13 @@ namespace _conv
                         }
                         else
                         {
-                            printDocument1.Print();
+                            printDocumentReceipt.Print();
                         }
 
                         // Capture before it's cleared below - this is what ties every sales_ row
                         // from this checkout back to the receipt that was just printed.
                         string completedTransactionCode = TransactionCode;
+                        UpdateLastTransactionCodeMenu(completedTransactionCode);
 
                         // Both copies are done rendering (preview and/or the real print) -
                         // safe to clear now that nothing will draw "Transcode: " again.
@@ -1447,13 +2065,17 @@ namespace _conv
                             await ConnectDb();
                             try
                             {
-                                for (int i = 0; i < dgv_items.RowCount - 1; i++)
+                                for (int i = 0; i < dgv_items.RowCount; i++)
                                 {
                                     rows = dgv_items.Rows[i].Cells[0].Value?.ToString() ?? "";
 
                                     qty = ToInt(dgv_items.Rows[i].Cells[2].Value);
 
-                                    if (await inventory_update(connect_db, rows, qty)) // change 1
+                                    int rowQtyState = ToInt(dgv_items.Rows[i].Cells[QtyStateColumnIndex].Value);
+                                    if (rowQtyState != QtyStatePerPiece && rowQtyState != QtyStateBulk)
+                                        rowQtyState = QtyStateBulk;
+
+                                    if (await inventory_update(connect_db, rows, qty, rowQtyState))
                                         anyLiveInventoryUpdate = true;
 
                                     soldLineItems.Add((rows, qty, ToDecimal(dgv_items.Rows[i].Cells[4].Value)));
@@ -1503,6 +2125,8 @@ namespace _conv
                         tbx_denomination.ReadOnly = false;
 
                         selltype.Text = "Select...";
+
+                        gbx_itemList.Text = "Item List";
                     }
 
                 }
@@ -1516,18 +2140,18 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Press OK to continue! \n {ex.Message}", "POSXX1");
+                ErrorDialog.Show(this, "Something went wrong while processing the payment.", "Payment Error", ex);
             }
 
         }
-        public int price_per_piece;
-        private int Itemprice_InPcs(string serial)
+        public decimal price_per_piece;
+        private decimal Itemprice_InPcs(string serial)
         {
             try
             {
                 var row = FindItemRow(serial);
 
-                price_per_piece = row != null ? ToInt(row["price_perpc"]) : 0;
+                price_per_piece = row != null ? ToDecimal(row["price_perpc"]) : 0;
             }
             catch (Exception ex)
             {
@@ -1535,56 +2159,61 @@ namespace _conv
             }
             return price_per_piece;
         }
-        private void textBox1_KeyUp(object sender, KeyEventArgs e)
+        private void ResetQuantityEditUi()
+        {
+            tbx_quantity.Enabled = false;
+            tbx_quantity.Text = "1";
+
+            tbx_serialcode.ReadOnly = false;
+            tbx_serialcode.Enabled = true;
+            tbx_serialcode.Clear();
+            tbx_serialcode.Focus();
+
+            lbl_quantityStatus.Text = "**";
+            lbl_quantityStatus.ResetForeColor();
+            lbl_quantityStatus.ResetFont();
+        }
+
+        private void tbx_quantity_KeyUp(object sender, KeyEventArgs e)
         {
             try
             {
-                int totalRow = 0;
-
                 var total_qty = 0;
 
                 if (e.KeyCode == Keys.Enter)
                 {
+                    if (!int.TryParse(tbx_quantity.Text, out int newQuantity) || newQuantity <= 0)
+                    {
+                        lbl_warning.Text = "Enter a valid quantity (a positive whole number).";
+                        return;
+                    }
 
-                    dgv_items.CurrentRow.Cells[2].Value = textBox1.Text;
+                    dgv_items.CurrentRow.Cells[2].Value = newQuantity;
 
                     if (dgv_items.CurrentRow.Cells[0].Value.ToString() == "01282026-085944") //atwork
                     {
-                        if (Convert.ToInt32(dgv_items.CurrentRow.Cells[2].Value) >= 4)
+                        if (newQuantity >= 4)
                         {
-                            dgv_items.CurrentRow.Cells[4].Value = (Convert.ToInt64(textBox1.Text) * Convert.ToInt64(dgv_items.CurrentRow.Cells[3].Value.ToString())) - 2;
+                            dgv_items.CurrentRow.Cells[4].Value = (newQuantity * Convert.ToDecimal(dgv_items.CurrentRow.Cells[3].Value.ToString())) - 2;
                         }
                         else
                         {
-                            dgv_items.CurrentRow.Cells[4].Value = (Convert.ToInt64(textBox1.Text) * Convert.ToInt64(dgv_items.CurrentRow.Cells[3].Value.ToString()));
+                            dgv_items.CurrentRow.Cells[4].Value = newQuantity * Convert.ToDecimal(dgv_items.CurrentRow.Cells[3].Value.ToString());
                         }
                     }
                     else
                     {
-                        dgv_items.CurrentRow.Cells[4].Value = Convert.ToInt64(textBox1.Text) * Convert.ToInt64(dgv_items.CurrentRow.Cells[3].Value.ToString());
+                        dgv_items.CurrentRow.Cells[4].Value = newQuantity * Convert.ToDecimal(dgv_items.CurrentRow.Cells[3].Value.ToString());
                     }
-                    textBox1.Enabled = false;
 
-                    tbx_serialcode.Enabled = true;
-
-                    tbx_serialcode.ReadOnly = false;
-
-                    tbx_serialcode.Clear();
-
-                    tbx_serialcode.Focus();
-
-                    textBox1.Text = "1";
+                    ResetQuantityEditUi();
 
                     grandTotal = 0;
 
-
-                    for (int i = 0; i < dgv_items.Rows.Count - 1; i++)
+                    for (int i = 0; i < dgv_items.Rows.Count; i++)
                     {
-                        grandTotal += Convert.ToDecimal(dgv_items.Rows[i].Cells[4].Value);
-
-                        totalRow = Convert.ToInt32(dgv_items.Rows[i].Cells[2].Value) + Convert.ToInt32(dgv_items.CurrentRow.Cells[2].Value);
-
-                        total_qty += Convert.ToInt32(dgv_items.Rows[i].Cells[2].Value);
+                        grandTotal += ToDecimal(dgv_items.Rows[i].Cells[4].Value);
+                        total_qty += ToInt(dgv_items.Rows[i].Cells[2].Value);
                     }
 
                     // Keep the class-level count field (which dgv_items_RowsAdded now updates
@@ -1595,9 +2224,7 @@ namespace _conv
                 }
                 else if (e.KeyCode == Keys.Escape)
                 {
-                    textBox1.Clear();
-
-                    tbx_serialcode.Focus();
+                    ResetQuantityEditUi();
                 }
             }
             catch (Exception ex)
@@ -1607,7 +2234,7 @@ namespace _conv
             //counter.Text = "Total distinct items: " + count + " \nGrand Total: " + grandTotal.ToString("0.00");
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void tbx_quantity_TextChanged(object sender, EventArgs e)
         {
 
         }
@@ -1627,69 +2254,20 @@ namespace _conv
             { ex.Message.ToString(); }
         }
 
-        private void tbx_serialcode_Enter(object sender, EventArgs e)
-        {
-
-        }
-        public string ReturnSerial(string serial)
-        {
-            return serial;
-        }
         public void msgbox(string msg)
         {
             MessageBox.Show(msg);
         }
-        MySqlCommand update_inventory = new MySqlCommand();
-        private void tbx_serialcode_Validated(object sender, EventArgs e)
+
+        private async void tabControlMain_SelectedIndexChanged(object sender, EventArgs e)
         {
-
-        }
-        public async Task Update_Qty_In_Inventory(string serial, int quantity)
-        {
-            try
-            {
-                await ConnectDb();
-
-                CreateTransactionCode(serial);
-
-                long current_quantity = ItemsTable.AsEnumerable()
-                    .Where(r => r.Field<string>("serial") == serial)
-                    .Sum(r => ToLong(r["new_quantity"]));
-
-                long diff = current_quantity - (Convert.ToInt32(quantity));
-
-                update_inventory.Connection = connect_db;
-
-                update_inventory.CommandText = "UPDATE items_ SET new_quantity = @new_quantity WHERE serial = @serial AND new_quantity != '' ";
-
-                update_inventory.Parameters.AddWithValue("@new_quantity", diff);
-
-                update_inventory.Parameters.AddWithValue("@serial", serial);
-
-                await update_inventory.ExecuteNonQueryAsync();
-
-                update_inventory.Connection.Close();
-
-                RefreshItemsCache();
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Qty Inventory: Error occurred while processing the data.");
-
-            }
-            connect_db?.Close();
-        }
-
-        private async void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (tabControl1.SelectedTab == tabPageDashboard)
+            if (tabControlMain.SelectedTab == tabPageDashboard)
             {
                 await LoadDashboardAsync();
                 return;
             }
 
-            if (tabControl1.SelectedTab != tabPageManagePrices)
+            if (tabControlMain.SelectedTab != tabPageManagePrices)
                 return;
 
             using (var pinForm = new PinPromptForm())
@@ -1697,8 +2275,9 @@ namespace _conv
                 string managerPin = ConfigurationManager.AppSettings["MANAGER_PIN"];
                 if (pinForm.ShowDialog(this) != DialogResult.OK || pinForm.EnteredPin != managerPin)
                 {
-                    MessageBox.Show("Incorrect PIN. Access to Manage Prices is restricted.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    tabControl1.SelectedTab = tabPageSales;
+                    ErrorDialog.Show(this, "Incorrect PIN. Access to Manage Prices is restricted.", "Access Denied",
+                        $"Manager PIN rejected for 'Manage Prices' at {DateTime.Now:G} on {Environment.MachineName}.", MessageBoxIcon.Warning);
+                    tabControlMain.SelectedTab = tabPageSales;
                     return;
                 }
             }
@@ -1851,6 +2430,127 @@ namespace _conv
 
         private void btnDashSystemConfig_Click(object sender, EventArgs e) => systemConfigToolStripMenuItem_Click(sender, e);
 
+        // Cells the manager has just edited get flagged red/bold for ManagePricesEditHighlightMs,
+        // then revert - a quick "this one's unsaved and was just touched" visual cue on top of
+        // (not a replacement for) btn_savePrices_Click's actual DataRowState.Modified tracking.
+        // Keyed by the cell object itself rather than row/column index, since ApplyManagePricesFilter
+        // re-sorts/hides rows via the bound DataTable's DefaultView without replacing DataSource -
+        // index pairs would go stale, but the underlying DataGridViewCell objects for rows that
+        // stay in the view do not.
+        private readonly Dictionary<DataGridViewCell, System.Windows.Forms.Timer> _managePricesEditHighlights =
+            new Dictionary<DataGridViewCell, System.Windows.Forms.Timer>();
+
+        private const int ManagePricesEditHighlightMs = 15000;
+
+        // Value a cell held right before the manager started editing it, captured at
+        // CellBeginEdit (the bound DataTable isn't updated until the edit commits, so this is
+        // still the pre-edit value) and consumed at CellEndEdit to log an actual before/after
+        // line to the history panel - without this, every CellEndEdit (even clicking into a
+        // cell and away again with no change) would read as an "edit".
+        private readonly Dictionary<DataGridViewCell, object> _managePricesCellOldValues =
+            new Dictionary<DataGridViewCell, object>();
+
+        private const int ManagePricesHistoryMaxEntries = 200;
+
+        private void dgv_managePrices_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+
+            DataGridViewCell cell = dgv_managePrices.Rows[e.RowIndex].Cells[e.ColumnIndex];
+            _managePricesCellOldValues[cell] = cell.Value;
+        }
+
+        private void dgv_managePrices_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+
+            DataGridViewRow row = dgv_managePrices.Rows[e.RowIndex];
+            DataGridViewCell cell = row.Cells[e.ColumnIndex];
+
+            HighlightEditedManagePricesCell(cell);
+
+            if (_managePricesCellOldValues.TryGetValue(cell, out object oldValue))
+            {
+                _managePricesCellOldValues.Remove(cell);
+
+                object newValue = cell.Value;
+                if (!Equals(oldValue?.ToString(), newValue?.ToString()))
+                    LogManagePricesHistory(row, dgv_managePrices.Columns[e.ColumnIndex], oldValue, newValue);
+            }
+        }
+
+        private static string ManagePricesColumnShortLabel(string columnName)
+        {
+            switch (columnName)
+            {
+                case "price": return "Price";
+                case "retail_price": return "Retail Price";
+                case "price_perpc": return "Price/Pc";
+                default: return columnName;
+            }
+        }
+
+        private void LogManagePricesHistory(DataGridViewRow row, DataGridViewColumn column, object oldValue, object newValue)
+        {
+            string serial = row.Cells["serial"].Value?.ToString() ?? "";
+            string label = ManagePricesColumnShortLabel(column.Name);
+
+            lst_managePricesHistory.Items.Insert(0,
+                $"{DateTime.Now:h:mm:ss tt}  {serial} — {label}: {oldValue} → {newValue}");
+
+            // A long-running session (prices tweaked over and over through the day) shouldn't
+            // let this grow without bound - oldest entries fall off the bottom.
+            while (lst_managePricesHistory.Items.Count > ManagePricesHistoryMaxEntries)
+                lst_managePricesHistory.Items.RemoveAt(lst_managePricesHistory.Items.Count - 1);
+
+            SaveManagePricesHistory();
+        }
+
+        /// <summary>Loads the encrypted history file (if any) into the panel at startup, so
+        /// price-edit history survives an app restart instead of only lasting the session.</summary>
+        private void RestoreManagePricesHistory()
+        {
+            lst_managePricesHistory.Items.Clear();
+            foreach (string entry in ManagePricesHistoryStore.Load())
+                lst_managePricesHistory.Items.Add(entry);
+        }
+
+        private void SaveManagePricesHistory() =>
+            ManagePricesHistoryStore.Save(lst_managePricesHistory.Items.Cast<string>());
+
+        private void HighlightEditedManagePricesCell(DataGridViewCell cell)
+        {
+            if (_managePricesEditHighlights.TryGetValue(cell, out System.Windows.Forms.Timer runningTimer))
+            {
+                runningTimer.Stop();
+                runningTimer.Dispose();
+                _managePricesEditHighlights.Remove(cell);
+            }
+
+            cell.Style.ForeColor = Color.Red;
+            cell.Style.Font = new Font(dgv_managePrices.Font, FontStyle.Bold);
+
+            var timer = new System.Windows.Forms.Timer { Interval = ManagePricesEditHighlightMs };
+            timer.Tick += (s, args) =>
+            {
+                timer.Stop();
+                timer.Dispose();
+                _managePricesEditHighlights.Remove(cell);
+
+                // Empty/null falls back to the column's DefaultCellStyle instead of forcing a
+                // specific color/font, so this plays nicely with whatever theme/scale is active.
+                cell.Style.ForeColor = Color.Empty;
+                cell.Style.Font = null;
+                dgv_managePrices.InvalidateCell(cell);
+            };
+            timer.Start();
+            this.FormClosed += (s, args) => timer.Stop();
+
+            _managePricesEditHighlights[cell] = timer;
+        }
+
         private async Task LoadManagePricesGrid()
         {
             try
@@ -1862,6 +2562,18 @@ namespace _conv
                     {
                         var table = new DataTable();
                         adapter.Fill(table);
+
+                        // A reload swaps in a brand new DataTable/grid rows, so any highlight
+                        // timers still pending from the previous load would otherwise touch
+                        // disposed DataGridViewCell objects.
+                        foreach (System.Windows.Forms.Timer pending in _managePricesEditHighlights.Values)
+                        {
+                            pending.Stop();
+                            pending.Dispose();
+                        }
+                        _managePricesEditHighlights.Clear();
+                        _managePricesCellOldValues.Clear();
+
                         dgv_managePrices.DataSource = table;
                     }
                 }
@@ -1874,11 +2586,11 @@ namespace _conv
                 dgv_managePrices.Columns["serial"].ReadOnly = true;
                 dgv_managePrices.Columns["description"].HeaderText = "Description";
                 dgv_managePrices.Columns["description"].ReadOnly = true;
-                dgv_managePrices.Columns["price"].HeaderText = "Price";
+                dgv_managePrices.Columns["price"].HeaderText = "Price (whole number)";
                 dgv_managePrices.Columns["price"].DefaultCellStyle.Format = "0.00";
-                dgv_managePrices.Columns["retail_price"].HeaderText = "Retail Price";
+                dgv_managePrices.Columns["retail_price"].HeaderText = "Retail Price (whole number)";
                 dgv_managePrices.Columns["retail_price"].DefaultCellStyle.Format = "0.00";
-                dgv_managePrices.Columns["price_perpc"].HeaderText = "Price Per Piece";
+                dgv_managePrices.Columns["price_perpc"].HeaderText = "Price Per Piece (whole number)";
                 dgv_managePrices.Columns["price_perpc"].DefaultCellStyle.Format = "0.00";
 
                 // Reloading swaps in a brand new DataTable, so re-apply whatever the manager
@@ -1889,7 +2601,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to load items.");
+                ErrorDialog.Show(this, "Could not load the item list for Manage Prices.", "Failed to Load Items", ex);
             }
         }
 
@@ -1932,6 +2644,7 @@ namespace _conv
                 {
                     RefreshItemsCache();
                     await LoadManagePricesGrid();
+                    UpdateOfflineItemsStatus();
                 }
             }
         }
@@ -1950,12 +2663,12 @@ namespace _conv
 
             foreach (DataRow row in changes.Rows)
             {
-                if (!decimal.TryParse(row["price"].ToString(), out decimal price) ||
-                    !decimal.TryParse(row["retail_price"].ToString(), out decimal retailPrice) ||
-                    !decimal.TryParse(row["price_perpc"].ToString(), out decimal pricePerPc) ||
+                if (!int.TryParse(row["price"].ToString(), out int price) ||
+                    !int.TryParse(row["retail_price"].ToString(), out int retailPrice) ||
+                    !int.TryParse(row["price_perpc"].ToString(), out int pricePerPc) ||
                     price < 0 || retailPrice < 0 || pricePerPc < 0)
                 {
-                    MessageBox.Show($"Invalid price value for item '{row["serial"]}'. Prices must be non-negative numbers.", "Invalid Input");
+                    MessageBox.Show($"Invalid price value for item '{row["serial"]}'. Prices must be non-negative whole numbers.", "Invalid Input");
                     return;
                 }
             }
@@ -1982,13 +2695,16 @@ namespace _conv
                     connect_db?.Close();
                 }
 
+                foreach (DataRow row in changes.Rows)
+                    OperationLog.RecordUpdate(nameof(Purchases), $"Item '{row["serial"]}' price updated (price={row["price"]}, retail={row["retail_price"]}, perpc={row["price_perpc"]}).");
+
                 table.AcceptChanges();
                 RefreshItemsCache();
                 lbl_managePricesStatus.Text = $"Saved {changes.Rows.Count} item(s).";
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to save prices.");
+                ErrorDialog.Show(this, "Could not save the price changes to the database.", "Failed to Save Prices", ex);
             }
         }
 
@@ -2006,8 +2722,8 @@ namespace _conv
             if (string.IsNullOrEmpty(serial))
                 return;
 
-            var confirm = MessageBox.Show(this, $"Delete item '{description}' ({serial})? This cannot be undone.",
-                "Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var confirm = ConfirmDialog.Show(this, $"Delete item '{description}' ({serial})? This cannot be undone. (Y/N)",
+                "Confirm delete", MessageBoxIcon.Question);
             if (confirm != DialogResult.Yes)
                 return;
 
@@ -2027,22 +2743,18 @@ namespace _conv
                     connect_db?.Close();
                 }
 
+                OperationLog.RecordDelete(nameof(Purchases), $"Item '{serial}' ({description}) deleted.");
                 RefreshItemsCache();
                 await LoadManagePricesGrid();
                 lbl_managePricesStatus.Text = $"Deleted '{serial}'.";
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to delete item.");
+                ErrorDialog.Show(this, "Could not delete this item from the database.", "Failed to Delete Item", ex);
             }
         }
 
         #region UnusedEvents
-        private void process1_Exited(object sender, EventArgs e)
-        {
-
-        }
-
         private void Purchases_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.F8)
@@ -2054,7 +2766,7 @@ namespace _conv
                 selltype.SelectedIndex = 0;
             }
         }
-        private void pictureBox1_Click(object sender, EventArgs e)
+        private void picLogo_Click(object sender, EventArgs e)
         {
 
         }
@@ -2066,433 +2778,35 @@ namespace _conv
         /// </summary>
         private async Task LoadReceiptLogoAsync()
         {
-            pictureBox1.Image = await LogoCache.LoadAsync();
+            Image logo = await LogoCache.LoadAsync();
+            picLogo.Image = logo;
+            picCartLogo.Image = logo;
         }
 
-        private async void CreateTransactionCode(string itemcode)
+        private void UpdateCartEmptyLogo()
         {
-            try
-            {
-                await ConnectDb();
-                if (connect_db.State != ConnectionState.Open)
-                    connect_db.Open();
-                using (var cmd = new MySqlCommand())
-                {
-                    cmd.Connection = connect_db;
-
-                    cmd.CommandText = "SELECT COUNT(transaction_code) FROM sales_ ";
-
-                    var result = await cmd.ExecuteScalarAsync();
-
-                    cmd.CommandText = $"INSERT INTO sales_(transaction_code,itemcode, transaction_date, seller, item_price) VALUES ( @transaction_code, @itemcode, @transaction_date, @seller, @item_price)";
-                    cmd.Parameters.AddWithValue("@transaction_code", TransactionCode + "-" + (result != DBNull.Value ? Convert.ToInt64(result) + 1 : 1));
-
-                    cmd.Parameters.AddWithValue("@itemcode", itemcode);
-
-                    cmd.Parameters.AddWithValue("@transaction_date", DateTime.Now.ToString("yyyy-MMMM-dd H:m:ss"));
-
-                    cmd.Parameters.AddWithValue("@seller", log_in);
-
-                    cmd.Parameters.AddWithValue("@item_price", GetItemPrice(itemcode));
-
-                    await cmd.ExecuteNonQueryAsync();
-
-                }
-                connect_db.Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Transaction Code: Error occurred while processing the data.");
-            }
-            return;
+            picCartLogo.Visible = dgv_items.Rows.Count == 0;
         }
-        private int Isolated(string sugar_barcode, int num_of_items = 2)
+
+        private decimal Isolated(string sugar_barcode, int num_of_items = 2)
         {
-            int price = 0;
+            decimal price = 0;
 
             var row = FindItemRow(sugar_barcode);
             if (row != null)
             {
                 if (num_of_items == 1)
                 {
-                    price = ToInt(row["price_perpc"]);
+                    price = ToDecimal(row["price_perpc"]);
                 }
                 else if (num_of_items >= 4)
                 {
-                    price = ToInt(row["retail_price"]) - 2;
+                    price = ToDecimal(row["retail_price"]) - 2;
                 }
             }
             return price;
         }
-        /// <summary>
-        /// Points the given PrintDocument at the thermal printer configured in System Config >
-        /// Printer (RECEIPT_PRINTER_NAME) and pulls its paper size straight from that printer's
-        /// own Windows driver settings, so the preview - and the eventual print - are sized for
-        /// the actual POS80/58mm roll instead of whatever page size a different default printer
-        /// left behind. Falls back to leaving the paper size alone (system default printer/paper)
-        /// if nothing is configured yet or the configured printer isn't installed right now.
-        /// If System Config > Printer has a paper width override (RECEIPT_PAPER_WIDTH_MM) set,
-        /// that replaces whatever width was just detected - lets the cashier correct a driver
-        /// that reports the wrong roll width instead of being stuck with it.
-        /// Shared by every printable in the app - printDocument1 (receipts), printDocument2
-        /// (the out-of-stock report), and other forms' print jobs (e.g. HelpForm, GenerateBarcode)
-        /// - so there is exactly one place a printer/paper choice is made instead of each print
-        /// path drifting to whatever the Windows default printer happens to be. Internal (not
-        /// private) so other forms in the assembly can anchor their PrintDocuments on it too.
-        /// </summary>
-        /// <summary>
-        /// True when RECEIPT_PRINTER_NAME is set and currently installed on this machine. Shared
-        /// by ApplyReceiptPrinterSettings (decides whether to pull paper settings from that
-        /// printer's driver) and Program.cs's startup check (warns the admin to set one up in
-        /// System Config > Printer if it's missing).
-        /// </summary>
-        internal static bool IsReceiptPrinterConfigured()
-        {
-            string configuredPrinter = ConfigurationManager.AppSettings["RECEIPT_PRINTER_NAME"];
-            return !string.IsNullOrWhiteSpace(configuredPrinter) &&
-                System.Drawing.Printing.PrinterSettings.InstalledPrinters
-                    .Cast<string>()
-                    .Any(p => string.Equals(p, configuredPrinter, StringComparison.OrdinalIgnoreCase));
-        }
-
-        internal static void ApplyReceiptPrinterSettings(PrintDocument document)
-        {
-            // A small fixed floor - keeps the page-width-driven layouts that use this actually
-            // using the paper's real printable area, even before a real printer is selected
-            // below (or if the configured one isn't installed right now).
-            int marginX = 2;
-            int marginY = 2;
-
-            string configuredPrinter = ConfigurationManager.AppSettings["RECEIPT_PRINTER_NAME"];
-            bool isInstalled = IsReceiptPrinterConfigured();
-
-            if (isInstalled)
-            {
-                try
-                {
-                    document.PrinterSettings.PrinterName = configuredPrinter;
-                    document.DefaultPageSettings.PaperSize = document.PrinterSettings.DefaultPageSettings.PaperSize;
-
-                    // POS80/58mm thermal drivers report a hardware-enforced unprintable border via
-                    // HardMarginX/Y - e.g. the print head physically can't reach the outer ~2-4mm of
-                    // an 80mm roll even though the roll (and PaperSize.Width) is nominally 80mm.
-                    // MarginBounds (and the pageWidth/rightEdge derived from it below) has no idea
-                    // about that border, so a margin smaller than it lets right-aligned text and
-                    // dividers get laid out past what the printer can actually mark - GDI then just
-                    // clips them, which reads as text "running off the edge" on real hardware even
-                    // though it looked fine in a plain preview. Flooring the margin at the hard
-                    // margin keeps the usable width honest for whichever printer is selected.
-                    marginX = (int)Math.Max(marginX, Math.Ceiling(document.DefaultPageSettings.HardMarginX));
-                    marginY = (int)Math.Max(marginY, Math.Ceiling(document.DefaultPageSettings.HardMarginY));
-                }
-                catch (InvalidPrinterException)
-                {
-                    // Listed in InstalledPrinters (Windows still has a queue for it) but not
-                    // actually reachable right now - e.g. a disconnected/offline network or USB
-                    // thermal printer, or a redirected printer from a remote session that isn't
-                    // live. Accessing PrinterSettings/DefaultPageSettings throws in that case
-                    // instead of degrading gracefully, which used to crash both real checkout
-                    // printing and the receipt preview. Falls back to the un-configured defaults
-                    // set above instead, same as if the printer weren't configured at all.
-                    document.PrinterSettings.PrinterName = "";
-                }
-            }
-
-            if (double.TryParse(ConfigurationManager.AppSettings["RECEIPT_PAPER_WIDTH_MM"], out double widthMm) && widthMm > 0)
-            {
-                PaperSize current = document.DefaultPageSettings.PaperSize;
-                int widthHundredthsOfInch = (int)Math.Round(widthMm / 25.4 * 100);
-                document.DefaultPageSettings.PaperSize = new PaperSize(current.PaperName, widthHundredthsOfInch, current.Height);
-            }
-
-            // RECEIPT_MARGIN_LEFT/RIGHT/TOP_MM are saved from System Config > Receipt Testing's
-            // preview window (drag a boundary handle, then Save) - each is independently optional,
-            // so an admin can pin just the side(s) they actually adjusted and leave the rest on
-            // the printer-driver/hard-margin default computed above. Still floored at that default
-            // rather than letting a saved value go below it, for the same "don't clip on real
-            // hardware" reason the hard-margin flooring above exists.
-            int marginLeft = ReadMarginOverrideHundredths("RECEIPT_MARGIN_LEFT_MM") is int left ? Math.Max(marginX, left) : marginX;
-            int marginRight = ReadMarginOverrideHundredths("RECEIPT_MARGIN_RIGHT_MM") is int right ? Math.Max(marginX, right) : marginX;
-            int marginTop = ReadMarginOverrideHundredths("RECEIPT_MARGIN_TOP_MM") is int top ? Math.Max(marginY, top) : marginY;
-
-            document.DefaultPageSettings.Margins = new Margins(marginLeft, marginRight, marginTop, marginY);
-        }
-
-        private static int? ReadMarginOverrideHundredths(string appSettingKey) =>
-            double.TryParse(ConfigurationManager.AppSettings[appSettingKey], out double mm) && mm > 0
-                ? (int)Math.Round(mm / 25.4 * 100)
-                : (int?)null;
-
-        // Inverse of ReadMarginOverrideHundredths's mm->hundredths conversion - used by
-        // ReceiptPreviewForm's Save button to write a dragged margin (in preview pixels, already
-        // converted to hundredths of an inch) back out as the human-readable mm App.config expects.
-        internal static double HundredthsToMm(int hundredths) => hundredths / 100.0 * 25.4;
-
-        private void PrintDocument1_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
-        {
-            try
-            {
-                // A handful of reused weights/sizes instead of one-off Fonts scattered through the
-                // layout - keeps the receipt's type hierarchy (store name > section labels > body >
-                // fine print) consistent, and every size here is bumped up from the old 5-8pt range
-                // so the receipt is legible for customers who aren't reading it up close.
-                Font fontStoreName = new Font(AppFonts.MorallySerif, 16, FontStyle.Bold);
-                Font fontAddress = new Font("Arial", 9);
-                Font fontCopyLabel = new Font("Arial", 9, FontStyle.Bold);
-                Font fontTranscode = new Font("Arial", 8.5f);
-                Font fontSectionHeader = new Font("Arial", 9.5f, FontStyle.Bold);
-                Font fontItemTitle = new Font("Arial", 8);
-                Font fontItemDetail = new Font("Arial", 7.5f);
-                Font fontTotalsLabel = new Font("Arial", 9);
-                Font fontGrandTotal = new Font("Arial", 10, FontStyle.Bold);
-                Font fontFooterThanks = new Font("Arial", 9, FontStyle.Italic);
-                Font fontFooterMeta = new Font("Arial", 7.5f);
-
-                Pen thinPen = Pens.Black;
-                Pen thickPen = new Pen(Color.Black, 1.5f);
-
-                int startX = 5;
-                int total = 0;
-
-                // Header block (logo through Transcode) is centered on the page; everything
-                // below it (items, totals, footer) stays left-aligned/right-aligned to the same
-                // margins so amounts line up into a clean column regardless of the configured
-                // receipt printer's paper width.
-                int pageWidth = e.MarginBounds.Width > 0 ? e.MarginBounds.Width : e.PageBounds.Width;
-                int rightEdge = pageWidth - startX;
-
-                void DrawCentered(string text, Font font, float yPos)
-                {
-                    float textWidth = e.Graphics.MeasureString(text, font).Width;
-                    float x = Math.Max(0, (pageWidth - textWidth) / 2f);
-                    e.Graphics.DrawString(text, font, Brushes.Black, x, yPos);
-                }
-
-                void DrawRightAligned(string text, Font font, float yPos)
-                {
-                    float textWidth = e.Graphics.MeasureString(text, font).Width;
-                    float x = Math.Max(startX, rightEdge - textWidth);
-                    e.Graphics.DrawString(text, font, Brushes.Black, x, yPos);
-                }
-
-                void DrawDivider(float yPos, Pen pen)
-                {
-                    e.Graphics.DrawLine(pen, startX, yPos, rightEdge, yPos);
-                }
-
-                // STORE_NAME is admin-configurable (System Config > Settings) and unlike the
-                // rest of the receipt's fixed text, its length isn't known up front - shrink it
-                // to fit rather than let a long store name run off the edge of a narrow roll.
-                Font FitFont(string text, Font baseFont, float maxWidth)
-                {
-                    Font font = baseFont;
-                    while (font.Size > 8f && e.Graphics.MeasureString(text, font).Width > maxWidth)
-                        font = new Font(font.FontFamily, font.Size - 1f, font.Style);
-                    return font;
-                }
-
-                // Word-wraps long item descriptions instead of letting them run off the edge of
-                // the paper or overlap the next line. Capped at maxLines so one long description
-                // can't push an unbounded number of lines down a narrow 58mm/80mm roll - once the
-                // cap is hit, whatever's left over is truncated with "..." on the last line.
-                List<string> WrapText(string text, Font font, float maxWidth, int maxLines = int.MaxValue)
-                {
-                    var lines = new List<string>();
-                    var words = (text ?? "").Split(' ');
-                    var current = new StringBuilder();
-
-                    foreach (string word in words)
-                    {
-                        string candidate = current.Length == 0 ? word : current + " " + word;
-                        if (current.Length > 0 && e.Graphics.MeasureString(candidate, font).Width > maxWidth)
-                        {
-                            lines.Add(current.ToString());
-                            current.Clear();
-                            current.Append(word);
-                        }
-                        else
-                        {
-                            current.Clear();
-                            current.Append(candidate);
-                        }
-                    }
-                    lines.Add(current.ToString());
-
-                    if (lines.Count > maxLines)
-                    {
-                        string overflow = string.Join(" ", lines.Skip(maxLines - 1));
-                        lines = lines.Take(maxLines - 1).ToList();
-
-                        const string ellipsis = "...";
-                        while (overflow.Length > 0 && e.Graphics.MeasureString(overflow + ellipsis, font).Width > maxWidth)
-                            overflow = overflow.Substring(0, overflow.Length - 1);
-
-                        lines.Add(overflow.TrimEnd() + ellipsis);
-                    }
-
-                    return lines;
-                }
-
-                // Customer's and counter's copy print as two pages of the same job (see
-                // HasMorePages below); on a continuous thermal roll there's no page break between
-                // them otherwise, so the second copy would butt right up against the first with
-                // nothing to cut/tear along. Only applies when both are actually printing
-                // together - not when printSingleReceiptCopyOnly renders just one copy (either
-                // the customer's copy alone, or the counter's copy alone for SaveCounterReceiptAsJpeg).
-                const float interCopyGapHeight = 60f;
-                bool isSecondCopyInSameJob = receiptCopyIndex > 0 && !printSingleReceiptCopyOnly;
-                float topOffset = isSecondCopyInSameJob ? interCopyGapHeight : 0f;
-
-                if (isSecondCopyInSameJob)
-                {
-                    // A cut trace in the gap - a dashed line with a "CUT HERE" label - so the
-                    // cashier has a visual guide for separating the two copies once printed.
-                    float cutLineY = interCopyGapHeight / 2f;
-                    using (var dashedPen = new Pen(Color.Black, 1f) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash })
-                        e.Graphics.DrawLine(dashedPen, startX, cutLineY, rightEdge, cutLineY);
-
-                    DrawCentered("- - - CUT HERE - - -", fontFooterMeta, cutLineY - 12);
-                }
-
-                int logoHeight = 0;
-                if (pictureBox1.Image != null)
-                {
-                    const int maxLogoHeight = 60;
-                    Image logo = pictureBox1.Image;
-                    int logoWidth = (int)(logo.Width * ((double)maxLogoHeight / logo.Height));
-                    int logoX = Math.Max(0, (pageWidth - logoWidth) / 2);
-                    e.Graphics.DrawImage(logo, logoX, topOffset, logoWidth, maxLogoHeight);
-                    logoHeight = maxLogoHeight;
-                }
-
-                float y = topOffset + 6 + logoHeight;
-
-                DrawCentered(L_DEFAULTNAME, FitFont(L_DEFAULTNAME, fontStoreName, rightEdge - startX), y);
-                y += 22;
-
-                DrawCentered("Calayan, Gonzaga, Cagayan", fontAddress, y);
-                y += 15;
-
-                DrawCentered(ReceiptCopyLabels[receiptCopyIndex], fontCopyLabel, y);
-                y += 15;
-
-                DrawCentered("Transcode: " + TransactionCode, fontTranscode, y);
-                y += 14;
-
-                DrawDivider(y, thickPen);
-                y += 12;
-
-                e.Graphics.DrawString("ITEMS", fontSectionHeader, Brushes.Black, startX, y);
-                y += 18;
-
-                for (int i = 0; i < dgv_items.Rows.Count - 1; i++)
-                {
-                    string title = dgv_items.Rows[i].Cells[1].Value?.ToString() ?? "";
-                    string qty = dgv_items.Rows[i].Cells[2].Value?.ToString() ?? "";
-                    decimal.TryParse(dgv_items.Rows[i].Cells[3].Value?.ToString(), out decimal unitPrice);
-                    decimal.TryParse(dgv_items.Rows[i].Cells[4].Value?.ToString(), out decimal lineTotal);
-
-                    if (TestPriceOverride.HasValue)
-                    {
-                        int.TryParse(qty, out int qtyCount);
-                        unitPrice = TestPriceOverride.Value;
-                        lineTotal = unitPrice * Math.Max(1, qtyCount);
-                    }
-
-                    total += (int)Math.Round(lineTotal);
-
-                    foreach (string titleLine in WrapText(title, fontItemTitle, rightEdge - startX, maxLines: 3))
-                    {
-                        e.Graphics.DrawString(titleLine, fontItemTitle, Brushes.Black, startX, y);
-                        y += 13;
-                    }
-
-                    // "qty x unit price" on the left spells out how the right-aligned line
-                    // total was arrived at, instead of an unlabeled "Price" that used to just
-                    // repeat the total with no unit price shown anywhere on the receipt.
-                    e.Graphics.DrawString($"{qty} x {unitPrice:0.00}", fontItemDetail, Brushes.Black, startX + 14, y);
-                    DrawRightAligned(lineTotal.ToString("0.00"), fontItemDetail, y);
-                    y += 16;
-
-                    DrawDivider(y, thinPen);
-                    y += 10;
-                }
-
-                y += 2;
-                DrawDivider(y, thickPen);
-                y += 14;
-
-                decimal subtotal = total;
-                decimal taxAmount = TaxConfig.ComputeTax(subtotal);
-                decimal totalWithTax = subtotal + taxAmount;
-                bool showTaxLines = TaxConfig.EffectiveTaxRatePercent > 0;
-
-                if (showTaxLines)
-                {
-                    e.Graphics.DrawString("Subtotal:", fontTotalsLabel, Brushes.Black, startX, y);
-                    DrawRightAligned(subtotal.ToString("0.00"), fontTotalsLabel, y);
-                    y += 15;
-
-                    e.Graphics.DrawString($"Tax ({TaxConfig.EffectiveTaxRatePercent:0.##}%):", fontTotalsLabel, Brushes.Black, startX, y);
-                    DrawRightAligned(taxAmount.ToString("0.00"), fontTotalsLabel, y);
-                    y += 15;
-                }
-
-                e.Graphics.DrawString("Grand Total:", fontGrandTotal, Brushes.Black, startX, y);
-                DrawRightAligned(totalWithTax.ToString("0.00"), fontGrandTotal, y);
-                y += 22;
-
-                // A thin rule separates what's owed (subtotal/tax/grand total, above) from
-                // how it was paid (cash/change, below) - previously these two conceptually
-                // different blocks ran together with no visual break between them.
-                DrawDivider(y, thinPen);
-                y += 12;
-
-                decimal cash = Convert.ToInt32(tbx_denomination.Text);
-                e.Graphics.DrawString("Cash:", fontTotalsLabel, Brushes.Black, startX, y);
-                DrawRightAligned(cash.ToString("0.00"), fontTotalsLabel, y);
-                y += 15;
-
-                e.Graphics.DrawString("Change:", fontTotalsLabel, Brushes.Black, startX, y);
-                DrawRightAligned((cash - totalWithTax).ToString("0.00"), fontTotalsLabel, y);
-                y += 20;
-
-                DrawDivider(y, thickPen);
-                y += 16;
-
-                DrawCentered("Thank you for shopping! Come again!", fontFooterThanks, y);
-                y += 16;
-
-                DrawCentered("Date of purchase: " + DateTime.Now, fontFooterMeta, y);
-                y += 12;
-
-                DrawCentered("Cashier's ID: " + log_in, fontFooterMeta, y);
-
-                pendingReceiptCode = !string.IsNullOrEmpty(TransactionCode) ? TransactionCode : "TXN" + DateTime.Now.ToString("yyyyMMddHHmmss");
-                pendingReceiptText = BuildReceiptText(total);
-                lastReceiptContentHeight = y + 8;
-
-                // One more copy to go? Ask the print system for another PrintPage call
-                // instead of finishing the job - TransactionCode isn't cleared until
-                // EndPrint, so the next copy still sees the same transcode. Skipped when only a
-                // single copy was requested (e.g. the counter's copy is being rendered to a JPEG
-                // separately rather than looped in as another page of this same job).
-                if (!printSingleReceiptCopyOnly && receiptCopyIndex < ReceiptCopyLabels.Length - 1)
-                {
-                    receiptCopyIndex++;
-                    e.HasMorePages = true;
-                }
-                else
-                {
-                    e.HasMorePages = false;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-        private async void tbx_search_TextChanged(object sender, EventArgs e)
+        private void tbx_search_TextChanged(object sender, EventArgs e)
         {
             string search = tbx_search.Text ?? "";
 
@@ -2513,463 +2827,17 @@ namespace _conv
                     if (!r["serial"].ToString().Contains("https:"))
                     {
                         if (selltype.SelectedIndex == 0 && ToInt(r["price"]) != 0)
-                            dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString(), ToDecimal(r["price"]));
+                            dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["price"]), ToLong(r["new_quantity"]));
                         else if (selltype.SelectedIndex == 1 && ToInt(r["retail_price"]) != 0)
-                            dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString(), ToDecimal(r["retail_price"]));
+                            dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["retail_price"]), ToLong(r["new_quantity"]));
                         else if (selltype.SelectedIndex == 2 && ToInt(r["price_perpc"]) != 0)
-                            dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString(), ToDecimal(r["price_perpc"]));
+                            dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["price_perpc"]), ToLong(r["new_quantity"]));
                     }
                 }
             }
             listing.Text = "Total items: " + retriever.ToString();
-            await AddToLogs($"User searched for: {tbx_search.Text}");
-        }
-        public async Task<bool> AddToLogs(string event_name)
-        {
-            var is_logged = false;
-            try
-            {
-                await ConnectDb();
-                using (MySqlCommand cmd = new MySqlCommand())
-                {
-                    cmd.Connection = connect_db;
-                    cmd.CommandText = "INSERT INTO logs_(event_log) VALUES (@event)";
-                    cmd.Parameters.AddWithValue("@event", event_name);
-                    await cmd.ExecuteNonQueryAsync();
-                    cmd.Connection.Close();
-                    is_logged = true;
-                }
-            }
-            catch (Exception)
-            {
-                // Activity logging is best-effort. Failing to log (e.g. offline) must never
-                // interrupt the cashier - this fires on every keystroke in the search box.
-            }
-            return is_logged;
         }
         #endregion
-        private void printDocument1_BeginPrint(object sender, System.Drawing.Printing.PrintEventArgs e)
-        {
-            receiptCopyIndex = 0;
-        }
-        private static string GetReceiptsDirectory()
-        {
-            string documentsDir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            return Path.Combine(documentsDir, "Receipts");
-        }
-
-        /// <summary>
-        /// True when System Config > Printer has COUNTER_RECEIPT_MODE set to save the counter's
-        /// copy as a JPEG file instead of sending it to the physical printer. Default ("Print")
-        /// keeps the original behavior of printing both copies.
-        /// </summary>
-        private static bool IsCounterReceiptJpegMode()
-        {
-            return string.Equals(
-                ConfigurationManager.AppSettings["COUNTER_RECEIPT_MODE"],
-                "Jpeg",
-                StringComparison.OrdinalIgnoreCase);
-        }
-
-        // Pixels-per-inch used to size every on-screen receipt preview bitmap - shared with
-        // ReceiptPreviewForm so its draggable margin handles convert screen pixels back to the
-        // same hundredths-of-an-inch units System.Drawing.Printing.Margins uses.
-        internal const float ReceiptPreviewDpi = 203f;
-
-        internal readonly struct ReceiptPreviewResult
-        {
-            public Bitmap Image { get; }
-            public int PageWidthPx { get; }
-            public int MarginLeftPx { get; }
-            public int MarginRightPx { get; }
-            public int MarginTopPx { get; }
-
-            public ReceiptPreviewResult(Bitmap image, int pageWidthPx, int marginLeftPx, int marginRightPx, int marginTopPx)
-            {
-                Image = image;
-                PageWidthPx = pageWidthPx;
-                MarginLeftPx = marginLeftPx;
-                MarginRightPx = marginRightPx;
-                MarginTopPx = marginTopPx;
-            }
-        }
-
-        /// <summary>
-        /// Renders the customer's copy onto an in-memory bitmap for on-screen preview - reuses
-        /// the same drawing code PrintPage uses for the physical printer, without touching a print
-        /// job. Backs System Config > Receipt Testing's preview window, so it needs something to
-        /// draw even when there's no live sale in progress: if dgv_items has no real item rows,
-        /// a couple of placeholder rows are added just long enough to render, then removed again.
-        /// paperWidthMmOverride, if given, overrides whatever ApplyReceiptPrinterSettings detected
-        /// from the configured printer, so 58mm/80mm can be previewed side by side without
-        /// actually reconfiguring the receipt printer. marginLeft/Right/TopHundredthsOverride
-        /// (hundredths of an inch, matching Margins) likewise override the detected margins - fed
-        /// from the preview window's draggable boundary handles once the tester has dragged one.
-        /// </summary>
-        internal ReceiptPreviewResult RenderReceiptPreview(
-            int? paperWidthMmOverride,
-            int? marginLeftHundredthsOverride = null,
-            int? marginRightHundredthsOverride = null,
-            int? marginTopHundredthsOverride = null)
-        {
-            ApplyReceiptPrinterSettings(printDocument1);
-
-            bool injectedSampleRows = dgv_items.Rows.Count <= 1; // just the AllowUserToAddRows placeholder
-            if (injectedSampleRows)
-            {
-                dgv_items.Rows.Add("SAMPLE001", "Sample Item", 2, 45.00m, 90.00m);
-                dgv_items.Rows.Add("SAMPLE002", "Sample Item With A Longer Description To Test Wrapping", 1, 125.50m, 125.50m);
-            }
-
-            string previousTransactionCode = TransactionCode;
-            string previousPendingReceiptText = pendingReceiptText;
-            string previousPendingReceiptCode = pendingReceiptCode;
-            int previousReceiptCopyIndex = receiptCopyIndex;
-            string previousDenominationText = tbx_denomination.Text;
-            if (string.IsNullOrEmpty(TransactionCode))
-                TransactionCode = "PREVIEW";
-            // PrintPage does Convert.ToInt32(tbx_denomination.Text) for the Cash/Change lines -
-            // fine at a real checkout (cash is always typed as a whole number before Enter is
-            // pressed), but this preview can render with nothing typed there yet, or with
-            // leftover text that isn't a clean integer (e.g. a decimal amount, or anything else),
-            // either of which throws a FormatException. Validating with TryParse (rather than
-            // just checking for empty) and falling back to "0" keeps the Cash/Change lines on the
-            // preview instead of crashing it.
-            if (!int.TryParse(tbx_denomination.Text, out _))
-                tbx_denomination.Text = "0";
-
-            try
-            {
-                PaperSize paperSize = printDocument1.DefaultPageSettings.PaperSize;
-                Margins margins = printDocument1.DefaultPageSettings.Margins;
-
-                int widthHundredths = paperWidthMmOverride.HasValue
-                    ? (int)Math.Round(paperWidthMmOverride.Value / 25.4 * 100)
-                    : paperSize.Width;
-                int marginLeftHundredths = marginLeftHundredthsOverride ?? margins.Left;
-                int marginRightHundredths = marginRightHundredthsOverride ?? margins.Right;
-                int marginTopHundredths = marginTopHundredthsOverride ?? margins.Top;
-
-                int pageWidthPx = Math.Max(1, (int)(widthHundredths / 100f * ReceiptPreviewDpi));
-                int marginLeftPx = (int)(marginLeftHundredths / 100f * ReceiptPreviewDpi);
-                int marginRightPx = (int)(marginRightHundredths / 100f * ReceiptPreviewDpi);
-                int marginTopPx = (int)(marginTopHundredths / 100f * ReceiptPreviewDpi);
-                int marginWidthPx = Math.Max(1, pageWidthPx - marginLeftPx - marginRightPx);
-
-                const int scratchHeightPx = 3000;
-
-                using (var scratch = new Bitmap(pageWidthPx, scratchHeightPx))
-                {
-                    using (Graphics g = Graphics.FromImage(scratch))
-                    {
-                        g.Clear(Color.White);
-
-                        var marginBounds = new Rectangle(marginLeftPx, marginTopPx, marginWidthPx, scratchHeightPx - marginTopPx);
-                        var pageBounds = new Rectangle(0, 0, pageWidthPx, scratchHeightPx);
-
-                        // Only marginBounds/pageBounds (above) actually drive the layout inside
-                        // PrintDocument1_PrintPage - e.PageSettings itself isn't read there - so
-                        // the real printDocument1.DefaultPageSettings is fine to pass through as
-                        // metadata even though its PaperSize/Margins don't reflect this preview's
-                        // paper-width or margin overrides.
-                        receiptCopyIndex = 0; // CUSTOMER'S COPY
-                        // PrintDocument1_PrintPage catches its own exceptions (shows a MessageBox
-                        // and returns) instead of throwing, so it wouldn't reach the line that
-                        // sets lastReceiptContentHeight if something in this render goes wrong.
-                        // Reset it first so a failed render can't silently reuse a stale height
-                        // from a previous, differently-sized receipt.
-                        lastReceiptContentHeight = 0f;
-                        var args = new PrintPageEventArgs(g, marginBounds, pageBounds, printDocument1.DefaultPageSettings);
-                        PrintDocument1_PrintPage(this, args);
-                    }
-
-                    // Clamped to a sane minimum so a render that failed partway (see reset above)
-                    // still shows a visible sheet of paper instead of collapsing to a near-invisible
-                    // sliver a couple pixels tall.
-                    const int minContentHeightPx = 200;
-                    int cropHeight = (int)Math.Min(scratchHeightPx, Math.Max(lastReceiptContentHeight, minContentHeightPx));
-                    var cropped = new Bitmap(pageWidthPx, cropHeight);
-                    using (Graphics g = Graphics.FromImage(cropped))
-                        g.DrawImage(scratch, new Rectangle(0, 0, pageWidthPx, cropHeight), new Rectangle(0, 0, pageWidthPx, cropHeight), GraphicsUnit.Pixel);
-
-                    return new ReceiptPreviewResult(cropped, pageWidthPx, marginLeftPx, marginRightPx, marginTopPx);
-                }
-            }
-            finally
-            {
-                TransactionCode = previousTransactionCode;
-                pendingReceiptText = previousPendingReceiptText;
-                pendingReceiptCode = previousPendingReceiptCode;
-                receiptCopyIndex = previousReceiptCopyIndex;
-                tbx_denomination.Text = previousDenominationText;
-
-                if (injectedSampleRows)
-                {
-                    for (int i = dgv_items.Rows.Count - 1; i >= 0; i--)
-                    {
-                        if (!dgv_items.Rows[i].IsNewRow)
-                            dgv_items.Rows.RemoveAt(i);
-                    }
-
-                    // The cart was empty before these sample rows went in (that's what
-                    // injectedSampleRows means), so restore that exactly - dgv_items_RowsAdded
-                    // incrementally folded the sample rows' price/qty into grandTotal/count,
-                    // and removing rows doesn't undo that on its own.
-                    grandTotal = 0;
-                    count = 0;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Renders the counter's copy onto an in-memory bitmap - the same drawing code PrintPage
-        /// uses for the physical printer - and saves it as a JPEG under the folder configured in
-        /// System Config > Printer (COUNTER_RECEIPT_JPEG_PATH), or Documents\Receipts\Jpeg if
-        /// nothing's been configured, instead of consuming a print. Called right after the
-        /// customer's copy has been printed, while TransactionCode/dgv_items/tbx_denomination
-        /// still reflect this transaction.
-        /// </summary>
-        private void SaveCounterReceiptAsJpeg()
-        {
-            // Re-applied here (not just relying on the caller having done it before printing the
-            // customer's copy) so the JPEG's paper width always tracks the configured receipt
-            // printer even if a future call site saves a JPEG without printing first.
-            ApplyReceiptPrinterSettings(printDocument1);
-
-            PaperSize paperSize = printDocument1.DefaultPageSettings.PaperSize;
-            Margins margins = printDocument1.DefaultPageSettings.Margins;
-
-            // Printer paper sizes are reported in hundredths of an inch; 203 DPI is a typical
-            // thermal receipt printer's native resolution, so the saved JPEG comes out roughly
-            // the size/proportions the paper copy would have been.
-            const float dpi = 203f;
-
-            // The image copy is meant to look like a standard 80mm thermal receipt regardless of
-            // what the configured/fallback printer's driver reports - without this cap, no
-            // installed/configured RECEIPT_PRINTER_NAME (or one whose driver defaults to a wider
-            // page like Letter) would stretch the receipt's text/dividers out to that width
-            // instead of staying inside an 80mm roll. Only clamps the width used for this JPEG
-            // render - printDocument1's real page settings (used for the physical print) are
-            // untouched, so an intentionally configured 80mm/58mm/etc. printer is never widened.
-            const float maxJpegPaperWidthMm = 80f;
-            int maxJpegPaperWidthHundredths = (int)Math.Round(maxJpegPaperWidthMm / 25.4 * 100);
-            int effectiveWidthHundredths = Math.Min(paperSize.Width, maxJpegPaperWidthHundredths);
-
-            int pageWidthPx = Math.Max(1, (int)(effectiveWidthHundredths / 100f * dpi));
-            int marginLeftPx = (int)(margins.Left / 100f * dpi);
-            int marginTopPx = (int)(margins.Top / 100f * dpi);
-            int marginWidthPx = Math.Max(1, pageWidthPx - marginLeftPx - (int)(margins.Right / 100f * dpi));
-
-            // Receipt length varies with item count and isn't known until PrintDocument1_PrintPage
-            // finishes drawing - render onto a generously tall scratch bitmap, then crop to
-            // lastReceiptContentHeight afterward.
-            const int scratchHeightPx = 3000;
-
-            string savedFilePath;
-            using (var bitmap = new Bitmap(pageWidthPx, scratchHeightPx))
-            {
-                using (Graphics g = Graphics.FromImage(bitmap))
-                {
-                    g.Clear(Color.White);
-
-                    var marginBounds = new Rectangle(marginLeftPx, marginTopPx, marginWidthPx, scratchHeightPx - marginTopPx);
-                    var pageBounds = new Rectangle(0, 0, pageWidthPx, scratchHeightPx);
-
-                    receiptCopyIndex = ReceiptCopyLabels.Length - 1; // COUNTER'S COPY
-                    var args = new PrintPageEventArgs(g, marginBounds, pageBounds, printDocument1.DefaultPageSettings);
-                    PrintDocument1_PrintPage(this, args);
-                }
-
-                int cropHeight = (int)Math.Min(scratchHeightPx, Math.Max(lastReceiptContentHeight, 1));
-
-                try
-                {
-                    string configuredJpegPath = ConfigurationManager.AppSettings["COUNTER_RECEIPT_JPEG_PATH"];
-                    string receiptsDir = !string.IsNullOrWhiteSpace(configuredJpegPath)
-                        ? configuredJpegPath
-                        : Path.Combine(GetReceiptsDirectory(), "Jpeg");
-                    Directory.CreateDirectory(receiptsDir);
-
-                    string code = !string.IsNullOrEmpty(TransactionCode) ? TransactionCode : "TXN" + DateTime.Now.ToString("yyyyMMddHHmmss");
-                    string fileName = $"Receipt_{code}_{DateTime.Now:yyyyMMdd_HHmmss}_counter.jpg";
-                    savedFilePath = Path.Combine(receiptsDir, fileName);
-
-                    string printerLabel = string.IsNullOrWhiteSpace(printDocument1.PrinterSettings.PrinterName)
-                        ? "Default"
-                        : printDocument1.PrinterSettings.PrinterName;
-                    double paperWidthMm = effectiveWidthHundredths / 100.0 * 25.4;
-                    string slugText = $"TRIM {pageWidthPx}×{cropHeight}px  •  BLEED {BleedMm:0}mm  •  " +
-                        $"{printerLabel}  •  {paperWidthMm:0}mm roll  •  {code}  •  {DateTime.Now:yyyy-MM-dd HH:mm}";
-
-                    using (var withMarks = RenderWithBleedAndSlug(bitmap, pageWidthPx, cropHeight, dpi, slugText))
-                    {
-                        withMarks.Save(savedFilePath, System.Drawing.Imaging.ImageFormat.Jpeg);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Failed to save counter's receipt as JPEG");
-                }
-            }
-
-            // pendingReceiptText/pendingReceiptCode were set by the manual PrintPage call above
-            // but printDocument1_EndPrint never ran for it (it wasn't a real print job) - save the
-            // usual .txt backup here so the counter's copy still leaves a plain-text record too.
-            if (!string.IsNullOrEmpty(pendingReceiptText))
-            {
-                try
-                {
-                    string receiptsDir = GetReceiptsDirectory();
-                    Directory.CreateDirectory(receiptsDir);
-
-                    string fileName = $"Receipt_{pendingReceiptCode}_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
-                    File.WriteAllText(Path.Combine(receiptsDir, fileName), pendingReceiptText);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Failed to save receipt copy");
-                }
-                finally
-                {
-                    pendingReceiptText = null;
-                    pendingReceiptCode = null;
-                }
-            }
-        }
-
-        // How far the crop/bleed marks sit from the receipt's trim edge, in millimeters - a
-        // conventional small print-shop bleed allowance (the marks live in this margin, not on
-        // top of the receipt content).
-        private const float BleedMm = 3f;
-
-        /// <summary>
-        /// Wraps the tightly-cropped receipt render in a print-production bleed border: corner
-        /// crop marks just outside the trim edge on all four sides, plus a slug line along the
-        /// bottom identifying the trim size, bleed, configured printer/paper, transaction, and
-        /// timestamp - the same marks a print shop expects around camera-ready art, so the saved
-        /// JPEG can be sent out for physical reproduction without redoing the layout. Returns a
-        /// new bitmap; the caller owns disposing it.
-        /// </summary>
-        private static Bitmap RenderWithBleedAndSlug(Bitmap source, int trimWidthPx, int trimHeightPx, float dpi, string slugText)
-        {
-            int bleedPx = Math.Max(1, (int)Math.Round(dpi * BleedMm / 25.4));
-            Font slugFont = new Font("Arial", 6.5f);
-            int slugHeightPx;
-            using (var measureBmp = new Bitmap(1, 1))
-            using (Graphics measureG = Graphics.FromImage(measureBmp))
-                slugHeightPx = (int)Math.Ceiling(measureG.MeasureString(slugText, slugFont).Height) + 6;
-
-            int width = trimWidthPx + 2 * bleedPx;
-            int height = bleedPx + trimHeightPx + bleedPx + slugHeightPx;
-            var trimBounds = new Rectangle(bleedPx, bleedPx, trimWidthPx, trimHeightPx);
-
-            var result = new Bitmap(width, height);
-            using (Graphics g = Graphics.FromImage(result))
-            {
-                g.Clear(Color.White);
-                g.DrawImage(source, trimBounds, new Rectangle(0, 0, trimWidthPx, trimHeightPx), GraphicsUnit.Pixel);
-
-                using (var markPen = new Pen(Color.Black, 1f))
-                {
-                    const int gap = 4; // clearance between the trim edge and where each mark starts
-                    int markLen = Math.Max(1, bleedPx - gap);
-
-                    void HMark(int y, int fromX, int toX) => g.DrawLine(markPen, fromX, y, toX, y);
-                    void VMark(int x, int fromY, int toY) => g.DrawLine(markPen, x, fromY, x, toY);
-
-                    // Top-left
-                    VMark(trimBounds.Left, trimBounds.Top - gap - markLen, trimBounds.Top - gap);
-                    HMark(trimBounds.Top, trimBounds.Left - gap - markLen, trimBounds.Left - gap);
-                    // Top-right
-                    VMark(trimBounds.Right, trimBounds.Top - gap - markLen, trimBounds.Top - gap);
-                    HMark(trimBounds.Top, trimBounds.Right + gap, trimBounds.Right + gap + markLen);
-                    // Bottom-left
-                    VMark(trimBounds.Left, trimBounds.Bottom + gap, trimBounds.Bottom + gap + markLen);
-                    HMark(trimBounds.Bottom, trimBounds.Left - gap - markLen, trimBounds.Left - gap);
-                    // Bottom-right
-                    VMark(trimBounds.Right, trimBounds.Bottom + gap, trimBounds.Bottom + gap + markLen);
-                    HMark(trimBounds.Bottom, trimBounds.Right + gap, trimBounds.Right + gap + markLen);
-                }
-
-                using (var slugBrush = new SolidBrush(Color.Gray))
-                {
-                    float textWidth = g.MeasureString(slugText, slugFont).Width;
-                    float x = Math.Max(0, (width - textWidth) / 2f);
-                    float y = bleedPx + trimHeightPx + bleedPx + (slugHeightPx - slugFont.Height) / 2f;
-                    g.DrawString(slugText, slugFont, slugBrush, x, y);
-                }
-            }
-
-            return result;
-        }
-
-        private void printDocument1_EndPrint(object sender, System.Drawing.Printing.PrintEventArgs e)
-        {
-            if (string.IsNullOrEmpty(pendingReceiptText))
-                return;
-
-            try
-            {
-                string receiptsDir = GetReceiptsDirectory();
-                Directory.CreateDirectory(receiptsDir);
-
-                string fileName = $"Receipt_{pendingReceiptCode}_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
-                string filePath = Path.Combine(receiptsDir, fileName);
-
-                File.WriteAllText(filePath, pendingReceiptText);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Failed to save receipt copy");
-            }
-            finally
-            {
-                pendingReceiptText = null;
-                pendingReceiptCode = null;
-            }
-        }
-
-        private string BuildReceiptText(int total)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine(L_DEFAULTNAME);
-            sb.AppendLine("Calayan, Gonzaga, Cagayan");
-            sb.AppendLine("Transcode: " + TransactionCode);
-            sb.AppendLine(new string('-', 40));
-            sb.AppendLine("ITEMS");
-
-            for (int i = 0; i < dgv_items.Rows.Count - 1; i++)
-            {
-                string title = dgv_items.Rows[i].Cells[1].Value?.ToString() ?? "";
-                string qty = dgv_items.Rows[i].Cells[2].Value?.ToString() ?? "";
-                string price = dgv_items.Rows[i].Cells[4].Value?.ToString() ?? "";
-
-                sb.AppendLine(title);
-                sb.AppendLine($"  Qty: {qty}    Price: {price}");
-            }
-
-            sb.AppendLine(new string('-', 40));
-
-            decimal subtotal = total;
-            decimal taxAmount = TaxConfig.ComputeTax(subtotal);
-            decimal totalWithTax = subtotal + taxAmount;
-
-            if (TaxConfig.EffectiveTaxRatePercent > 0)
-            {
-                sb.AppendLine("Subtotal: " + subtotal.ToString("0.00"));
-                sb.AppendLine($"Tax ({TaxConfig.EffectiveTaxRatePercent:0.##}%): " + taxAmount.ToString("0.00"));
-            }
-            sb.AppendLine("Grand Total: " + totalWithTax.ToString("0.00"));
-            sb.AppendLine($"Cash: {tbx_denomination.Text}.00");
-            sb.AppendLine("Change: " + (Convert.ToInt32(tbx_denomination.Text) - totalWithTax).ToString("0.00"));
-            sb.AppendLine();
-            sb.AppendLine("Thank you for shopping! Come again!");
-            sb.AppendLine("Date of purchase: " + DateTime.Now);
-            sb.AppendLine("Cashier's ID: " + log_in);
-
-            return sb.ToString();
-        }
-
         private const int SlowPingThresholdMs = 300;
         private long? lastPingRoundtripMs;
 
@@ -2979,7 +2847,7 @@ namespace _conv
             lastPingRoundtripMs = null;
             try
             {
-                string dbsrv = ConfigurationManager.AppSettings["DB_SERVER"];
+                string dbsrv = ConfigurationManager.AppSettings["DB_SERVER"]?.Trim();
                 using (var ping = new Ping())
                 {
                     PingReply reply = await ping.SendPingAsync(dbsrv, 2000);
@@ -3004,7 +2872,6 @@ namespace _conv
         {
             try
             {
-
                 tbx_search.Enabled = true;
 
                 tbx_serialcode.Focus();
@@ -3015,7 +2882,7 @@ namespace _conv
 
                 RefreshItemSearchList();
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
+            catch (Exception ex) { ErrorDialog.Show(this, "Something went wrong while switching the selling type.", "Selling Type", ex); }
         }
 
         // Populates dgv_itemSearch for the current selltype selection. Shared by
@@ -3032,9 +2899,9 @@ namespace _conv
 
                     dgv_itemSearch.Rows.Clear();
 
-                    var rows = ItemsTable.AsEnumerable()
-                        .Where(r => ToInt(r["price"]) != 0 && ToInt(r["new_quantity"]) != 0)
-                        .OrderBy(r => r["description"].ToString());
+                    var rows = OrderRows(ItemsTable.AsEnumerable()
+                        .Where(r => ToInt(r["price"]) != 0 && ToInt(r["new_quantity"]) != 0),
+                        r => r["description"].ToString(), ItemSearchNameSortDescending);
 
                     foreach (var r in rows)
                     {
@@ -3043,7 +2910,7 @@ namespace _conv
                         if (!string.IsNullOrEmpty(r["serial"].ToString()) && !r["serial"].ToString().Contains("https:"))
 
                             if (retriever > 10)
-                                dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["price"]));
+                                dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["price"]), ToLong(r["new_quantity"]));
                     }
 
                 }
@@ -3052,9 +2919,9 @@ namespace _conv
 
                     dgv_itemSearch.Rows.Clear();
 
-                    var rows = ItemsTable.AsEnumerable()
-                        .Where(r => ToInt(r["retail_price"]) != 0 && ToInt(r["new_quantity"]) != 0)
-                        .OrderBy(r => r["description"].ToString());
+                    var rows = OrderRows(ItemsTable.AsEnumerable()
+                        .Where(r => ToInt(r["retail_price"]) != 0 && ToInt(r["new_quantity"]) != 0),
+                        r => r["description"].ToString(), ItemSearchNameSortDescending);
 
                     foreach (var r in rows)
                     {
@@ -3062,18 +2929,17 @@ namespace _conv
 
                         if (!string.IsNullOrEmpty(r["serial"].ToString()) && !r["serial"].ToString().Contains("https:"))
                             if (retriever > 10)
-                                dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["retail_price"]));
+                                dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["retail_price"]), ToLong(r["new_quantity"]));
                     }
                 }
                 else if (selltype.SelectedIndex == 2)
                 {
 
-
                     dgv_itemSearch.Rows.Clear();
 
-                    var rows = ItemsTable.AsEnumerable()
-                        .Where(r => ToInt(r["price_perpc"]) != 0 && ToInt(r["new_quantity"]) != 0)
-                        .OrderBy(r => r["description"].ToString());
+                    var rows = OrderRows(ItemsTable.AsEnumerable()
+                        .Where(r => ToInt(r["price_perpc"]) != 0 && ToInt(r["new_quantity"]) != 0),
+                        r => r["description"].ToString(), ItemSearchNameSortDescending);
 
                     foreach (var r in rows)
                     {
@@ -3081,7 +2947,7 @@ namespace _conv
 
                         if (!string.IsNullOrEmpty(r["serial"].ToString()) && !r["serial"].ToString().Contains("https:"))
                             if (retriever > 10)
-                                dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["price_perpc"]));
+                                dgv_itemSearch.Rows.Add(r["serial"].ToString(), r["description"].ToString().ToUpper(), ToDecimal(r["price_perpc"]), ToLong(r["new_quantity"]));
                     }
                 }
                 else
@@ -3106,7 +2972,7 @@ namespace _conv
 
                 listing.Text = "Total items: " + retriever.ToString();
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
+            catch (Exception ex) { ErrorDialog.Show(this, "Could not refresh the item search list.", "Item Search", ex); }
         }
 
         private void selltype_KeyUp(object sender, KeyEventArgs e)
@@ -3152,7 +3018,6 @@ namespace _conv
 
                     cmd.Parameters.AddWithValue("@new_quantity", quantity);
 
-
                     cmd.ExecuteNonQuery();
 
                     cmd.Connection.Close();
@@ -3173,83 +3038,6 @@ namespace _conv
 
         private void tbx_serialcode_Enter2(object sender, EventArgs e)
         {
-
-        }
-
-        private void tbx_serialcode_Validated_1(object sender, EventArgs e)
-        {
-            /*
-            try
-            {
-                if (tbx_serialcode.Text != "")
-                    tbx_serialcode.Text = dgv_itemSearch.CurrentRow.Cells[0].Value.ToString();
-
-                if (tbx_serialcode.Text == "01282026-085944")
-                {
-                    int quantity_exception = Convert.ToInt32(textBox1.Text);
-
-                    dgv_items.Rows.Add(
-                        tbx_serialcode.Text,
-                        getItem(tbx_serialcode.Text)[0].ToUpperInvariant(),
-                        textBox1.Text,
-                        Isolated(tbx_serialcode.Text, quantity_exception),
-                        Convert.ToInt64(Isolated(tbx_serialcode.Text, quantity_exception)) * Convert.ToInt64(textBox1.Text)
-                        );
-                }
-                else
-                {
-                    dgv_items.Rows.Add(
-                        tbx_serialcode.Text,
-                        getItem(tbx_serialcode.Text)[0].ToUpperInvariant(),
-                        textBox1.Text,
-                        GetItemPrice(tbx_serialcode.Text),
-                        Convert.ToInt64(GetItemPrice(tbx_serialcode.Text)) * Convert.ToInt32(textBox1.Text)
-                        );
-                }
-                tbx_serialcode.Clear();
-
-                tbx_serialcode.Focus();
-            }
-            catch (Exception xe)
-            {
-                MessageBox.Show(xe.Message, "Error occurred while processing the data.");
-                throw;
-            }
-            */
-            try
-            {
-
-                if (tbx_serialcode.Text != "")
-                {
-
-                    if (tbx_serialcode.Text == "01282026-085944")
-                    {
-                        dgv_items.Rows.Add(
-                                tbx_serialcode.Text,
-                                getItem(tbx_serialcode.Text)[0].ToUpperInvariant(),
-                                //getItem(tbx_serialcode.Text),
-                                textBox1.Text,
-                                Isolated(tbx_serialcode.Text),
-                                Convert.ToInt64(GetItemPrice(tbx_serialcode.Text)) * Convert.ToInt64(textBox1.Text)
-                            );
-                    }
-                    else
-                    {
-                        dgv_items.Rows.Add(
-                                tbx_serialcode.Text,
-                                getItem(tbx_serialcode.Text)[0].ToUpperInvariant(),
-                                //getItem(tbx_serialcode.Text),
-                                textBox1.Text,
-                                GetItemPrice(tbx_serialcode.Text),
-                                Convert.ToInt64(GetItemPrice(tbx_serialcode.Text)) * Convert.ToInt64(textBox1.Text)
-                            );
-                    }
-
-                    tbx_serialcode.Clear();
-                    tbx_serialcode.Focus();
-                }
-            }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
 
         }
 
@@ -3309,7 +3097,7 @@ namespace _conv
 
         }
 
-        private void printPreviewDialog1_Load(object sender, EventArgs e)
+        private void printPreviewDialogReceipt_Load(object sender, EventArgs e)
         {
 
         }
@@ -3320,6 +3108,7 @@ namespace _conv
                 "GLOBAL\n" +
                 "  F6           Hold the current transaction\n" +
                 "  F8           Resume a held transaction\n" +
+                "  Numpad /     View held transactions\n" +
                 "  Ctrl+H       Show this shortcuts list\n" +
                 "\n" +
                 "SERIAL CODE BOX\n" +
@@ -3331,7 +3120,7 @@ namespace _conv
                 "  F4           Jump to the item search box\n" +
                 "  F5           Reload items and restart the app\n" +
                 "  F9           Jump to the cash/denomination box\n" +
-                "  F10          Open Petty Cash\n" +
+                "  F10          Open Petty Cash (cart empty) / Calculator (cart has items)\n" +
                 "  F12          Jump to the cart grid\n" +
                 "  Escape       Deselect the selling type\n" +
                 "\n" +
@@ -3410,24 +3199,75 @@ namespace _conv
                 helpForm.ShowDialog(this);
         }
 
-        private void holdTransactionToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SaveHeldTransactions() => HeldTransactionStore.Save(heldTransactions.Values);
+
+        private void RestoreHeldTransactions()
         {
-            var items = new List<object[]>();
+            List<HeldTransaction> restored = HeldTransactionStore.Load();
+            if (restored.Count == 0)
+                return;
+
+            foreach (HeldTransaction held in restored)
+                heldTransactions[held.TicketCode] = held;
+
+            ShowTrayNotification("Held Transactions Restored",
+                restored.Count == 1
+                    ? "1 held transaction from a previous session was restored - open View Held Transactions (numpad /) to review it."
+                    : $"{restored.Count} held transactions from a previous session were restored - open View Held Transactions (numpad /) to review them.",
+                ToolTipIcon.Info);
+        }
+
+        private List<object[]> CaptureCartRows()
+        {
+            var items = new List<object[]>(dgv_items.Rows.Count);
             foreach (DataGridViewRow row in dgv_items.Rows)
             {
-                if (row.IsNewRow) continue;
-
                 var vals = new object[row.Cells.Count];
                 for (int i = 0; i < row.Cells.Count; i++)
                     vals[i] = row.Cells[i].Value;
                 items.Add(vals);
             }
+            return items;
+        }
+
+        private void LoadCartRows(List<object[]> items)
+        {
+            dgv_items.SuspendLayout();
+            try
+            {
+                dgv_items.Rows.Clear();
+                count = 0;
+                foreach (var vals in items)
+                    dgv_items.Rows.Add(vals);
+            }
+            finally
+            {
+                dgv_items.ResumeLayout();
+            }
+        }
+
+        private void holdTransactionToolStripMenuItem_Click(object sender, EventArgs e) =>
+            HoldCurrentTransaction(remarks: null, silent: false);
+
+        private bool HoldCurrentTransaction(string remarks, bool silent)
+        {
+            if (_preHeldPreviewSnapshot != null)
+            {
+                if (!silent)
+                    msgbox($"You're previewing held ticket \"{_previewedTicketCode}\" - this isn't a live transaction. Resume it first if you want to hold it again.");
+                return false;
+            }
+
+            var items = CaptureCartRows();
 
             if (items.Count == 0)
             {
-                suppressNextSerialKeyUp = true;
-                MessageBox.Show("There is nothing to hold - the current cart is empty.", "Hold Transaction");
-                return;
+                if (!silent)
+                {
+                    suppressNextSerialKeyUp = true;
+                    MessageBox.Show("There is nothing to hold - the current cart is empty.", "Hold Transaction");
+                }
+                return false;
             }
 
             string ticketCode = !string.IsNullOrEmpty(TransactionCode) ? TransactionCode : "HOLD" + DateTime.Now.ToString("yyyyMMddHHmmss");
@@ -3440,8 +3280,10 @@ namespace _conv
                 GrandTotal = grandTotal,
                 CounterText = counter.Text,
                 HeldAt = DateTime.Now,
-                Items = items
+                Items = items,
+                Remarks = remarks,
             };
+            SaveHeldTransactions();
 
             dgv_items.Rows.Clear();
             grandTotal = 0;
@@ -3453,12 +3295,24 @@ namespace _conv
             tbx_denomination.Enabled = false;
             TransactionCode = "";
 
+            gbx_itemList.Text = "Item List";
+
             heldTransactionsWindow?.RefreshList();
 
-            suppressNextSerialKeyUp = true;
-            MessageBox.Show($"Transaction held as ticket \"{ticketCode}\".\nUse Resume Transaction (F8) or View Held Transactions (Ctrl+T) to bring it back.", "Hold Transaction", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (silent)
+            {
+                ShowTrayNotification("Transaction Auto-Held",
+                    $"An idle cart (ticket \"{ticketCode}\") was automatically held. {remarks}",
+                    ToolTipIcon.Info);
+            }
+            else
+            {
+                suppressNextSerialKeyUp = true;
+                MessageBox.Show($"Transaction held as ticket \"{ticketCode}\".\nUse Resume Transaction (F8) or View Held Transactions (numpad /) to bring it back.", "Hold Transaction", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
 
             tbx_serialcode.Focus();
+            return true;
         }
 
         private void resumeTransactionToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3485,14 +3339,36 @@ namespace _conv
             ShowHeldTransactionsWindow();
         }
 
+        private void transactionListToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ListSales listSales = new ListSales();
+            listSales.ShowDialog();
+        }
+
         private void ShowHeldTransactionsWindow()
         {
             if (heldTransactionsWindow == null || heldTransactionsWindow.IsDisposed)
+            {
                 heldTransactionsWindow = new HeldTransactionsForm(this);
 
+                heldTransactionsWindow.FormClosed += (s, e) => heldTransactionsWindow = null;
+
+                heldTransactionsWindow.FormClosed += (s, e) => EndHeldTransactionPreview();
+            }
+
             heldTransactionsWindow.RefreshList();
-            heldTransactionsWindow.StartPosition = FormStartPosition.Manual;
-            heldTransactionsWindow.Location = new Point(this.Left + this.Width, this.Top);
+            if (!heldTransactionsWindow.TopMost)
+            {
+                heldTransactionsWindow.StartPosition = FormStartPosition.Manual;
+
+                Rectangle workArea = Screen.FromControl(this).WorkingArea;
+                Point cartBoardScreenLocation = GetCartBoardScreenLocation();
+                int x = Math.Max(cartBoardScreenLocation.X - heldTransactionsWindow.Width, workArea.Left);
+                int y = Math.Min(cartBoardScreenLocation.Y, workArea.Bottom - heldTransactionsWindow.Height);
+                y = Math.Max(y, workArea.Top);
+                heldTransactionsWindow.Location = new Point(x, y);
+            }
+
             heldTransactionsWindow.Show();
             heldTransactionsWindow.Activate();
         }
@@ -3501,7 +3377,8 @@ namespace _conv
         {
             errorMessage = null;
 
-            if (dgv_items.Rows.Cast<DataGridViewRow>().Any(r => !r.IsNewRow))
+            int realCartRowCount = _preHeldPreviewSnapshot?.Items.Count ?? dgv_items.Rows.Count;
+            if (realCartRowCount > 0)
             {
                 errorMessage = "Please hold or finish the current transaction before resuming another one.";
                 return false;
@@ -3514,23 +3391,34 @@ namespace _conv
             }
 
             heldTransactions.Remove(ticketCode);
+            SaveHeldTransactions();
+
+            _preHeldPreviewSnapshot = null;
+            _previewedTicketCode = null;
 
             selltype.SelectedIndex = held.SelltypeIndex;
             TransactionCode = held.TransactionCode;
 
-            dgv_items.Rows.Clear();
-            count = 0;
-            foreach (var vals in held.Items)
-                dgv_items.Rows.Add(vals);
+            gbx_itemList.Text = $"Item List for {S_DEFAULTNAME}-{TransactionCode} ({ticketCode})";
+
+            LoadCartRows(held.Items);
 
             grandTotal = held.GrandTotal;
             counter.Text = held.CounterText;
 
             tbx_serialcode.Enabled = true;
-            tbx_serialcode.Focus();
 
-            heldTransactionsWindow?.RefreshList();
+            heldTransactionsWindow?.RefreshList(false);
+
+            if (heldTransactionsWindow != null && !heldTransactionsWindow.IsDisposed)
+            {
+                heldTransactionsWindow.TopMost = false;
+                heldTransactionsWindow.SendToBack();
+            }
+
             this.BringToFront();
+            this.Activate();
+            tbx_serialcode.Focus();
 
             return true;
         }
@@ -3538,149 +3426,75 @@ namespace _conv
         internal void CancelHeldTransaction(string ticketCode)
         {
             heldTransactions.Remove(ticketCode);
+            SaveHeldTransactions();
             heldTransactionsWindow?.RefreshList();
         }
 
-        private void printDocument2_BeginPrint(object sender, PrintEventArgs e)
+        internal void PreviewHeldTransaction(string ticketCode)
         {
-            outOfStockPrintRowIndex = 0;
-        }
-
-        /// <summary>
-        /// Prints the Dashboard's "Out of Stock Items" list (dgvDashboardLowStock). Laid out the
-        /// same way PrintDocument1_PrintPage lays out a receipt - word-wrapped item line then a
-        /// Serial/Qty detail line, page-width-driven rather than fixed column offsets - because
-        /// this is meant to come out of the same narrow POS80/58mm thermal roll as receipts, not
-        /// a letter/A4 sheet, and a rigid table would clip on paper that narrow.
-        /// </summary>
-        private void printDocument2_PrintPage(object sender, PrintPageEventArgs e)
-        {
-            try
-            {
-                Font fontTitle = new Font(AppFonts.MorallySerif, 13, FontStyle.Bold);
-                Font fontMeta = new Font("Arial", 8.5f);
-                Font fontItemTitle = new Font("Arial", 9);
-                Font fontItemDetail = new Font("Arial", 8.5f);
-
-                Pen thinPen = Pens.Black;
-                Pen thickPen = new Pen(Color.Black, 1.5f);
-
-                int startX = 5;
-                int pageWidth = e.MarginBounds.Width > 0 ? e.MarginBounds.Width : e.PageBounds.Width;
-                int rightEdge = pageWidth - startX;
-                float pageBottom = e.MarginBounds.Top + e.MarginBounds.Height;
-
-                void DrawCentered(string text, Font font, float yPos)
-                {
-                    float textWidth = e.Graphics.MeasureString(text, font).Width;
-                    float x = Math.Max(0, (pageWidth - textWidth) / 2f);
-                    e.Graphics.DrawString(text, font, Brushes.Black, x, yPos);
-                }
-
-                void DrawRightAligned(string text, Font font, float yPos)
-                {
-                    float textWidth = e.Graphics.MeasureString(text, font).Width;
-                    float x = Math.Max(startX, rightEdge - textWidth);
-                    e.Graphics.DrawString(text, font, Brushes.Black, x, yPos);
-                }
-
-                void DrawDivider(float yPos, Pen pen) => e.Graphics.DrawLine(pen, startX, yPos, rightEdge, yPos);
-
-                List<string> WrapText(string text, Font font, float maxWidth)
-                {
-                    var lines = new List<string>();
-                    var words = (text ?? "").Split(' ');
-                    var current = new StringBuilder();
-
-                    foreach (string word in words)
-                    {
-                        string candidate = current.Length == 0 ? word : current + " " + word;
-                        if (current.Length > 0 && e.Graphics.MeasureString(candidate, font).Width > maxWidth)
-                        {
-                            lines.Add(current.ToString());
-                            current.Clear();
-                            current.Append(word);
-                        }
-                        else
-                        {
-                            current.Clear();
-                            current.Append(candidate);
-                        }
-                    }
-
-                    lines.Add(current.ToString());
-                    return lines;
-                }
-
-                float y = e.MarginBounds.Top;
-
-                if (outOfStockPrintRowIndex == 0)
-                {
-                    DrawCentered(L_DEFAULTNAME, fontTitle, y);
-                    y += 20;
-                    DrawCentered("OUT OF STOCK ITEMS", fontMeta, y);
-                    y += 13;
-                    DrawCentered(DateTime.Now.ToString("MMM d, yyyy h:mm tt"), fontMeta, y);
-                    y += 14;
-                    DrawDivider(y, thickPen);
-                    y += 10;
-                }
-
-                while (outOfStockPrintRowIndex < dgvDashboardLowStock.Rows.Count)
-                {
-                    DataGridViewRow row = dgvDashboardLowStock.Rows[outOfStockPrintRowIndex];
-                    string serial = row.Cells[0].Value?.ToString() ?? "";
-                    string description = row.Cells[1].Value?.ToString() ?? "";
-                    string qty = row.Cells[2].Value?.ToString() ?? "";
-
-                    List<string> titleLines = WrapText(description, fontItemTitle, rightEdge - startX);
-                    float itemHeight = titleLines.Count * 13 + 16 + 10;
-
-                    // Doesn't fit on this page - stop here (unless nothing's been drawn on this
-                    // page yet, in which case draw it anyway so a single oversized item can't
-                    // stall pagination in an endless empty-page loop) and pick it up on the next.
-                    if (y + itemHeight > pageBottom && y > e.MarginBounds.Top)
-                        break;
-
-                    foreach (string line in titleLines)
-                    {
-                        e.Graphics.DrawString(line, fontItemTitle, Brushes.Black, startX, y);
-                        y += 13;
-                    }
-
-                    e.Graphics.DrawString("Serial: " + serial, fontItemDetail, Brushes.Black, startX, y);
-                    DrawRightAligned("Qty: " + qty, fontItemDetail, y);
-                    y += 16;
-
-                    DrawDivider(y, thinPen);
-                    y += 10;
-
-                    outOfStockPrintRowIndex++;
-                }
-
-                e.HasMorePages = outOfStockPrintRowIndex < dgvDashboardLowStock.Rows.Count;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-
-        private void btnPrintOutOfStock_Click(object sender, EventArgs e)
-        {
-            if (dgvDashboardLowStock.Rows.Count == 0)
-            {
-                MessageBox.Show("No out-of-stock items to print.", "Nothing to Print");
+            if (ticketCode == _previewedTicketCode)
                 return;
+
+            if (!heldTransactions.TryGetValue(ticketCode, out HeldTransaction held))
+                return;
+
+            bool isFirstPreview = _preHeldPreviewSnapshot == null;
+            if (isFirstPreview)
+            {
+                _preHeldPreviewSnapshot = new CartSnapshot
+                {
+                    Items = CaptureCartRows(),
+                    GrandTotal = grandTotal,
+                    CounterText = counter.Text,
+                    TransactionCode = TransactionCode,
+                };
             }
 
-            // Targets the same configured POS80 printer as receipts (paper size/margins pulled
-            // straight from its driver) so the print actually matches the roll it'll come out
-            // on. No preview gate here either - same as the sale receipt, this must go straight
-            // to the printer instead of waiting on the cashier to click Print in a dialog first.
-            ApplyReceiptPrinterSettings(printDocument2);
+            _previewedTicketCode = ticketCode;
 
-            printDocument2.Print();
+            LoadCartRows(held.Items);
+
+            grandTotal = held.GrandTotal;
+            counter.Text = held.CounterText;
+            gbx_itemList.Text = $"Item List for {S_DEFAULTNAME}-{held.TransactionCode} ({ticketCode}) - PREVIEW";
+
+            if (!string.IsNullOrEmpty(tbx_serialcode.Text))
+            {
+                tbx_search.Text = tbx_serialcode.Text;
+                tbx_search.SelectionStart = tbx_search.Text.Length;
+                tbx_search.Focus();
+            }
+
+            tbx_serialcode.Clear();
+            tbx_serialcode.Enabled = false;
+
+            if (isFirstPreview)
+            {
+                ShowTrayNotification("Held Transaction Preview",
+                    $"Previewing held ticket \"{ticketCode}\" - the serial code box is disabled. Resume it (F8) in the Held Transactions window to make changes.",
+                    ToolTipIcon.Info);
+            }
+        }
+
+        internal void EndHeldTransactionPreview()
+        {
+            if (_preHeldPreviewSnapshot == null)
+                return;
+
+            CartSnapshot snapshot = _preHeldPreviewSnapshot;
+            _preHeldPreviewSnapshot = null;
+            _previewedTicketCode = null;
+
+            LoadCartRows(snapshot.Items);
+
+            grandTotal = snapshot.GrandTotal;
+            counter.Text = snapshot.CounterText;
+            TransactionCode = snapshot.TransactionCode;
+            gbx_itemList.Text = snapshot.Items.Count > 0
+                ? $"Item List for {S_DEFAULTNAME}-{TransactionCode}"
+                : "Item List";
+
+            tbx_serialcode.Enabled = true;
         }
 
         private void barcodeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3698,6 +3512,9 @@ namespace _conv
         {
             new InventoryReport().ShowDialog();
         }
+
+        private void cachedItemsStatusToolStripMenuItem_Click(object sender, EventArgs e) =>
+            inventoryReportToolStripMenuItem_Click(sender, e);
 
         private void salesReportToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -3729,7 +3546,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to open Receipts folder");
+                ErrorDialog.Show(this, "Could not open the Receipts folder.", "Failed to Open Receipts Folder", ex);
             }
         }
 
@@ -3740,7 +3557,8 @@ namespace _conv
                 string managerPin = ConfigurationManager.AppSettings["MANAGER_PIN"];
                 if (pinForm.ShowDialog(this) != DialogResult.OK || pinForm.EnteredPin != managerPin)
                 {
-                    MessageBox.Show("Incorrect PIN. Access to Manage Users is restricted.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    ErrorDialog.Show(this, "Incorrect PIN. Access to Manage Users is restricted.", "Access Denied",
+                        $"Manager PIN rejected for 'Manage Users' at {DateTime.Now:G} on {Environment.MachineName}.", MessageBoxIcon.Warning);
                     return;
                 }
             }
@@ -3758,7 +3576,8 @@ namespace _conv
                 string managerPin = ConfigurationManager.AppSettings["MANAGER_PIN"];
                 if (pinForm.ShowDialog(this) != DialogResult.OK || pinForm.EnteredPin != managerPin)
                 {
-                    MessageBox.Show("Incorrect PIN. Access to Tax Configuration is restricted.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    ErrorDialog.Show(this, "Incorrect PIN. Access to Tax Configuration is restricted.", "Access Denied",
+                        $"Manager PIN rejected for 'Tax Configuration' at {DateTime.Now:G} on {Environment.MachineName}.", MessageBoxIcon.Warning);
                     return;
                 }
             }
@@ -3777,6 +3596,9 @@ namespace _conv
             }
         }
 
+        private const int DoubleHomeWindowMs = 500;
+        private DateTime _lastHomePress = DateTime.MinValue;
+
         /// <summary>
         /// systemConfigToolStripMenuItem is hidden from the menu bar, so its own ShortcutKeys
         /// never fires (WinForms only processes a menu shortcut while the item is Visible).
@@ -3788,6 +3610,20 @@ namespace _conv
             {
                 systemConfigToolStripMenuItem_Click(this, EventArgs.Empty);
                 return true;
+            }
+
+            if (keyData == Keys.Home)
+            {
+                DateTime now = DateTime.Now;
+                if ((now - _lastHomePress).TotalMilliseconds <= DoubleHomeWindowMs)
+                {
+                    _lastHomePress = DateTime.MinValue;
+                    this.WindowState = FormWindowState.Minimized;
+                }
+                else
+                {
+                    _lastHomePress = now;
+                }
             }
 
             return base.ProcessCmdKey(ref msg, keyData);
@@ -3804,7 +3640,8 @@ namespace _conv
                 string adminPin = ConfigurationManager.AppSettings["ADMIN_PIN"];
                 if (pinForm.ShowDialog(this) != DialogResult.OK || pinForm.EnteredPin != adminPin)
                 {
-                    MessageBox.Show("Incorrect PIN. Access to System Configuration is restricted.", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    ErrorDialog.Show(this, "Incorrect PIN. Access to System Configuration is restricted.", "Access Denied",
+                        $"Admin PIN rejected for 'System Configuration' at {DateTime.Now:G} on {Environment.MachineName}.", MessageBoxIcon.Warning);
                     return;
                 }
             }
@@ -3815,7 +3652,57 @@ namespace _conv
             }
 
             ApplyMenuVisibility();
+            ApplyItemSearchColumnVisibility();
+            ApplyCartColumnVisibility();
             ApplyStoreIdentity();
+        }
+
+        private void editLayoutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_layoutEditFilter == null)
+            {
+                bool layoutEditEnabled = string.Equals(
+                    ConfigurationManager.AppSettings["LAYOUT_EDIT_ENABLED"], "true", StringComparison.OrdinalIgnoreCase);
+                if (!layoutEditEnabled)
+                {
+                    MessageBox.Show(
+                        "Layout editing is turned off. Enable \"Allow Edit Layout from the main menu\" on System Config's Appearance tab first.",
+                        "Edit Layout Disabled", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                using (var pinForm = new PinPromptForm())
+                {
+                    pinForm.PromptText = "Enter system admin PIN to continue:";
+                    string adminPin = ConfigurationManager.AppSettings["ADMIN_PIN"];
+                    if (pinForm.ShowDialog(this) != DialogResult.OK || pinForm.EnteredPin != adminPin)
+                    {
+                        ErrorDialog.Show(this, "Incorrect PIN. Editing the layout is restricted.", "Access Denied",
+                            $"Admin PIN rejected for 'Edit Layout' at {DateTime.Now:G} on {Environment.MachineName}.", MessageBoxIcon.Warning);
+                        return;
+                    }
+                }
+
+                _layoutEditFilter = new LayoutEditMessageFilter(this);
+                Application.AddMessageFilter(_layoutEditFilter);
+                LayoutEditOverlay.Attach(this);
+                editLayoutToolStripMenuItem.Text = "Exit Layout Edit";
+                MessageBox.Show(
+                    "Layout editing is on - each movable item is outlined with a small handle at its " +
+                    "bottom-right corner. Drag the item itself to reposition it, or drag its handle to " +
+                    "resize it. Nothing else on screen will respond to clicks until you choose " +
+                    "\"Exit Layout Edit\" from this same menu.",
+                    "Edit Layout", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                Application.RemoveMessageFilter(_layoutEditFilter);
+                _layoutEditFilter = null;
+                LayoutEditOverlay.Detach(this);
+                editLayoutToolStripMenuItem.Text = "Edit Layout";
+                MainLayoutStore.SaveFrom(this);
+                ShowTrayNotification("Layout Saved", "The main screen layout has been saved on this computer.", ToolTipIcon.Info);
+            }
         }
 
         internal static void ExportToExcel(DataGridView dgv)

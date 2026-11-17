@@ -3,7 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Xml.Linq;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Persists the store's flat tax rate to a local XML file so it survives restarts and

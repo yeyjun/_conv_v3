@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -15,7 +15,7 @@ using SpeedTest.Net;
 using SpeedTest.Net.Enums;
 using SpeedTest.Net.Models;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Lets a system admin edit the app-wide settings that currently live in App.config
@@ -59,8 +59,41 @@ namespace _conv
             txtGmailSender.TextChanged += (s, e) => UpdateWarningBar();
         }
 
+        private static readonly System.Drawing.Color SectionSelectedColor = System.Drawing.Color.FromArgb(205, 230, 247);
+
+        private void lstConfigSections_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0)
+                return;
+
+            bool selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
+
+            using (var backBrush = new System.Drawing.SolidBrush(selected ? SectionSelectedColor : lstConfigSections.BackColor))
+                e.Graphics.FillRectangle(backBrush, e.Bounds);
+
+            var textRect = new System.Drawing.Rectangle(e.Bounds.X + 14, e.Bounds.Y, e.Bounds.Width - 14, e.Bounds.Height);
+            var format = new System.Drawing.StringFormat { LineAlignment = System.Drawing.StringAlignment.Center };
+
+            using (var textBrush = new System.Drawing.SolidBrush(System.Drawing.SystemColors.ControlText))
+                e.Graphics.DrawString(lstConfigSections.Items[e.Index].ToString(), lstConfigSections.Font, textBrush, textRect, format);
+        }
+
+        private void lstConfigSections_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lstConfigSections.SelectedIndex >= 0)
+                tabControlConfig.SelectedIndex = lstConfigSections.SelectedIndex;
+        }
+
+        private void tabControlConfig_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControlConfig.SelectedIndex >= 0)
+                lstConfigSections.SelectedIndex = tabControlConfig.SelectedIndex;
+        }
+
         private void SystemConfigForm_Load(object sender, EventArgs e)
         {
+            lstConfigSections.SelectedIndex = tabControlConfig.SelectedIndex;
+
             txtStoreName.Text = ConfigurationManager.AppSettings["STORE_NAME"];
             txtStoreCode.Text = ConfigurationManager.AppSettings["STORE_CODE"];
             txtStoreEmail.Text = ConfigurationManager.AppSettings["STORE_EMAIL"];
@@ -74,10 +107,15 @@ namespace _conv
             if (int.TryParse(ConfigurationManager.AppSettings["CONNECTION_TIMEOUT"], out int timeout))
                 nud_connectionTimeout.Value = Math.Min(Math.Max(timeout, nud_connectionTimeout.Minimum), nud_connectionTimeout.Maximum);
 
+            LoadSalesDefaults();
+            LoadAlertSettings();
             LoadMenuVisibility();
+            LoadItemSearchColumns();
+            LoadCartColumns();
             LoadReceiptTesting();
             LoadReceiptPrinter();
             LoadAppearance();
+            LoadLayoutRevision();
             LoadReportSchedule();
             LoadDataSync();
             LoadTrialLicense();
@@ -87,6 +125,7 @@ namespace _conv
             NotifyTrayOfWarnings();
 
             _ = LoadMaintenanceAsync();
+            _ = LoadLowStockReminderAsync();
         }
 
         // Cached from the last successful load/save/refresh so ComputeWarnings (called
@@ -140,6 +179,49 @@ namespace _conv
         }
 
         private async void btnRefreshMaintenance_Click(object sender, EventArgs e) => await LoadMaintenanceAsync();
+
+        private async Task LoadLowStockReminderAsync()
+        {
+            lblLowStockStatus.Text = "Checking current status...";
+
+            (bool enabled, int threshold, int intervalMinutes) = await AppConfigService.GetLowStockReminderSettingsAsync();
+
+            chkLowStockEnabled.Checked = enabled;
+            nudLowStockThreshold.Value = Math.Min(Math.Max(threshold, nudLowStockThreshold.Minimum), nudLowStockThreshold.Maximum);
+            nudLowStockInterval.Value = Math.Min(Math.Max(intervalMinutes, nudLowStockInterval.Minimum), nudLowStockInterval.Maximum);
+
+            lblLowStockStatus.ForeColor = System.Drawing.Color.Gray;
+            lblLowStockStatus.Text = $"Status: Low stock reminder is currently {(enabled ? "ON" : "OFF")} (live, shared across all terminals).";
+        }
+
+        private async void btnSaveLowStock_Click(object sender, EventArgs e)
+        {
+            btnSaveLowStock.Enabled = false;
+            lblLowStockStatus.Text = "Saving...";
+
+            try
+            {
+                bool enabled = chkLowStockEnabled.Checked;
+                int threshold = (int)nudLowStockThreshold.Value;
+                int intervalMinutes = (int)nudLowStockInterval.Value;
+
+                await AppConfigService.SetLowStockReminderSettingsAsync(enabled, threshold, intervalMinutes);
+
+                lblLowStockStatus.ForeColor = System.Drawing.Color.Gray;
+                lblLowStockStatus.Text = $"Status: Low stock reminder is currently {(enabled ? "ON" : "OFF")} (live, shared across all terminals).";
+            }
+            catch (Exception ex)
+            {
+                lblLowStockStatus.ForeColor = System.Drawing.Color.Tomato;
+                lblLowStockStatus.Text = $"Failed to save: {ex.Message}";
+            }
+            finally
+            {
+                btnSaveLowStock.Enabled = true;
+            }
+        }
+
+        private async void btnRefreshLowStock_Click(object sender, EventArgs e) => await LoadLowStockReminderAsync();
 
         private void LoadRemoteControl()
         {
@@ -277,10 +359,10 @@ namespace _conv
                 return;
             }
 
-            DialogResult confirm = MessageBox.Show(this,
+            DialogResult confirm = ConfirmDialog.Show(this,
                 $"This will create the database \"{dbName}\" (if it doesn't already exist) and its " +
-                $"tables on {server}, using the connection details in the Settings tab.\n\nContinue?",
-                "Create Database", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                $"tables on {server}, using the connection details in the Settings tab.\n\nContinue? (Y/N)",
+                "Create Database", MessageBoxIcon.Question);
             if (confirm != DialogResult.Yes)
                 return;
 
@@ -321,7 +403,21 @@ namespace _conv
             chkTrialEnabled.Checked = TrialLicense.IsEnabled;
             nud_trialDays.Value = Math.Min(Math.Max(TrialLicense.TrialDays, nud_trialDays.Minimum), nud_trialDays.Maximum);
             SetTrialControlsEnabled(chkTrialEnabled.Checked);
+
+            int tierIndex = cmbSubscriptionTier.Items.IndexOf(TrialLicense.SubscriptionTier);
+            cmbSubscriptionTier.SelectedIndex = tierIndex >= 0 ? tierIndex : 0;
+
             UpdateTrialStatusLabel();
+        }
+
+        private string SelectedTierLicenseDirectory()
+        {
+            string tier = cmbSubscriptionTier.SelectedItem as string ?? "Basic";
+            string dir = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                "App Inventory", "Licenses", tier);
+            try { System.IO.Directory.CreateDirectory(dir); } catch { }
+            return dir;
         }
 
         private void SetTrialControlsEnabled(bool enabled) => nud_trialDays.Enabled = enabled;
@@ -333,9 +429,10 @@ namespace _conv
         {
             if (TrialLicense.IsLicensed)
             {
+                string tierSuffix = string.IsNullOrEmpty(TrialLicense.SubscriptionTier) ? "" : $" ({TrialLicense.SubscriptionTier})";
                 lblTrialStatus.Text = TrialLicense.LicenseExpiryUtc.HasValue
-                    ? $"Status: Licensed until {TrialLicense.LicenseExpiryUtc.Value:yyyy-MM-dd} - the trial gate does not apply."
-                    : "Status: Licensed (no expiry) - the trial gate does not apply.";
+                    ? $"Status: Licensed{tierSuffix} until {TrialLicense.LicenseExpiryUtc.Value:yyyy-MM-dd} - the trial gate does not apply."
+                    : $"Status: Licensed{tierSuffix} (no expiry) - the trial gate does not apply.";
                 return;
             }
 
@@ -372,6 +469,7 @@ namespace _conv
 
         private void btnImportLicenseFile_Click(object sender, EventArgs e)
         {
+            openFileDialogLicense.InitialDirectory = SelectedTierLicenseDirectory();
             if (openFileDialogLicense.ShowDialog(this) != DialogResult.OK)
                 return;
 
@@ -477,7 +575,6 @@ namespace _conv
         }
 
         /// <summary>
-        /// Pops a Windows tray balloon (via the owning Purchases main form's notifyIcon1) listing
         /// the same warnings as the hover bar, so they're visible even after this window closes.
         /// Skipped if the warning set hasn't changed since the last balloon, to avoid spamming one
         /// per keystroke.
@@ -558,6 +655,49 @@ namespace _conv
             lblScheduleStatus.Text = $"Last sent: {lastSentText}\nNext due: {nextDueText}";
         }
 
+        private void LoadSalesDefaults()
+        {
+            bool enabled = string.Equals(ConfigurationManager.AppSettings["DEFAULT_SELLTYPE_ENABLED"], "true", StringComparison.OrdinalIgnoreCase);
+            chkDefaultSelltype.Checked = enabled;
+
+            int index = int.TryParse(ConfigurationManager.AppSettings["DEFAULT_SELLTYPE_INDEX"], out int i) ? i : 0;
+            cbxDefaultSelltype.SelectedIndex = index >= 0 && index <= 2 ? index : 0;
+
+            cbxDefaultSelltype.Enabled = enabled;
+
+            bool autoHoldEnabled = string.Equals(ConfigurationManager.AppSettings["AUTO_HOLD_IDLE_ENABLED"], "true", StringComparison.OrdinalIgnoreCase);
+            chkAutoHoldEnabled.Checked = autoHoldEnabled;
+
+            int autoHoldMinutes = int.TryParse(ConfigurationManager.AppSettings["AUTO_HOLD_IDLE_MINUTES"], out int mins) ? mins : 30;
+            nud_autoHoldMinutes.Value = Math.Min(Math.Max(autoHoldMinutes, nud_autoHoldMinutes.Minimum), nud_autoHoldMinutes.Maximum);
+
+            nud_autoHoldMinutes.Enabled = autoHoldEnabled;
+
+            chkBlockZeroPriceItems.Checked = !string.Equals(ConfigurationManager.AppSettings["BLOCK_ZERO_PRICE_ITEMS"], "false", StringComparison.OrdinalIgnoreCase);
+
+            chkAutoStartWithWindows.Checked = AutoStartService.IsEnabled;
+        }
+
+        private void chkDefaultSelltype_CheckedChanged(object sender, EventArgs e) =>
+            cbxDefaultSelltype.Enabled = chkDefaultSelltype.Checked;
+
+        private void chkAutoHoldEnabled_CheckedChanged(object sender, EventArgs e) =>
+            nud_autoHoldMinutes.Enabled = chkAutoHoldEnabled.Checked;
+
+        private void LoadAlertSettings()
+        {
+            bool enabled = !string.Equals(ConfigurationManager.AppSettings["ALERT_AUTO_DISMISS_ENABLED"], "false", StringComparison.OrdinalIgnoreCase);
+            chkAlertAutoDismissEnabled.Checked = enabled;
+
+            int seconds = int.TryParse(ConfigurationManager.AppSettings["ALERT_AUTO_DISMISS_SECONDS"], out int s) && s > 0 ? s : 5;
+            nud_alertAutoDismissSeconds.Value = Math.Min(Math.Max(seconds, nud_alertAutoDismissSeconds.Minimum), nud_alertAutoDismissSeconds.Maximum);
+
+            nud_alertAutoDismissSeconds.Enabled = enabled;
+        }
+
+        private void chkAlertAutoDismissEnabled_CheckedChanged(object sender, EventArgs e) =>
+            nud_alertAutoDismissSeconds.Enabled = chkAlertAutoDismissEnabled.Checked;
+
         private void LoadMenuVisibility()
         {
             string raw = ConfigurationManager.AppSettings["HIDDEN_MENUS"] ?? Purchases.DefaultHiddenMenus;
@@ -568,6 +708,77 @@ namespace _conv
             clbMenus.Items.Clear();
             foreach (var menu in Purchases.ConfigurableMenuItems)
                 clbMenus.Items.Add(menu.Label, !hidden.Contains(menu.Name));
+        }
+
+        private void LoadItemSearchColumns()
+        {
+            string raw = ConfigurationManager.AppSettings["ITEM_SEARCH_HIDDEN_COLUMNS"] ?? Purchases.DefaultHiddenItemSearchColumns;
+            var hidden = new HashSet<string>(
+                raw.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()),
+                StringComparer.OrdinalIgnoreCase);
+
+            clbItemSearchColumns.Items.Clear();
+            foreach (var col in Purchases.GetOrderedItemSearchColumns())
+                clbItemSearchColumns.Items.Add(col.Label, !hidden.Contains(col.Name));
+
+            chkItemSearchDateSortDescending.Checked = Purchases.ItemSearchDateSortDescending;
+            chkItemSearchNameSortDescending.Checked = Purchases.ItemSearchNameSortDescending;
+        }
+
+        private void LoadCartColumns()
+        {
+            string raw = ConfigurationManager.AppSettings["CART_HIDDEN_COLUMNS"] ?? Purchases.DefaultHiddenCartColumns;
+            var hidden = new HashSet<string>(
+                raw.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()),
+                StringComparer.OrdinalIgnoreCase);
+
+            clbCartColumns.Items.Clear();
+            foreach (var col in Purchases.GetOrderedCartColumns())
+                clbCartColumns.Items.Add(col.Label, !hidden.Contains(col.Name));
+        }
+
+        private static void MoveCheckedListItem(CheckedListBox list, int delta)
+        {
+            int index = list.SelectedIndex;
+            if (index < 0)
+                return;
+
+            int newIndex = index + delta;
+            if (newIndex < 0 || newIndex >= list.Items.Count)
+                return;
+
+            object item = list.Items[index];
+            bool isChecked = list.GetItemChecked(index);
+            list.Items.RemoveAt(index);
+            list.Items.Insert(newIndex, item);
+            list.SetItemChecked(newIndex, isChecked);
+            list.SelectedIndex = newIndex;
+        }
+
+        private void btnItemSearchColumnUp_Click(object sender, EventArgs e) => MoveCheckedListItem(clbItemSearchColumns, -1);
+        private void btnItemSearchColumnDown_Click(object sender, EventArgs e) => MoveCheckedListItem(clbItemSearchColumns, 1);
+        private void btnCartColumnUp_Click(object sender, EventArgs e) => MoveCheckedListItem(clbCartColumns, -1);
+        private void btnCartColumnDown_Click(object sender, EventArgs e) => MoveCheckedListItem(clbCartColumns, 1);
+
+        private static void SaveColumnConfig(Configuration config, CheckedListBox list,
+            (string Name, string Label)[] columns, string hiddenKey, string orderKey)
+        {
+            var labelToName = columns.ToDictionary(c => c.Label, c => c.Name, StringComparer.Ordinal);
+            var order = new List<string>();
+            var hidden = new List<string>();
+
+            for (int i = 0; i < list.Items.Count; i++)
+            {
+                if (!labelToName.TryGetValue(list.Items[i].ToString(), out string name))
+                    continue;
+
+                order.Add(name);
+                if (!list.GetItemChecked(i))
+                    hidden.Add(name);
+            }
+
+            SetSetting(config, hiddenKey, string.Join(",", hidden));
+            SetSetting(config, orderKey, string.Join(",", order));
         }
 
         /// <summary>
@@ -635,9 +846,12 @@ namespace _conv
                 : Path.Combine(GetDefaultReceiptsDirectory(), "Jpeg");
             UpdateCounterReceiptPathEnabled();
 
-            int configuredWidthMm = int.TryParse(ConfigurationManager.AppSettings["RECEIPT_PAPER_WIDTH_MM"], out int mm) ? mm : 0;
+            int configuredWidthMm = int.TryParse(ConfigurationManager.AppSettings["RECEIPT_PAPER_WIDTH_MM"], out int mm) ? mm : 58;
             int widthIndex = Array.IndexOf(PaperWidthMmByComboIndex, configuredWidthMm);
-            cbxPaperWidth.SelectedIndex = widthIndex >= 0 ? widthIndex : 0;
+            cbxPaperWidth.SelectedIndex = widthIndex >= 0 ? widthIndex : Array.IndexOf(PaperWidthMmByComboIndex, 58);
+
+            chkPaperWidthIsDefault.Checked = true;
+            cbxPaperWidth.Enabled = true;
 
             if (cbxReceiptPrinter.Items.Count == 0)
             {
@@ -668,6 +882,9 @@ namespace _conv
 
         private void chkSaveCounterReceiptAsJpeg_CheckedChanged(object sender, EventArgs e) =>
             UpdateCounterReceiptPathEnabled();
+
+        private void chkPaperWidthIsDefault_CheckedChanged(object sender, EventArgs e) =>
+            cbxPaperWidth.Enabled = chkPaperWidthIsDefault.Checked;
 
         private void btnBrowseCounterReceiptPath_Click(object sender, EventArgs e)
         {
@@ -720,6 +937,11 @@ namespace _conv
 
             decimal deltaPt = (decimal)YourApp.Data.AppFontScale.DeltaPt;
             nud_fontScalePt.Value = Math.Min(Math.Max(deltaPt, nud_fontScalePt.Minimum), nud_fontScalePt.Maximum);
+
+            txtLogoUrl.Text = ConfigurationManager.AppSettings["LOGO_URL"];
+
+            chkLayoutEditEnabled.Checked = string.Equals(
+                ConfigurationManager.AppSettings["LAYOUT_EDIT_ENABLED"], "true", StringComparison.OrdinalIgnoreCase);
         }
 
         private void SetSwatchControlsEnabled(bool enabled)
@@ -743,6 +965,62 @@ namespace _conv
             colorDialogAccent.Color = pnlFgSwatch.BackColor;
             if (colorDialogAccent.ShowDialog(this) == DialogResult.OK)
                 pnlFgSwatch.BackColor = colorDialogAccent.Color;
+        }
+
+        private void LoadLayoutRevision()
+        {
+            txtLayoutRevision.Text = YourApp.Data.MainLayoutStore.ReadRawXml();
+        }
+
+        private void btnRefreshLayoutText_Click(object sender, EventArgs e)
+        {
+            LoadLayoutRevision();
+            ShowStatus("Reloaded the currently saved layout.", isError: false);
+        }
+
+        private void btnApplyLayoutText_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                YourApp.Data.MainLayoutStore.WriteRawXml(txtLayoutRevision.Text);
+                ShowStatus("Layout updated - takes effect next time the main screen loads.", isError: false);
+            }
+            catch (Exception ex)
+            {
+                ShowStatus("Invalid layout XML: " + ex.Message, isError: true);
+            }
+        }
+
+        private void btnLoadLayoutFile_Click(object sender, EventArgs e)
+        {
+            if (openFileDialogLayout.ShowDialog(this) != DialogResult.OK)
+                return;
+
+            try
+            {
+                txtLayoutRevision.Text = File.ReadAllText(openFileDialogLayout.FileName);
+                ShowStatus("Loaded layout text from file - review it, then click Apply.", isError: false);
+            }
+            catch (Exception ex)
+            {
+                ShowStatus("Could not read that file: " + ex.Message, isError: true);
+            }
+        }
+
+        private void btnSaveLayoutFile_Click(object sender, EventArgs e)
+        {
+            if (saveFileDialogLayout.ShowDialog(this) != DialogResult.OK)
+                return;
+
+            try
+            {
+                File.WriteAllText(saveFileDialogLayout.FileName, txtLayoutRevision.Text);
+                ShowStatus("Saved layout text to file.", isError: false);
+            }
+            catch (Exception ex)
+            {
+                ShowStatus("Could not save that file: " + ex.Message, isError: true);
+            }
         }
 
         private void chkShowDbPassword_CheckedChanged(object sender, EventArgs e) =>
@@ -792,6 +1070,14 @@ namespace _conv
                 return;
             }
 
+            if (!string.IsNullOrWhiteSpace(txtLogoUrl.Text) &&
+                (!Uri.TryCreate(txtLogoUrl.Text.Trim(), UriKind.Absolute, out Uri logoUri) ||
+                 (logoUri.Scheme != Uri.UriSchemeHttp && logoUri.Scheme != Uri.UriSchemeHttps)))
+            {
+                ShowStatus("Logo image URL is not a valid http(s) URL.", isError: true);
+                return;
+            }
+
             if (rdoProviderGmail.Checked &&
                 (string.IsNullOrWhiteSpace(txtGmailClientId.Text) || string.IsNullOrWhiteSpace(txtGmailClientSecret.Text) ||
                  string.IsNullOrWhiteSpace(txtGmailRefreshToken.Text) || string.IsNullOrWhiteSpace(txtGmailSender.Text)))
@@ -820,10 +1106,29 @@ namespace _conv
                 SetSetting(config, "MANAGER_PIN", txtManagerPin.Text.Trim());
                 SetSetting(config, "ADMIN_PIN", txtAdminPin.Text.Trim());
 
+                SetSetting(config, "DEFAULT_SELLTYPE_ENABLED", chkDefaultSelltype.Checked.ToString());
+                SetSetting(config, "DEFAULT_SELLTYPE_INDEX", cbxDefaultSelltype.SelectedIndex.ToString());
+
+                SetSetting(config, "AUTO_HOLD_IDLE_ENABLED", chkAutoHoldEnabled.Checked.ToString());
+                SetSetting(config, "AUTO_HOLD_IDLE_MINUTES", ((int)nud_autoHoldMinutes.Value).ToString());
+
+                SetSetting(config, "BLOCK_ZERO_PRICE_ITEMS", chkBlockZeroPriceItems.Checked.ToString());
+
+                SetSetting(config, "ALERT_AUTO_DISMISS_ENABLED", chkAlertAutoDismissEnabled.Checked.ToString());
+                SetSetting(config, "ALERT_AUTO_DISMISS_SECONDS", ((int)nud_alertAutoDismissSeconds.Value).ToString());
+
                 var hiddenMenuNames = Purchases.ConfigurableMenuItems
                     .Where((menu, index) => index >= clbMenus.Items.Count || !clbMenus.GetItemChecked(index))
                     .Select(menu => menu.Name);
                 SetSetting(config, "HIDDEN_MENUS", string.Join(",", hiddenMenuNames));
+
+                SaveColumnConfig(config, clbItemSearchColumns, Purchases.ItemSearchColumns,
+                    "ITEM_SEARCH_HIDDEN_COLUMNS", "ITEM_SEARCH_COLUMN_ORDER");
+                SaveColumnConfig(config, clbCartColumns, Purchases.CartColumns,
+                    "CART_HIDDEN_COLUMNS", "CART_COLUMN_ORDER");
+
+                SetSetting(config, "ITEM_SEARCH_DATE_SORT_DESCENDING", chkItemSearchDateSortDescending.Checked.ToString());
+                SetSetting(config, "ITEM_SEARCH_NAME_SORT_DESCENDING", chkItemSearchNameSortDescending.Checked.ToString());
 
                 string selectedPrinter = cbxReceiptPrinter.SelectedItem as string;
                 if (selectedPrinter != null)
@@ -832,8 +1137,11 @@ namespace _conv
                 SetSetting(config, "COUNTER_RECEIPT_MODE", chkSaveCounterReceiptAsJpeg.Checked ? "Jpeg" : "Print");
                 SetSetting(config, "COUNTER_RECEIPT_JPEG_PATH", txtCounterReceiptPath.Text.Trim());
 
-                int paperWidthMm = cbxPaperWidth.SelectedIndex >= 0 ? PaperWidthMmByComboIndex[cbxPaperWidth.SelectedIndex] : 0;
-                SetSetting(config, "RECEIPT_PAPER_WIDTH_MM", paperWidthMm > 0 ? paperWidthMm.ToString() : "");
+                if (chkPaperWidthIsDefault.Checked)
+                {
+                    int paperWidthMm = cbxPaperWidth.SelectedIndex >= 0 ? PaperWidthMmByComboIndex[cbxPaperWidth.SelectedIndex] : 0;
+                    SetSetting(config, "RECEIPT_PAPER_WIDTH_MM", paperWidthMm > 0 ? paperWidthMm.ToString() : "");
+                }
 
                 SetSetting(config, "ACCENT_BACKGROUND_COLOR",
                     chkEnableAccent.Checked ? System.Drawing.ColorTranslator.ToHtml(pnlBgSwatch.BackColor) : "");
@@ -841,6 +1149,10 @@ namespace _conv
                     chkEnableAccent.Checked ? System.Drawing.ColorTranslator.ToHtml(pnlFgSwatch.BackColor) : "");
 
                 SetSetting(config, "FONT_SCALE_PT", nud_fontScalePt.Value.ToString(System.Globalization.CultureInfo.InvariantCulture));
+
+                SetSetting(config, "LOGO_URL", txtLogoUrl.Text.Trim());
+
+                SetSetting(config, "LAYOUT_EDIT_ENABLED", chkLayoutEditEnabled.Checked.ToString());
 
                 SetSetting(config, "REPORT_SCHEDULE_FREQUENCY", cbxReportFrequency.SelectedItem as string ?? "Weekly");
 
@@ -886,6 +1198,15 @@ namespace _conv
                 {
                     if (!SetDefaultPrinter(selectedPrinter))
                         statusMessage = "Saved, but could not set the Windows default printer.";
+                }
+
+                try
+                {
+                    AutoStartService.SetEnabled(chkAutoStartWithWindows.Checked);
+                }
+                catch (Exception ex)
+                {
+                    statusMessage = $"Saved, but could not update the Windows startup setting: {ex.Message}";
                 }
 
                 ShowStatus(statusMessage, isError: false);

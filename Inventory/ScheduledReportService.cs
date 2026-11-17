@@ -12,7 +12,7 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using YourApp.Data;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Emails a sales + inventory summary to STORE_EMAIL on a configurable cadence
@@ -111,7 +111,9 @@ namespace _conv
             }
 
             MarkSent();
-            await ActivityLog.LogAsync($"{frequency} report emailed to {recipient}");
+            string logText = $"{frequency} report emailed to {recipient}";
+            await ActivityLog.LogAsync(logText);
+            OperationLog.RecordAction(nameof(ScheduledReportService), logText);
         }
 
         private static bool IsDue()

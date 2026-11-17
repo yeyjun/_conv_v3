@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     public partial class printable : Form
     {

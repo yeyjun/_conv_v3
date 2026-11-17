@@ -1,4 +1,4 @@
-namespace _conv
+namespace Inventory
 {
     partial class LoyaltyForm
     {
@@ -13,7 +13,7 @@ namespace _conv
             base.Dispose(disposing);
         }
 
-        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabControl tabControlLoyalty;
         private System.Windows.Forms.TabPage tabRegister;
         private System.Windows.Forms.TabPage tabCredit;
 
@@ -60,7 +60,7 @@ namespace _conv
 
         private void InitializeComponent()
         {
-            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabControlLoyalty = new System.Windows.Forms.TabControl();
             this.tabRegister = new System.Windows.Forms.TabPage();
             this.pnlCardPreview = new System.Windows.Forms.Panel();
             this.lblBackCaption = new System.Windows.Forms.Label();
@@ -102,7 +102,7 @@ namespace _conv
             this.txtSearchCustomer = new System.Windows.Forms.TextBox();
             this.lblSearch = new System.Windows.Forms.Label();
             this.lblCreditTitle = new System.Windows.Forms.Label();
-            this.tabControl1.SuspendLayout();
+            this.tabControlLoyalty.SuspendLayout();
             this.tabRegister.SuspendLayout();
             this.pnlCardPreview.SuspendLayout();
             this.pnlCardBack.SuspendLayout();
@@ -114,16 +114,16 @@ namespace _conv
             this.pnlCreditForm.SuspendLayout();
             this.SuspendLayout();
             //
-            // tabControl1
+            // tabControlLoyalty
             //
-            this.tabControl1.Controls.Add(this.tabRegister);
-            this.tabControl1.Controls.Add(this.tabCredit);
-            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 0);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(860, 560);
-            this.tabControl1.TabIndex = 0;
+            this.tabControlLoyalty.Controls.Add(this.tabRegister);
+            this.tabControlLoyalty.Controls.Add(this.tabCredit);
+            this.tabControlLoyalty.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControlLoyalty.Location = new System.Drawing.Point(0, 0);
+            this.tabControlLoyalty.Name = "tabControlLoyalty";
+            this.tabControlLoyalty.SelectedIndex = 0;
+            this.tabControlLoyalty.Size = new System.Drawing.Size(860, 560);
+            this.tabControlLoyalty.TabIndex = 0;
             //
             // tabRegister
             //
@@ -517,13 +517,13 @@ namespace _conv
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(860, 560);
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.tabControlLoyalty);
             this.MinimumSize = new System.Drawing.Size(800, 500);
             this.Name = "LoyaltyForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Customer Loyalty";
             this.Load += new System.EventHandler(this.LoyaltyForm_Load);
-            this.tabControl1.ResumeLayout(false);
+            this.tabControlLoyalty.ResumeLayout(false);
             this.tabRegister.ResumeLayout(false);
             this.pnlCardPreview.ResumeLayout(false);
             this.pnlCardPreview.PerformLayout();

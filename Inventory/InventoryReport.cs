@@ -1,10 +1,12 @@
 using System;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using YourApp.Data;
+using static Inventory.DataRowConvert;
 
-namespace _conv
+namespace Inventory
 {
     public partial class InventoryReport : Form
     {
@@ -44,24 +46,38 @@ namespace _conv
                     || (stockFilter == "In Stock" && ToLong(row["new_quantity"]) > 0)
                     || (stockFilter == "Out of Stock" && ToLong(row["new_quantity"]) <= 0)));
 
+            int pendingCount = 0, issueCount = 0;
+
             foreach (DataRow row in rows)
             {
-                dgvInventory.Rows.Add(
+                bool hasIssue = DataCacheManager.ItemRowHasIntegrityIssue(row);
+                bool isPending = !hasIssue && PendingItemStore.IsPending(row["serial"] as string);
+                if (hasIssue) issueCount++;
+                if (isPending) pendingCount++;
+
+                string status = hasIssue ? "⚠ Needs review" : isPending ? "Pending Sync" : "Synced";
+
+                int rowIndex = dgvInventory.Rows.Add(
                     row["serial"].ToString(),
                     row["description"].ToString().ToUpperInvariant(),
                     FormatPrice(row["price"]),
                     FormatPrice(row["retail_price"]),
                     FormatPrice(row["price_perpc"]),
-                    row["new_quantity"].ToString());
+                    row["new_quantity"].ToString(),
+                    status);
+
+                if (hasIssue)
+                    dgvInventory.Rows[rowIndex].DefaultCellStyle.BackColor = Color.MistyRose;
+                else if (isPending)
+                    dgvInventory.Rows[rowIndex].DefaultCellStyle.BackColor = Color.LightYellow;
             }
 
-            lblTotal.Text = $"Total items: {dgvInventory.Rows.Count}";
-        }
-
-        private static long ToLong(object value)
-        {
-            if (value == null || value == DBNull.Value) return 0;
-            return long.TryParse(value.ToString(), out long result) ? result : 0;
+            string summary = $"Total items: {dgvInventory.Rows.Count}";
+            if (pendingCount > 0)
+                summary += $" - {pendingCount} pending sync";
+            if (issueCount > 0)
+                summary += $" - {issueCount} need review";
+            lblTotal.Text = summary;
         }
 
         private static string FormatPrice(object value) =>

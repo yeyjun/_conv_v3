@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Blocking gate shown from Program.Main before the main form ever opens, once

@@ -3,7 +3,7 @@ using System;
 using System.Configuration;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     public partial class PettyCashEntryForm : Form
     {
@@ -15,14 +15,6 @@ namespace _conv
             YourApp.Data.AppFontScale.ApplyTo(this);
         }
 
-        private static string BuildConnectionString()
-        {
-            string dbsrv = ConfigurationManager.AppSettings["DB_SERVER"];
-            string dbname = ConfigurationManager.AppSettings["DB_NAME"];
-            string dbuser = ConfigurationManager.AppSettings["DB_USER"];
-            string dbpw = ConfigurationManager.AppSettings["DB_PASSWORD"];
-            return $"Server={dbsrv};user id={dbuser};password={dbpw};database={dbname};";
-        }
 
         private void PettyCashEntryForm_Load(object sender, EventArgs e)
         {
@@ -46,7 +38,7 @@ namespace _conv
             {
                 string today = DateTime.Now.ToString("yyyy-MMMM-dd");
 
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 using (var cmd = new MySqlCommand("INSERT INTO pettycash_(cash,date_now) VALUES(@cash,@date_now)", conn))
                 {
                     cmd.Parameters.AddWithValue("@cash", cash);
@@ -55,14 +47,16 @@ namespace _conv
                     await cmd.ExecuteNonQueryAsync();
                 }
 
-                await ActivityLog.LogAsync($"Petty cash entry of {cash} recorded by {Purchases.log_in}");
+                string logText = $"Petty cash entry of {cash} recorded by {Purchases.log_in}";
+                await ActivityLog.LogAsync(logText);
+                OperationLog.RecordCreate(nameof(PettyCashEntryForm), logText);
 
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to save petty cash entry.{Environment.NewLine}{ex.Message}", "Save failed");
+                ErrorDialog.Show(this, "Could not save this petty cash entry.", "Save Failed", ex);
                 btnSave.Enabled = true;
             }
         }

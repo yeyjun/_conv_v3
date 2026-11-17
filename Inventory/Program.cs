@@ -1,12 +1,13 @@
 ﻿using Hangfire;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YourApp.Data;
-namespace _conv
+namespace Inventory
 {
     internal static class Program
     {
@@ -28,36 +29,66 @@ namespace _conv
             Application.ThreadException += (s, e) => HandleUnhandledException(e.Exception);
             AppDomain.CurrentDomain.UnhandledException += (s, e) => HandleUnhandledException(e.ExceptionObject as Exception);
 
+            if (!TrialLicense.IsRegistered)
+            {
+                using (var registrationForm = new RegistrationForm())
+                {
+                    if (registrationForm.ShowDialog() != DialogResult.OK)
+                        return;
+                }
+            }
+
             using (var splash = new SplashForm())
             {
                 Application.Run(splash); // loads DataCacheManager + the logo, then closes itself
 
                 if (splash.LoadError != null)
                 {
-                    MessageBox.Show($"Failed to load startup data:\n{splash.LoadError.Message}",
-                        "Startup Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ErrorDialog.Show(null, "Failed to load startup data. The application cannot continue.",
+                        "Startup Error", splash.LoadError);
                     return;
                 }
             }
 
             if (DataCacheManager.Instance.IsOfflineMode)
             {
-                MessageBox.Show(
+                ErrorDialog.Show(null,
                     "Could not reach the database. Showing a local stock snapshot saved on " +
                     $"{DataCacheManager.Instance.OfflineSnapshotAsOf:g}.\n\n" +
                     "Prices and quantities may be outdated, and sales/inventory changes will not be saved until the connection is restored.",
-                    "Offline Mode", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    "Offline Mode", $"DB_SERVER={ConfigurationManager.AppSettings["DB_SERVER"]}\nSnapshot timestamp: {DataCacheManager.Instance.OfflineSnapshotAsOf:O}",
+                    MessageBoxIcon.Warning);
             }
 
             if (!Purchases.IsReceiptPrinterConfigured())
             {
-                MessageBox.Show(
+                ErrorDialog.Show(null,
                     "No receipt printer is set up yet (or the one configured isn't installed on this machine).\n\n" +
                     "You'll be shown the available printers next so you can pick one now, or set it later from System Config > Printer.",
-                    "Receipt Printer Not Set", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    "Receipt Printer Not Set", "No printer name found in App.config / Windows default printer.", MessageBoxIcon.Warning);
 
                 using (var selectPrinterForm = new SelectPrinterForm())
-                    selectPrinterForm.ShowDialog();
+                {
+                    if (selectPrinterForm.ShowDialog() == DialogResult.OK)
+                    {
+                        if (ConfirmDialog.Show(null,
+                            $"Printer \"{selectPrinterForm.SelectedPrinterName}\" is now set up.\n\n" +
+                            "Print a test page now to confirm it prints correctly? This prints the longest item name in your catalog, the hardest case for the receipt layout to fit.",
+                            "Print Test Page?") == DialogResult.Yes)
+                        {
+                            try
+                            {
+                                SelectPrinterForm.PrintTestPage();
+                            }
+                            catch (Exception ex)
+                            {
+                                ErrorDialog.Show(null,
+                                    "Could not print the test page. You can try again later from System Config > Printer.",
+                                    "Test Print Failed", ex);
+                            }
+                        }
+                    }
+                }
             }
 
             TrialLicense.EnsureTrialStarted();
@@ -70,7 +101,11 @@ namespace _conv
                 }
             }
 
-            (bool maintenanceOn, string maintenanceMessage) = AppConfigService.GetMaintenanceStatusAsync().GetAwaiter().GetResult();
+            Task<(bool Enabled, string Message)> maintenanceStatusTask = AppConfigService.GetMaintenanceStatusAsync();
+            Task<bool> subscriptionActiveTask = SubscriptionTokenService.IsActiveAsync();
+            Task.WhenAll(maintenanceStatusTask, subscriptionActiveTask).GetAwaiter().GetResult();
+
+            (bool maintenanceOn, string maintenanceMessage) = maintenanceStatusTask.Result;
             if (maintenanceOn)
             {
                 using (var maintenanceForm = new MaintenanceForm(maintenanceMessage))
@@ -80,7 +115,7 @@ namespace _conv
                 }
             }
 
-            if (!SubscriptionTokenService.IsActiveAsync().GetAwaiter().GetResult())
+            if (!subscriptionActiveTask.Result)
             {
                 using (var subscriptionForm = new SubscriptionExpiredForm())
                 {
@@ -116,14 +151,21 @@ namespace _conv
 
             bool isCancellation = ex is OperationCanceledException;
 
-            string message = isCancellation
-                ? "A background operation (e.g. a network or database call) timed out or was cancelled. You can keep using the app."
-                : $"An unexpected error occurred and was recovered from:\n{ex.Message}";
+            if (isCancellation)
+            {
+                ErrorDialog.Show(null,
+                    "A background operation (e.g. a network or database call) timed out or was cancelled. You can keep using the app.",
+                    "Operation Cancelled", ex, MessageBoxIcon.Warning);
+            }
+            else
+            {
+                ErrorDialog.Show(null, "An unexpected error occurred and was recovered from. You can keep using the app.",
+                    "Unexpected Error", ex);
+            }
 
-            MessageBox.Show(message, isCancellation ? "Operation Cancelled" : "Unexpected Error",
-                MessageBoxButtons.OK, isCancellation ? MessageBoxIcon.Warning : MessageBoxIcon.Error);
-
-            _ = ActivityLog.LogAsync($"Unhandled {(isCancellation ? "cancellation" : "exception")}: {ex}");
+            string logText = $"Unhandled {(isCancellation ? "cancellation" : "exception")}: {ex}";
+            _ = ActivityLog.LogAsync(logText);
+            OperationLog.RecordAction(nameof(Program), logText);
         }
     }
 }

@@ -5,7 +5,7 @@ using System;
 using System.Configuration;
 using System.Threading;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Bluetooth RFCOMM counterpart to RemoteControlServer's TCP listener - lets RemoteController

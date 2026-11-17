@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace _conv.Properties
+namespace Inventory.Properties
 {
 
 

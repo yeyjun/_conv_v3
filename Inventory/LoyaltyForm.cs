@@ -9,7 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     public partial class LoyaltyForm : Form
     {
@@ -57,14 +57,6 @@ namespace _conv
             return table;
         }
 
-        private static string BuildConnectionString()
-        {
-            string dbsrv = ConfigurationManager.AppSettings["DB_SERVER"];
-            string dbname = ConfigurationManager.AppSettings["DB_NAME"];
-            string dbuser = ConfigurationManager.AppSettings["DB_USER"];
-            string dbpw = ConfigurationManager.AppSettings["DB_PASSWORD"];
-            return $"Server={dbsrv};user id={dbuser};password={dbpw};database={dbname};";
-        }
 
         private async void LoyaltyForm_Load(object sender, EventArgs e)
         {
@@ -78,7 +70,7 @@ namespace _conv
 
             try
             {
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 {
                     await conn.OpenAsync();
 
@@ -108,7 +100,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to prepare loyalty tables");
+                ErrorDialog.Show(this, "Could not set up the loyalty program tables in the database.", "Failed to Prepare Loyalty Tables", ex);
                 return;
             }
 
@@ -122,7 +114,7 @@ namespace _conv
 
             try
             {
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 using (var cmd = new MySqlCommand(
                     "SELECT loyalty_code, full_name, contact_number, points, date_registered FROM customers_ ORDER BY full_name", conn))
                 {
@@ -144,7 +136,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to load customers");
+                ErrorDialog.Show(this, "Could not load the customer list.", "Failed to Load Customers", ex);
             }
         }
 
@@ -191,11 +183,12 @@ namespace _conv
 
             try
             {
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 {
                     await conn.OpenAsync();
 
-                    if (_originalCode == null)
+                    bool isNew = _originalCode == null;
+                    if (isNew)
                     {
                         using (var cmd = new MySqlCommand(
                             "INSERT INTO customers_(loyalty_code, full_name, contact_number, points, date_registered) " +
@@ -220,6 +213,11 @@ namespace _conv
                             await cmd.ExecuteNonQueryAsync();
                         }
                     }
+
+                    if (isNew)
+                        OperationLog.RecordCreate(nameof(LoyaltyForm), $"Customer '{code}' ({fullName}) created.");
+                    else
+                        OperationLog.RecordUpdate(nameof(LoyaltyForm), $"Customer '{_originalCode}' updated to '{code}' ({fullName}).");
                 }
 
                 await LoadCustomersAsync();
@@ -239,7 +237,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to save customer");
+                ErrorDialog.Show(this, "Could not save this customer.", "Failed to Save Customer", ex);
             }
         }
 
@@ -251,14 +249,14 @@ namespace _conv
                 return;
             }
 
-            var confirm = MessageBox.Show(this, $"Delete customer '{_originalCode}'? This also removes their points history and cannot be undone.",
-                "Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var confirm = ConfirmDialog.Show(this, $"Delete customer '{_originalCode}'? This also removes their points history and cannot be undone. (Y/N)",
+                "Confirm delete", MessageBoxIcon.Question);
             if (confirm != DialogResult.Yes)
                 return;
 
             try
             {
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 {
                     await conn.OpenAsync();
 
@@ -275,12 +273,13 @@ namespace _conv
                     }
                 }
 
+                OperationLog.RecordDelete(nameof(LoyaltyForm), $"Customer '{_originalCode}' deleted.");
                 await LoadCustomersAsync();
                 btnNewCustomer_Click(sender, e);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to delete customer");
+                ErrorDialog.Show(this, "Could not delete this customer.", "Failed to Delete Customer", ex);
             }
         }
 
@@ -316,7 +315,7 @@ namespace _conv
 
             try
             {
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 using (var cmd = new MySqlCommand(
                     "SELECT loyalty_code, full_name, points FROM customers_ " +
                     "WHERE loyalty_code = @code OR full_name LIKE @nameLike LIMIT 1", conn))
@@ -345,7 +344,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to search customers");
+                ErrorDialog.Show(this, "Could not search for customers.", "Failed to Search Customers", ex);
                 return;
             }
 
@@ -356,7 +355,7 @@ namespace _conv
 
             try
             {
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 using (var cmd = new MySqlCommand(
                     "SELECT date_credited, amount_spent, points_earned, teller FROM loyalty_transactions_ " +
                     "WHERE loyalty_code = @code ORDER BY date_credited DESC LIMIT 20", conn))
@@ -379,7 +378,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to load points history");
+                ErrorDialog.Show(this, "Could not load this customer's points history.", "Failed to Load Points History", ex);
             }
         }
 
@@ -411,7 +410,7 @@ namespace _conv
 
             try
             {
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 {
                     await conn.OpenAsync();
 
@@ -436,6 +435,8 @@ namespace _conv
                     }
                 }
 
+                OperationLog.RecordUpdate(nameof(LoyaltyForm), $"Customer '{_selectedCreditCode}' credited {points} point(s) for {amountSpent:0.00} spent.");
+
                 lblCreditStatus.ForeColor = System.Drawing.Color.SeaGreen;
                 lblCreditStatus.Text = $"Credited {points} point(s).";
 
@@ -448,7 +449,7 @@ namespace _conv
             catch (Exception ex)
             {
                 lblCreditStatus.ForeColor = System.Drawing.Color.Firebrick;
-                MessageBox.Show(ex.Message, "Failed to credit points");
+                ErrorDialog.Show(this, "Could not credit points to this customer.", "Failed to Credit Points", ex);
             }
         }
 

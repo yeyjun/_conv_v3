@@ -9,7 +9,7 @@ using System.Text;
 namespace RemoteController
 {
     /// <summary>
-    /// Talks to a running A10D-up terminal's RemoteControlServer (_conv\RemoteControlServer.cs)
+    /// Talks to a running BrewCode terminal's RemoteControlServer (Inventory\RemoteControlServer.cs)
     /// over TCP+TLS, using its one-request-per-connection protocol. Kept as a standalone duplicate
     /// of that protocol rather than a shared library, same reasoning as LicenseKeyGenerator - this
     /// tool has no build dependency on the main app.

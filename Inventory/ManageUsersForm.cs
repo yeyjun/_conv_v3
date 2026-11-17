@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using YourApp.Data;
 
-namespace _conv
+namespace Inventory
 {
     public partial class ManageUsersForm : Form
     {
@@ -30,14 +30,6 @@ namespace _conv
             return table;
         }
 
-        private static string BuildConnectionString()
-        {
-            string dbsrv = ConfigurationManager.AppSettings["DB_SERVER"];
-            string dbname = ConfigurationManager.AppSettings["DB_NAME"];
-            string dbuser = ConfigurationManager.AppSettings["DB_USER"];
-            string dbpw = ConfigurationManager.AppSettings["DB_PASSWORD"];
-            return $"Server={dbsrv};user id={dbuser};password={dbpw};database={dbname};";
-        }
 
         private async void ManageUsersForm_Load(object sender, EventArgs e)
         {
@@ -53,7 +45,7 @@ namespace _conv
 
             try
             {
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 using (var cmd = new MySqlCommand("SELECT name, fullname, last_seen_utc FROM user_ ORDER BY fullname", conn))
                 {
                     await conn.OpenAsync();
@@ -81,7 +73,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to load users");
+                ErrorDialog.Show(this, "Could not load the user list.", "Failed to Load Users", ex);
             }
         }
 
@@ -132,11 +124,12 @@ namespace _conv
 
             try
             {
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 {
                     await conn.OpenAsync();
 
-                    if (_originalCode == null)
+                    bool isNew = _originalCode == null;
+                    if (isNew)
                     {
                         using (var cmd = new MySqlCommand("INSERT INTO user_(name, fullname) VALUES (@name, @fullname)", conn))
                         {
@@ -155,6 +148,11 @@ namespace _conv
                             await cmd.ExecuteNonQueryAsync();
                         }
                     }
+
+                    if (isNew)
+                        OperationLog.RecordCreate(nameof(ManageUsersForm), $"User '{code}' ({fullName}) created.");
+                    else
+                        OperationLog.RecordUpdate(nameof(ManageUsersForm), $"User '{_originalCode}' updated to '{code}' ({fullName}).");
                 }
 
                 await RefreshUsersCacheAsync();
@@ -167,7 +165,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to save user");
+                ErrorDialog.Show(this, "Could not save this user.", "Failed to Save User", ex);
             }
         }
 
@@ -181,18 +179,19 @@ namespace _conv
 
             if (usersTable.Rows.Count <= 1)
             {
-                MessageBox.Show("Cannot delete the last remaining login - this would lock everyone out.", "Not allowed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                ErrorDialog.Show(this, "Cannot delete the last remaining login - this would lock everyone out.", "Not allowed",
+                    $"usersTable.Rows.Count={usersTable.Rows.Count}", MessageBoxIcon.Warning);
                 return;
             }
 
-            var confirm = MessageBox.Show(this, $"Delete login '{_originalCode}'? This cannot be undone.",
-                "Confirm delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var confirm = ConfirmDialog.Show(this, $"Delete login '{_originalCode}'? This cannot be undone. (Y/N)",
+                "Confirm delete", MessageBoxIcon.Question);
             if (confirm != DialogResult.Yes)
                 return;
 
             try
             {
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 using (var cmd = new MySqlCommand("DELETE FROM user_ WHERE name=@name", conn))
                 {
                     cmd.Parameters.AddWithValue("@name", _originalCode);
@@ -200,13 +199,14 @@ namespace _conv
                     await cmd.ExecuteNonQueryAsync();
                 }
 
+                OperationLog.RecordDelete(nameof(ManageUsersForm), $"User '{_originalCode}' deleted.");
                 await RefreshUsersCacheAsync();
                 await LoadUsersAsync();
                 btnNewUser_Click(sender, e);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to delete user");
+                ErrorDialog.Show(this, "Could not delete this user.", "Failed to Delete User", ex);
             }
         }
 

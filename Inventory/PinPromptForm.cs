@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     public partial class PinPromptForm : Form
     {

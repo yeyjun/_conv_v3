@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// First-run "Getting Started" walkthrough: a short Next/Back/Skip slideshow covering the
@@ -40,9 +40,12 @@ namespace _conv
                 "resume it later, or use the Transaction menu at the top."),
 
             ("Explore More",
-                "The Manage Prices tab lets managers edit items and prices; the Dashboard tab " +
-                "shows today's sales, stock levels, and quick links to Reports, Petty Cash, and " +
-                "Loyalty. Press Ctrl+H anytime for the full keyboard shortcut list."),
+                "The Manage Prices tab lets managers edit items and prices and add new ones via " +
+                "Add Item - if the database connection ever drops while saving a new item, it's " +
+                "still saved on this computer and ready to sell right away, no waiting for the " +
+                "connection to come back. The Dashboard tab shows today's sales, stock levels, " +
+                "and quick links to Reports, Petty Cash, and Loyalty. Press Ctrl+H anytime for " +
+                "the full keyboard shortcut list."),
         };
 
         private int stepIndex;

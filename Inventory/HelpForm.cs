@@ -2,7 +2,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Generic read-only text viewer with a Print button, reused for anything under the Help
@@ -42,7 +42,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, $"Failed to print: {ex.Message}", "Print", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ErrorDialog.Show(this, "Could not print this page. Check that the configured receipt printer is on and connected.", "Print", ex);
             }
         }
 

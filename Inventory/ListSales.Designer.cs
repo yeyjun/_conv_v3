@@ -1,4 +1,4 @@
-namespace _conv
+namespace Inventory
 {
     partial class ListSales
     {

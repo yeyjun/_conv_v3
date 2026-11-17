@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.IO;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Tracks whether the first-run "Getting Started" walkthrough (<see cref="TutorialForm"/>) has

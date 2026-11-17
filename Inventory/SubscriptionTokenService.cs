@@ -2,7 +2,7 @@ using MySql.Data.MySqlClient;
 using System.Configuration;
 using System.Threading.Tasks;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Checks the centralized subscription "tokens" table (a separate MySQL server/database from

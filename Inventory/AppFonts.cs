@@ -5,7 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Fonts embedded in the executable so the app renders the same on machines
@@ -21,7 +21,7 @@ namespace _conv
         {
             byte[] data;
             using (Stream stream = Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream("_conv.Fonts.Morally Serif.otf"))
+                .GetManifestResourceStream("Inventory.Fonts.Morally Serif.otf"))
             {
                 data = new byte[stream.Length];
                 stream.Read(data, 0, data.Length);

@@ -6,7 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     public partial class PettyCashHistoryForm : Form
     {
@@ -29,14 +29,6 @@ namespace _conv
             return table;
         }
 
-        private static string BuildConnectionString()
-        {
-            string dbsrv = ConfigurationManager.AppSettings["DB_SERVER"];
-            string dbname = ConfigurationManager.AppSettings["DB_NAME"];
-            string dbuser = ConfigurationManager.AppSettings["DB_USER"];
-            string dbpw = ConfigurationManager.AppSettings["DB_PASSWORD"];
-            return $"Server={dbsrv};user id={dbuser};password={dbpw};database={dbname};";
-        }
 
         private async void PettyCashHistoryForm_Load(object sender, EventArgs e)
         {
@@ -94,7 +86,7 @@ namespace _conv
 
             try
             {
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 using (var cmd = new MySqlCommand())
                 {
                     cmd.Connection = conn;
@@ -123,7 +115,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to load petty cash history");
+                ErrorDialog.Show(this, "Could not load the petty cash history.", "Failed to Load Petty Cash History", ex);
             }
 
             UpdateSummary();

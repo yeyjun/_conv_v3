@@ -3,7 +3,7 @@ using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace _conv
+namespace Inventory
 {
     internal sealed class DbSetupResult
     {
@@ -98,8 +98,13 @@ namespace _conv
             // Shared key/value store read live (not through DataCacheManager's startup-only
             // snapshot) so a flag flipped here - e.g. by AppConfigService's maintenance-mode
             // keys - takes effect on every terminal pointed at this database without a restart.
-            ("setting_",
-                "CREATE TABLE IF NOT EXISTS setting_ (" +
+            // Named app_config_, not setting_: a table already named setting_ turned up on real
+            // production databases with a completely different, unrelated shape (id/description/
+            // switch/switch2/switch3) - AppConfigService.EnsureTableAsync also creates this table
+            // on first use, so this entry mainly documents the schema for System Config >
+            // Database Setup rather than being the only place it gets created.
+            ("app_config_",
+                "CREATE TABLE IF NOT EXISTS app_config_ (" +
                 "config_key VARCHAR(100) PRIMARY KEY, " +
                 "config_value VARCHAR(255) NOT NULL DEFAULT '', " +
                 "updated_utc DATETIME NULL)"),

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36623.8
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "_conv", "_conv\_conv.csproj", "{6BDBE3EC-090D-4032-AF6E-91AABC82E36C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inventory", "Inventory\Inventory.csproj", "{6BDBE3EC-090D-4032-AF6E-91AABC82E36C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteController", "RemoteController\RemoteController.csproj", "{9E2F6F1F-9C36-4D0B-8C56-6F9D5D3A2C41}"
 EndProject
@@ -12,6 +12,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		FreshData.cs = FreshData.cs
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Remittancce", "Remittancce\Remittancce.csproj", "{4E5EAAF1-AE4E-43AB-B7FD-8E018342AD35}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Launcher", "Launcher\Launcher.csproj", "{DE3C88E2-7033-4818-B51B-61A5629670EC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfraMonitor", "InfraMonitor\InfraMonitor.csproj", "{0D00DF77-E18F-4187-A812-6F88B3297A26}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItemMonitor", "ItemMonitor\ItemMonitor.csproj", "{A8627E48-AE30-4CA5-9F1D-38283E5D4546}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +35,22 @@ Global
 		{9E2F6F1F-9C36-4D0B-8C56-6F9D5D3A2C41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E2F6F1F-9C36-4D0B-8C56-6F9D5D3A2C41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E2F6F1F-9C36-4D0B-8C56-6F9D5D3A2C41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E5EAAF1-AE4E-43AB-B7FD-8E018342AD35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E5EAAF1-AE4E-43AB-B7FD-8E018342AD35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E5EAAF1-AE4E-43AB-B7FD-8E018342AD35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E5EAAF1-AE4E-43AB-B7FD-8E018342AD35}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE3C88E2-7033-4818-B51B-61A5629670EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE3C88E2-7033-4818-B51B-61A5629670EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE3C88E2-7033-4818-B51B-61A5629670EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE3C88E2-7033-4818-B51B-61A5629670EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D00DF77-E18F-4187-A812-6F88B3297A26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D00DF77-E18F-4187-A812-6F88B3297A26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D00DF77-E18F-4187-A812-6F88B3297A26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D00DF77-E18F-4187-A812-6F88B3297A26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8627E48-AE30-4CA5-9F1D-38283E5D4546}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8627E48-AE30-4CA5-9F1D-38283E5D4546}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8627E48-AE30-4CA5-9F1D-38283E5D4546}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8627E48-AE30-4CA5-9F1D-38283E5D4546}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

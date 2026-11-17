@@ -18,6 +18,8 @@ namespace RemoteController
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageLicense = new System.Windows.Forms.TabPage();
             this.lblExpiryPreview = new System.Windows.Forms.Label();
+            this.lblSubscriptionTier = new System.Windows.Forms.Label();
+            this.cmbSubscriptionTier = new System.Windows.Forms.ComboBox();
             this.chkPermanent = new System.Windows.Forms.CheckBox();
             this.cmbDurationUnit = new System.Windows.Forms.ComboBox();
             this.nudDuration = new System.Windows.Forms.NumericUpDown();
@@ -90,6 +92,8 @@ namespace RemoteController
             //
             this.tabPageLicense.BackColor = System.Drawing.SystemColors.Control;
             this.tabPageLicense.Controls.Add(this.lblExpiryPreview);
+            this.tabPageLicense.Controls.Add(this.lblSubscriptionTier);
+            this.tabPageLicense.Controls.Add(this.cmbSubscriptionTier);
             this.tabPageLicense.Controls.Add(this.chkPermanent);
             this.tabPageLicense.Controls.Add(this.cmbDurationUnit);
             this.tabPageLicense.Controls.Add(this.nudDuration);
@@ -219,6 +223,24 @@ namespace RemoteController
             this.lblExpiryPreview.Size = new System.Drawing.Size(96, 13);
             this.lblExpiryPreview.TabIndex = 11;
             this.lblExpiryPreview.Text = "Expires: (not generated yet)";
+            //
+            // lblSubscriptionTier
+            //
+            this.lblSubscriptionTier.AutoSize = true;
+            this.lblSubscriptionTier.Location = new System.Drawing.Point(10, 188);
+            this.lblSubscriptionTier.Name = "lblSubscriptionTier";
+            this.lblSubscriptionTier.Size = new System.Drawing.Size(96, 13);
+            this.lblSubscriptionTier.TabIndex = 12;
+            this.lblSubscriptionTier.Text = "Subscription Tier:";
+            //
+            // cmbSubscriptionTier
+            //
+            this.cmbSubscriptionTier.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbSubscriptionTier.Items.AddRange(new object[] { "Basic", "Pro", "Enterprise" });
+            this.cmbSubscriptionTier.Location = new System.Drawing.Point(100, 184);
+            this.cmbSubscriptionTier.Name = "cmbSubscriptionTier";
+            this.cmbSubscriptionTier.Size = new System.Drawing.Size(150, 23);
+            this.cmbSubscriptionTier.TabIndex = 13;
             //
             // tabPageRemote
             //
@@ -634,7 +656,7 @@ namespace RemoteController
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "A10D-up - Remote Controller";
+            this.Text = "BrewCode - Remote Controller";
             this.tabControlMain.ResumeLayout(false);
             this.tabPageLicense.ResumeLayout(false);
             this.tabPageLicense.PerformLayout();
@@ -663,6 +685,8 @@ namespace RemoteController
         private System.Windows.Forms.ComboBox cmbDurationUnit;
         private System.Windows.Forms.CheckBox chkPermanent;
         private System.Windows.Forms.Label lblExpiryPreview;
+        private System.Windows.Forms.Label lblSubscriptionTier;
+        private System.Windows.Forms.ComboBox cmbSubscriptionTier;
         private System.Windows.Forms.TabPage tabPageRemote;
         private System.Windows.Forms.Label lblSetupSteps;
         private System.Windows.Forms.RadioButton radNetwork;

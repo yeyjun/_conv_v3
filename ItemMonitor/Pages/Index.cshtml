@@ -1,0 +1,97 @@
+@page
+@model ItemMonitor.Pages.IndexModel
+@using ItemMonitor.Services
+@{
+    ViewData["Title"] = "Stock Watch";
+}
+
+<header class="hero">
+    <div>
+        <p class="eyebrow">Baclig Minimart</p>
+        <h1>Stock Watch</h1>
+    </div>
+    <div class="live-indicator" id="liveIndicator" aria-live="polite">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span id="liveText">checked @Model.Counts.CheckedAtUtc.ToLocalTime().ToString("h:mm:ss tt")</span>
+    </div>
+</header>
+
+<section class="tag-rack" role="group" aria-label="Filter by stock status" id="tagRack">
+    <button type="button" class="tag tag--all is-active" data-status="">
+        <span class="tag-count" id="countAll">@Model.Counts.Total</span>
+        <span class="tag-label">All Items</span>
+    </button>
+    <button type="button" class="tag tag--normal" data-status="Normal">
+        <span class="tag-count" id="countNormal">@Model.Counts.Normal</span>
+        <span class="tag-label">Normal</span>
+    </button>
+    <button type="button" class="tag tag--low" data-status="Low">
+        <span class="tag-count" id="countLow">@Model.Counts.Low</span>
+        <span class="tag-label">Low Stock</span>
+    </button>
+    <button type="button" class="tag tag--out" data-status="OutOfStock">
+        <span class="tag-count" id="countOut">@Model.Counts.OutOfStock</span>
+        <span class="tag-label">Out of Stock</span>
+    </button>
+</section>
+
+<section class="toolbar">
+    <label class="search">
+        <span class="visually-hidden">Search by item name or barcode</span>
+        <input id="searchInput" type="search" placeholder="Search name or barcode&hellip;" autocomplete="off" value="@Model.Search" />
+    </label>
+    <label class="page-size">
+        Rows
+        <select id="pageSizeSelect">
+            <option value="25">25</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+        </select>
+    </label>
+</section>
+
+<p id="errorBanner" class="banner" role="alert" hidden></p>
+<p id="emptyState" class="empty-state" hidden></p>
+
+<div class="table-wrap">
+    <table class="ledger" id="itemsTable">
+        <thead>
+            <tr>
+                <th scope="col"><button type="button" class="sort-button" data-sort="serial">Barcode</button></th>
+                <th scope="col"><button type="button" class="sort-button" data-sort="description">Item</button></th>
+                <th scope="col" class="num"><button type="button" class="sort-button" data-sort="quantity">Qty</button></th>
+                <th scope="col" class="num"><button type="button" class="sort-button" data-sort="retailprice">Price</button></th>
+                <th scope="col"><button type="button" class="sort-button" data-sort="status">Status</button></th>
+            </tr>
+        </thead>
+        <tbody id="itemsBody">
+            @foreach (var item in Model.ItemsPage.Items)
+            {
+                <tr>
+                    <td class="mono">@item.Serial</td>
+                    <td>@item.Description</td>
+                    <td class="num mono">@item.Quantity</td>
+                    <td class="num mono">@item.RetailPrice.ToString("0.00")</td>
+                    <td><span class="status-tag status-tag--@item.Status.ToString().ToLowerInvariant()">@StatusLabel(item.Status)</span></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<nav class="pager" id="pager" aria-label="Pagination">
+    <button type="button" id="prevPage">&larr; Prev</button>
+    <span id="pagerLabel"></span>
+    <button type="button" id="nextPage">Next &rarr;</button>
+</nav>
+
+<script src="~/js/dashboard.js"></script>
+
+@functions {
+    private static string StatusLabel(StockStatus status) => status switch
+    {
+        StockStatus.Low => "Low Stock",
+        StockStatus.OutOfStock => "Out of Stock",
+        _ => "Normal",
+    };
+}

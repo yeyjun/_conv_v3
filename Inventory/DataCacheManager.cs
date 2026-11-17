@@ -28,7 +28,8 @@ namespace YourApp.Data
 
         private readonly Dictionary<string, DataTable> _cache = new Dictionary<string, DataTable>();
 
-        // TODO: move this to App.config / a secrets file instead of hardcoding.
+        private readonly Dictionary<string, DateTime> _lastUpdated = new Dictionary<string, DateTime>();
+
         private readonly string _connectionString =
             $"Server={ConfigurationManager.AppSettings["DB_SERVER"]};" +
             $"Port=3306;Database={ConfigurationManager.AppSettings["DB_NAME"]};" +
@@ -58,8 +59,6 @@ namespace YourApp.Data
             onStatus?.Invoke("Loading user accounts...");
             LoadTable("Users", "SELECT name, fullname FROM user_");
 
-            //LoadTable("Products", "SELECT * FROM products");
-            //LoadTable("Orders", "SELECT * FROM orders");
             // Add more tables here as your app needs them.
         }
 
@@ -77,6 +76,7 @@ namespace YourApp.Data
 
                 IsOfflineMode = false;
                 OfflineSnapshotAsOf = null;
+                _lastUpdated[key] = DateTime.Now;
                 TrySaveOfflineSnapshot(key);
             }
             catch (Exception ex)
@@ -88,11 +88,26 @@ namespace YourApp.Data
                 // as the active reference rather than downgrading it with a possibly-older snapshot
                 // file, and don't blow up the caller - offline just means "keep working with what we have".
                 if (_cache.ContainsKey(key))
+                {
+                    MergePendingItemsIfApplicable(key);
                     return;
+                }
 
                 if (!TryLoadOfflineSnapshot(key))
                     throw new Exception($"Could not reach the database, and no offline stock snapshot was found on this machine.\n{ex.Message}", ex);
             }
+
+            MergePendingItemsIfApplicable(key);
+        }
+
+        private void MergePendingItemsIfApplicable(string key)
+        {
+            if (key != "Items" || !_cache.TryGetValue(key, out DataTable table))
+                return;
+
+            DataTable merged = table.Copy();
+            PendingItemStore.MergeInto(merged);
+            _cache[key] = merged;
         }
 
         private static string GetOfflineCacheDirectory()
@@ -130,12 +145,55 @@ namespace YourApp.Data
                 table.ReadXml(path);
                 _cache[key] = table;
                 OfflineSnapshotAsOf = File.GetLastWriteTime(path);
+                _lastUpdated[key] = OfflineSnapshotAsOf.Value;
                 return true;
             }
             catch
             {
                 return false;
             }
+        }
+
+        public DateTime? GetLastUpdated(string key) =>
+            _lastUpdated.TryGetValue(key, out DateTime when) ? when : (DateTime?)null;
+
+        public static bool ItemRowHasIntegrityIssue(DataRow row)
+        {
+            DataTable table = row.Table;
+            bool hasSerial = table.Columns.Contains("serial") && !string.IsNullOrWhiteSpace(row["serial"] as string);
+            bool hasPrice = HasPositivePrice(row, table, "price") ||
+                            HasPositivePrice(row, table, "retail_price") ||
+                            HasPositivePrice(row, table, "price_perpc");
+            return !hasSerial || !hasPrice;
+        }
+
+        private static bool HasPositivePrice(DataRow row, DataTable table, string column)
+        {
+            if (!table.Columns.Contains(column) || row[column] == DBNull.Value)
+                return false;
+
+            try
+            {
+                return Convert.ToDecimal(row[column]) > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public int CountItemIntegrityIssues()
+        {
+            if (!_cache.TryGetValue("Items", out DataTable items))
+                return 0;
+
+            int count = 0;
+            foreach (DataRow row in items.Rows)
+            {
+                if (ItemRowHasIntegrityIssue(row))
+                    count++;
+            }
+            return count;
         }
 
         /// <summary>
@@ -148,6 +206,11 @@ namespace YourApp.Data
 
             throw new KeyNotFoundException(
                 $"Table '{key}' was not loaded into cache. Did you call LoadAll() at startup?");
+        }
+
+        public void ReplaceTable(string key, DataTable table)
+        {
+            _cache[key] = table;
         }
 
         /// <summary>

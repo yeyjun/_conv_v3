@@ -10,7 +10,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Generates (once) and reloads a self-signed TLS certificate for RemoteControlServer, so the

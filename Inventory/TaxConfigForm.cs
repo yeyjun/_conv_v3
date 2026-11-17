@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     public partial class TaxConfigForm : Form
     {
@@ -21,6 +21,7 @@ namespace _conv
         private void btnSave_Click(object sender, EventArgs e)
         {
             TaxConfig.Save(nud_taxRate.Value);
+            OperationLog.RecordUpdate(nameof(TaxConfigForm), $"Tax rate set to {nud_taxRate.Value}%.");
             DialogResult = DialogResult.OK;
             Close();
         }

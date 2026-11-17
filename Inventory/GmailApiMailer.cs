@@ -8,7 +8,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace _conv
+namespace Inventory
 {
     /// <summary>
     /// Sends report emails through the Gmail REST API (gmail.googleapis.com) instead of SMTP,

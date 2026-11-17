@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace _conv
+namespace Inventory
 {
     public enum SalesChartPeriod
     {
@@ -35,14 +35,6 @@ namespace _conv
             public decimal Price;
         }
 
-        private static string BuildConnectionString()
-        {
-            string dbsrv = ConfigurationManager.AppSettings["DB_SERVER"];
-            string dbname = ConfigurationManager.AppSettings["DB_NAME"];
-            string dbuser = ConfigurationManager.AppSettings["DB_USER"];
-            string dbpw = ConfigurationManager.AppSettings["DB_PASSWORD"];
-            return $"Server={dbsrv};user id={dbuser};password={dbpw};database={dbname};";
-        }
 
         private async void SalesChartForm_Load(object sender, EventArgs e)
         {
@@ -69,10 +61,10 @@ namespace _conv
             numYear.Value = DateTime.Now.Year;
             numYear.ValueChanged += async (s, args) => await RefreshChartAsync();
 
-            chart1.Series["Sales"].IsValueShownAsLabel = true;
-            chart1.Series["Sales"].LabelFormat = "N0";
-            chart1.ChartAreas["ChartArea1"].AxisY.Title = "Total Sales";
-            chart1.Legends["Legend1"].Enabled = false;
+            chartSales.Series["Sales"].IsValueShownAsLabel = true;
+            chartSales.Series["Sales"].LabelFormat = "N0";
+            chartSales.ChartAreas["ChartArea1"].AxisY.Title = "Total Sales";
+            chartSales.Legends["Legend1"].Enabled = false;
 
             await RefreshChartAsync();
         }
@@ -101,7 +93,7 @@ namespace _conv
             }
         }
 
-        // transaction_date is stored as "yyyy-MMMM-dd H:m:ss" (see Form1.CreateTransactionCode),
+        // transaction_date is stored as "yyyy-MMMM-dd H:m:ss" (see Form1.SaveSaleLineItemsAsync),
         // so a whole year's rows can be selected with a single "yyyy-%" LIKE pattern.
         private async Task<List<SaleRecord>> LoadYearSalesAsync(int year)
         {
@@ -109,7 +101,7 @@ namespace _conv
 
             try
             {
-                using (var conn = new MySqlConnection(BuildConnectionString()))
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
                 using (var cmd = new MySqlCommand())
                 {
                     cmd.Connection = conn;
@@ -135,7 +127,7 @@ namespace _conv
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Failed to load sales");
+                ErrorDialog.Show(this, "Could not load sales data for this chart.", "Failed to Load Sales", ex);
             }
 
             return result;
@@ -152,15 +144,15 @@ namespace _conv
                     totals[s.Date.Day - 1] += s.Price;
             }
 
-            var series = chart1.Series["Sales"];
+            var series = chartSales.Series["Sales"];
             series.Points.Clear();
             for (int day = 1; day <= daysInMonth; day++)
             {
                 series.Points.AddXY(day, totals[day - 1]);
             }
 
-            chart1.ChartAreas["ChartArea1"].AxisX.Title = "Day";
-            chart1.ChartAreas["ChartArea1"].AxisX.Interval = 1;
+            chartSales.ChartAreas["ChartArea1"].AxisX.Title = "Day";
+            chartSales.ChartAreas["ChartArea1"].AxisX.Interval = 1;
 
             lblSummary.Text = $"Total Sales: {totals.Sum():N2}";
         }
@@ -177,14 +169,14 @@ namespace _conv
 
             string[] monthLabels = CultureInfo.InvariantCulture.DateTimeFormat.AbbreviatedMonthNames.Take(12).ToArray();
 
-            var series = chart1.Series["Sales"];
+            var series = chartSales.Series["Sales"];
             series.Points.Clear();
             for (int i = 0; i < 12; i++)
             {
                 series.Points.AddXY(monthLabels[i], totals[i]);
             }
 
-            chart1.ChartAreas["ChartArea1"].AxisX.Title = "Month";
+            chartSales.ChartAreas["ChartArea1"].AxisX.Title = "Month";
 
             lblSummary.Text = $"Total Sales: {totals.Sum():N2}";
         }
@@ -201,14 +193,14 @@ namespace _conv
 
             string[] quarterLabels = { "Q1", "Q2", "Q3", "Q4" };
 
-            var series = chart1.Series["Sales"];
+            var series = chartSales.Series["Sales"];
             series.Points.Clear();
             for (int i = 0; i < 4; i++)
             {
                 series.Points.AddXY(quarterLabels[i], totals[i]);
             }
 
-            chart1.ChartAreas["ChartArea1"].AxisX.Title = "Quarter";
+            chartSales.ChartAreas["ChartArea1"].AxisX.Title = "Quarter";
 
             lblSummary.Text = $"Total Sales: {totals.Sum():N2}";
         }

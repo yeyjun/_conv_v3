@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{6BDBE3EC-090D-4032-AF6E-91AABC82E36C}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>_conv</RootNamespace>
+    <RootNamespace>Inventory</RootNamespace>
     <AssemblyName>A10D-up</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <ApplicationIcon>Resources\AppLogo.ico</ApplicationIcon>
@@ -14,7 +14,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>ftp://u204419713%4082.29.157.158/domains/tmrgo.org/public_html/market/POS/</PublishUrl>
+    <PublishUrl>C:\Users\Asus\Downloads\brewcode\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -27,7 +27,7 @@
     <UpdateUrl>https://drive.google.com/drive/folders/1cNpt3IwMdQ4uXpjkBGTBpkGsGivulzQ5%3fusp=sharing/</UpdateUrl>
     <WebPage>publish.htm</WebPage>
     <AutorunEnabled>true</AutorunEnabled>
-    <ApplicationRevision>43</ApplicationRevision>
+    <ApplicationRevision>56</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -56,7 +56,7 @@
     <ManifestCertificateThumbprint>129965476521820122B05B57F3074DDDD64A07CF</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>_conv_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>Inventory_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -159,7 +159,9 @@
     <Reference Include="SpeedTest.Net, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\SpeedTest.NetCore.2.1.0\lib\net45\SpeedTest.Net.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
+    <Reference Include="System">
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.dll</HintPath>
+    </Reference>
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
     </Reference>
@@ -226,6 +228,7 @@
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -243,6 +246,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActivityLog.cs" />
+    <Compile Include="AutoStartService.cs" />
     <Compile Include="AccessSyncService.cs" />
     <Compile Include="ScheduledReportService.cs" />
     <Compile Include="GmailApiMailer.cs" />
@@ -255,8 +259,17 @@
     <Compile Include="AddItemForm.Designer.cs">
       <DependentUpon>AddItemForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ConfirmDialog.cs" />
+    <Compile Include="ErrorDialog.cs" />
+    <Compile Include="OkDialog.cs" />
+    <Compile Include="OperationLog.cs" />
+    <Compile Include="TransactionShortcutFilter.cs" />
     <Compile Include="DataCacheManager.cs" />
+    <Compile Include="LayoutEditMessageFilter.cs" />
+    <Compile Include="LayoutEditOverlay.cs" />
     <Compile Include="LogoCache.cs" />
+    <Compile Include="MainLayoutStore.cs" />
+    <Compile Include="PendingItemStore.cs" />
     <Compile Include="ManageUsersForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -281,6 +294,10 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Form1.Receipts.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="GenerateBarcode.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -299,11 +316,25 @@
     <Compile Include="HeldTransactionsForm.Designer.cs">
       <DependentUpon>HeldTransactionsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="HeldTransactionStore.cs" />
+    <Compile Include="ManagePricesHistoryStore.cs" />
+    <Compile Include="ItemQuickSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ItemQuickSearchForm.Designer.cs">
+      <DependentUpon>ItemQuickSearchForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="InventoryReport.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="InventoryReport.Designer.cs">
       <DependentUpon>InventoryReport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CalculatorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CalculatorForm.Designer.cs">
+      <DependentUpon>CalculatorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Login.cs">
       <SubType>Form</SubType>
@@ -365,12 +396,26 @@
     <Compile Include="TrialExpiredForm.Designer.cs">
       <DependentUpon>TrialExpiredForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="RegistrationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RegistrationForm.Designer.cs">
+      <DependentUpon>RegistrationForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MaintenanceForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MaintenanceForm.Designer.cs">
       <DependentUpon>MaintenanceForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="LowStockReminderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LowStockReminderForm.Designer.cs">
+      <DependentUpon>LowStockReminderForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DbConnectionHelper.cs" />
+    <Compile Include="DataRowConvert.cs" />
     <Compile Include="TutorialForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -453,10 +498,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="_conv_TemporaryKey.pfx" />
+    <None Include="Inventory_TemporaryKey.pfx" />
     <Content Include="Resources\AppLogo.ico" />
     <EmbeddedResource Include="Resources\AccessSyncTemplate.accdb">
-      <LogicalName>_conv.Resources.AccessSyncTemplate.accdb</LogicalName>
+      <LogicalName>Inventory.Resources.AccessSyncTemplate.accdb</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -8,8 +8,8 @@ using System.Net.Sockets;
 namespace RemoteController
 {
     /// <summary>
-    /// Talks to a running A10D-up terminal's BluetoothControlServer
-    /// (_conv\BluetoothControlServer.cs) over a direct RFCOMM connection - the two machines must
+    /// Talks to a running BrewCode terminal's BluetoothControlServer
+    /// (Inventory\BluetoothControlServer.cs) over a direct RFCOMM connection - the two machines must
     /// already be paired at the OS level (Windows Settings > Bluetooth) before this will connect.
     /// Same request/response framing as RemoteControlClient's TCP path
     /// (RemoteControlClient.SendOverStream), just a different transport - no TLS here, since
@@ -17,7 +17,7 @@ namespace RemoteController
     /// </summary>
     internal static class BluetoothControlClient
     {
-        // Must match _conv\BluetoothControlServer.cs's ServiceGuid exactly, or this app's service
+        // Must match Inventory\BluetoothControlServer.cs's ServiceGuid exactly, or this app's service
         // won't be found on the paired device.
         private static readonly Guid ServiceGuid = new Guid("6f1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d");
 
