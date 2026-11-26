@@ -51,6 +51,7 @@ namespace Inventory
             this.lblSearch = new System.Windows.Forms.Label();
             this.pnlSummary = new System.Windows.Forms.Panel();
             this.lblSummary = new System.Windows.Forms.Label();
+            this.btnVoidRefund = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSales)).BeginInit();
             this.pnlFilters.SuspendLayout();
             this.pnlSummary.SuspendLayout();
@@ -140,6 +141,7 @@ namespace Inventory
             this.pnlFilters.Controls.Add(this.btnRefresh);
             this.pnlFilters.Controls.Add(this.txtSearch);
             this.pnlFilters.Controls.Add(this.lblSearch);
+            this.pnlFilters.Controls.Add(this.btnVoidRefund);
             this.pnlFilters.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlFilters.Location = new System.Drawing.Point(0, 0);
             this.pnlFilters.Name = "pnlFilters";
@@ -194,6 +196,20 @@ namespace Inventory
             this.dtpTo.Size = new System.Drawing.Size(115, 20);
             this.dtpTo.TabIndex = 3;
             this.dtpTo.KeyUp += new System.Windows.Forms.KeyEventHandler(this.dtp_KeyUp);
+            //
+            // btnVoidRefund
+            //
+            this.btnVoidRefund.BackColor = System.Drawing.Color.FromArgb(198, 40, 40);
+            this.btnVoidRefund.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnVoidRefund.FlatAppearance.BorderSize = 0;
+            this.btnVoidRefund.ForeColor = System.Drawing.Color.White;
+            this.btnVoidRefund.Location = new System.Drawing.Point(15, 10);
+            this.btnVoidRefund.Name = "btnVoidRefund";
+            this.btnVoidRefund.Size = new System.Drawing.Size(95, 25);
+            this.btnVoidRefund.TabIndex = 13;
+            this.btnVoidRefund.Text = "Refund/Void";
+            this.btnVoidRefund.UseVisualStyleBackColor = false;
+            this.btnVoidRefund.Click += new System.EventHandler(this.btnVoidRefund_Click);
             //
             // lblTo
             //
@@ -327,5 +343,6 @@ namespace Inventory
         private System.Windows.Forms.Button btnExport;
         private System.Windows.Forms.Panel pnlSummary;
         private System.Windows.Forms.Label lblSummary;
+        private System.Windows.Forms.Button btnVoidRefund;
     }
 }

@@ -84,6 +84,7 @@ namespace Inventory
 
             string configuredPrinter = ConfigurationManager.AppSettings["RECEIPT_PRINTER_NAME"];
             bool isInstalled = IsReceiptPrinterConfigured();
+            bool appliedConfiguredPrinter = false;
 
             if (isInstalled)
             {
@@ -103,6 +104,7 @@ namespace Inventory
                     // margin keeps the usable width honest for whichever printer is selected.
                     marginX = (int)Math.Max(marginX, Math.Ceiling(document.DefaultPageSettings.HardMarginX));
                     marginY = (int)Math.Max(marginY, Math.Ceiling(document.DefaultPageSettings.HardMarginY));
+                    appliedConfiguredPrinter = true;
                 }
                 catch (InvalidPrinterException)
                 {
@@ -111,9 +113,34 @@ namespace Inventory
                     // thermal printer, or a redirected printer from a remote session that isn't
                     // live. Accessing PrinterSettings/DefaultPageSettings throws in that case
                     // instead of degrading gracefully, which used to crash both real checkout
-                    // printing and the receipt preview. Falls back to the un-configured defaults
-                    // set above instead, same as if the printer weren't configured at all.
-                    document.PrinterSettings.PrinterName = "";
+                    // printing and the receipt preview. Falls through to the system-default
+                    // printer fallback below instead, same as if the printer weren't configured.
+                }
+            }
+
+            if (!appliedConfiguredPrinter)
+            {
+                // No receipt printer configured, or configured but unreachable right now - name
+                // the actual Windows default printer explicitly instead of leaving PrinterSettings
+                // untouched/blank. A PrintDocument with no printer resolved at all falls back to a
+                // hardcoded Letter-size page with no real driver behind it, which doesn't reflect
+                // what would actually print on this machine - this keeps the preview/print always
+                // tracking whatever paper size the system default printer is actually set to.
+                string defaultPrinterName = new PrinterSettings().PrinterName;
+                if (!string.IsNullOrWhiteSpace(defaultPrinterName))
+                {
+                    try
+                    {
+                        document.PrinterSettings.PrinterName = defaultPrinterName;
+                        document.DefaultPageSettings.PaperSize = document.PrinterSettings.DefaultPageSettings.PaperSize;
+                        marginX = (int)Math.Max(marginX, Math.Ceiling(document.DefaultPageSettings.HardMarginX));
+                        marginY = (int)Math.Max(marginY, Math.Ceiling(document.DefaultPageSettings.HardMarginY));
+                    }
+                    catch (InvalidPrinterException)
+                    {
+                        // No usable printer at all right now (e.g. the "default" printer is also
+                        // offline) - keep the small fixed-floor margins/paper size set above.
+                    }
                 }
             }
 

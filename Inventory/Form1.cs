@@ -98,6 +98,16 @@ namespace Inventory
             }
         }
 
+        /// <summary>Re-syncs the cart board grid's background per <see cref="CartBoardTheme"/> -
+        /// called from the constructor, and again by System Configuration (same pattern as
+        /// <see cref="ApplyMenuVisibility"/> for SET_MENUS) when CART_BOARD_BACKGROUND_COLOR
+        /// changes or when the accent background it blends with (gbx_itemList's BackColor) does.</summary>
+        public void ApplyCartBoardBackground() => CartBoardTheme.ApplyTo(dgv_items);
+
+        /// <summary>Re-syncs the item search grid's background per <see cref="ItemSearchGridTheme"/> -
+        /// same pattern as <see cref="ApplyCartBoardBackground"/> for the cart board grid.</summary>
+        public void ApplyItemSearchGridBackground() => ItemSearchGridTheme.ApplyTo(dgv_itemSearch);
+
         /// <summary>
         /// True if the given top-level menu (by ToolStripMenuItem name, e.g. "taxConfigToolStripMenuItem")
         /// is hidden per the HIDDEN_MENUS appSetting. Exposed statically so non-UI code - like
@@ -279,11 +289,36 @@ namespace Inventory
         private char _pendingManualChar;
         private bool _serialBurstConfirmed;
 
+        // Auto-clears tbx_search after it sits idle (no typing, no mouse movement) for the
+        // configured number of seconds (SEARCH_AUTO_CLEAR_ENABLED/_SECONDS, System Config >
+        // Alerts). The visible countdown on lbl_searchAutoClearCountdown is what makes it
+        // "dismissable": real mouse movement while it's showing counts as activity and cancels
+        // the pending clear, via an app-wide WM_MOUSEMOVE message filter rather than a
+        // per-control MouseMove (which wouldn't fire while the pointer sits over a child
+        // control like the item search grid). WM_MOUSEMOVE fires on sub-pixel sensor jitter too
+        // (a mouse just resting on the desk can report movement) - without a minimum-distance
+        // threshold the countdown would get cancelled almost immediately every time, which
+        // looks indistinguishable from the auto-clear "not working" at all.
+        private const int MouseJitterThresholdPixels = 6;
+        private readonly System.Windows.Forms.Timer _searchAutoClearTimer = new System.Windows.Forms.Timer { Interval = 1000 };
+        private int _searchAutoClearRemainingSeconds;
+        private Point _searchAutoClearLastMousePosition;
+        private IMessageFilter _searchAutoClearMouseFilter;
+
+        // Resets an abandoned, half-typed tbx_quantity edit back to "1" after it sits idle for
+        // the configured number of seconds (QTY_AUTO_RESET_ENABLED/_SECONDS, System Config >
+        // Alerts), the same way pressing Escape would. Single-shot per idle period - restarted
+        // on every keystroke via RestartQtyAutoResetTimer, stopped by ResetQuantityEditUi so it
+        // can't fire again (or re-arm itself) once the edit session has already ended.
+        private readonly System.Windows.Forms.Timer _qtyAutoResetTimer = new System.Windows.Forms.Timer();
+
         public Purchases()
         {
             InitializeComponent();
 
             _serialManualKeyTimer.Tick += SerialManualKeyTimer_Tick;
+            _searchAutoClearTimer.Tick += SearchAutoClearTimer_Tick;
+            _qtyAutoResetTimer.Tick += (s, e) => ResetQuantityEditUi();
 
             tabControlMain.Visible = false;
             statusStripMain.Visible = false;
@@ -292,6 +327,8 @@ namespace Inventory
             LogoCache.ApplyTo(this);
             AppTheme.ApplyTo(this);
             AppFontScale.ApplyTo(this);
+            ApplyCartBoardBackground();
+            ApplyItemSearchGridBackground();
             FormClosed += (s, e) =>
             {
                 if (_layoutEditFilter != null)
@@ -453,6 +490,9 @@ namespace Inventory
 
         private const int StaleCacheHours = 24;
 
+        /// <summary>Compact, icon-led status bar readout (click opens the Inventory Report) -
+        /// full detail (exact refresh time, which specific thing is wrong) lives in the tooltip
+        /// rather than in the visible text, which only ever shows the item count plus one glyph.</summary>
         private void UpdateCachedItemsStatusMenu()
         {
             int count;
@@ -466,26 +506,27 @@ namespace Inventory
             }
 
             DateTime? asOf = DataCacheManager.Instance.GetLastUpdated("Items");
-            string itemWord = count == 1 ? "item" : "items";
 
             bool isStale = asOf.HasValue && DateTime.Now - asOf.Value > TimeSpan.FromHours(StaleCacheHours);
             int issueCount = DataCacheManager.Instance.CountItemIntegrityIssues();
-            bool hasWarning = isStale || issueCount > 0;
+            int pendingSyncCount = PendingItemStore.GetPendingCount();
+            bool hasWarning = isStale || issueCount > 0 || pendingSyncCount > 0;
 
-            string text = asOf.HasValue
-                ? $"{count:N0} {itemWord} · {asOf:MMM d, h:mm tt}"
-                : $"{count:N0} {itemWord} offline";
-            cachedItemsStatusToolStripMenuItem.Text = hasWarning ? text + " ⚠" : text;
-            cachedItemsStatusToolStripMenuItem.ForeColor = hasWarning ? Color.Firebrick : SystemColors.ControlText;
+            lblCachedItemsStatus.Text = (hasWarning ? "⚠ " : "📦 ") + count.ToString("N0");
+            lblCachedItemsStatus.ForeColor = hasWarning ? Color.Firebrick : SystemColors.ControlText;
 
+            string itemWord = count == 1 ? "item" : "items";
             string tooltip = asOf.HasValue
-                ? $"{count:N0} item(s) available for offline use - last refreshed {asOf:MMMM dd, yyyy hh:mm tt}."
-                : $"{count:N0} item(s) available for offline use.";
+                ? $"{count:N0} {itemWord} available for offline use - last refreshed {asOf:MMMM dd, yyyy hh:mm tt}."
+                : $"{count:N0} {itemWord} available for offline use.";
             if (isStale)
                 tooltip += $" This data is more than {StaleCacheHours} hour(s) old - prices/stock may no longer be accurate.";
             if (issueCount > 0)
                 tooltip += $" {issueCount} item(s) are missing a serial or a usable price and may not scan or sell correctly - click to review them.";
-            cachedItemsStatusToolStripMenuItem.ToolTipText = tooltip;
+            tooltip += pendingSyncCount > 0
+                ? $" {pendingSyncCount} item(s) are queued offline and not yet synced to the database."
+                : " Cache and database are in sync.";
+            lblCachedItemsStatus.ToolTipText = tooltip;
         }
 
         private System.Windows.Forms.Timer cacheReconnectTimer;
@@ -530,8 +571,93 @@ namespace Inventory
         /// </summary>
         private static void TryRefreshCacheIfReconnected()
         {
-            if (DataCacheManager.Instance.IsOfflineMode)
+            if (!DataCacheManager.Instance.IsOfflineMode)
+                return;
+
+            Purchases purchases = Application.OpenForms.OfType<Purchases>().FirstOrDefault();
+            if (purchases != null)
+                _ = purchases.SyncInventoryWithDatabaseAsync(isAutomatic: true);
+            else
                 RefreshItemsCache();
+        }
+
+        /// <summary>
+        /// Pushes any offline-queued items (added via AddItemForm while unreachable) to the
+        /// database, then refreshes the cache from it - shared by the automatic reconnect watcher
+        /// (TryRefreshCacheIfReconnected) and a manual click on lblInventorySyncStatus. Without
+        /// the push, a plain cache refresh would keep showing queued items only in the local
+        /// cache, never actually syncing them to the database itself. Surfaces progress as a tray
+        /// balloon, since the automatic path runs from a poll/network-change callback with nobody
+        /// necessarily watching the status bar at the moment it starts.
+        /// </summary>
+        private async Task SyncInventoryWithDatabaseAsync(bool isAutomatic)
+        {
+            if (IsSyncingInventory)
+                return;
+
+            if (PendingItemSyncService.AutoSyncEnabled)
+            {
+                int pendingBefore = PendingItemStore.GetPendingCount();
+                string reconnectedPrefix = isAutomatic ? "Reconnected - s" : "S";
+                if (pendingBefore > 0)
+                    ShowTrayNotification("Inventory Sync",
+                        $"{reconnectedPrefix}yncing {pendingBefore} offline-queued item(s) to the database...",
+                        ToolTipIcon.Info);
+
+                IsSyncingInventory = true;
+                UpdateInventorySyncStatus();
+
+                try
+                {
+                    int synced = await PendingItemSyncService.SyncPendingItemsAsync();
+
+                    if (synced > 0)
+                    {
+                        int remaining = PendingItemStore.GetPendingCount();
+                        ShowTrayNotification("Inventory Sync Complete",
+                            remaining == 0
+                                ? $"Synced {synced} item(s). Cache and database are now in sync."
+                                : $"Synced {synced} item(s). {remaining} item(s) need manual review (duplicate serial already in the database).",
+                            ToolTipIcon.Info);
+                    }
+                    else if (pendingBefore == 0)
+                    {
+                        ShowTrayNotification("Inventory Sync",
+                            (isAutomatic ? "Reconnected - c" : "C") + "ache and database are already in sync.",
+                            ToolTipIcon.Info);
+                    }
+                }
+                catch
+                {
+                    // Best-effort - the refresh below still runs either way, and the next
+                    // reconnect (or another click here, or System Config > Offline Sync) retries.
+                    ShowTrayNotification("Inventory Sync",
+                        "Syncing offline-queued items failed - it will retry automatically.",
+                        ToolTipIcon.Warning);
+                }
+                finally
+                {
+                    IsSyncingInventory = false;
+                }
+            }
+
+            RefreshItemsCache();
+            UpdateInventorySyncStatus();
+        }
+
+        /// <summary>Lets a cashier/admin force a sync on demand instead of waiting for the next
+        /// automatic reconnect poll - re-entrant clicks while one's already running are ignored
+        /// (SyncInventoryWithDatabaseAsync's own IsSyncingInventory guard).</summary>
+        private async void lblInventorySyncStatus_Click(object sender, EventArgs e) =>
+            await SyncInventoryWithDatabaseAsync(isAutomatic: false);
+
+        /// <summary>Hand cursor over lblInventorySyncStatus specifically - ToolStripItem has no
+        /// Cursor property of its own (unlike a real Control), so this is done by hand at the
+        /// owning StatusStrip level instead.</summary>
+        private void statusStripMain_MouseMove(object sender, MouseEventArgs e)
+        {
+            ToolStripItem hovered = statusStripMain.GetItemAt(e.Location);
+            statusStripMain.Cursor = hovered == lblInventorySyncStatus ? Cursors.Hand : Cursors.Default;
         }
 
         private System.Windows.Forms.Timer lastSeenHeartbeatTimer;
@@ -737,6 +863,102 @@ namespace Inventory
                 return;
 
             HoldCurrentTransaction($"Auto-held after {minutes} minute(s) of inactivity.", silent: true);
+        }
+
+        private void StartSearchAutoClearWatcher()
+        {
+            _searchAutoClearMouseFilter = new MouseMoveMessageFilter(CheckMouseActivityForSearchAutoClear);
+            Application.AddMessageFilter(_searchAutoClearMouseFilter);
+
+            this.FormClosed += (s, e) =>
+            {
+                _searchAutoClearTimer.Stop();
+                Application.RemoveMessageFilter(_searchAutoClearMouseFilter);
+            };
+        }
+
+        private static bool SearchAutoClearEnabled =>
+            !string.Equals(ConfigurationManager.AppSettings["SEARCH_AUTO_CLEAR_ENABLED"], "false", StringComparison.OrdinalIgnoreCase);
+
+        private static int SearchAutoClearSeconds =>
+            int.TryParse(ConfigurationManager.AppSettings["SEARCH_AUTO_CLEAR_SECONDS"], out int s) && s > 0 ? s : 10;
+
+        /// <summary>Called from tbx_search_TextChanged: (re)starts the idle countdown while there's
+        /// text to clear, or cancels it once the box is already empty.</summary>
+        private void RestartSearchAutoClearCountdown()
+        {
+            if (!SearchAutoClearEnabled || string.IsNullOrEmpty(tbx_search.Text))
+            {
+                DismissSearchAutoClearCountdown();
+                return;
+            }
+
+            _searchAutoClearRemainingSeconds = SearchAutoClearSeconds;
+            _searchAutoClearLastMousePosition = Cursor.Position;
+            lbl_searchAutoClearCountdown.Text =
+                $"Clearing search in {_searchAutoClearRemainingSeconds}s (move the mouse to cancel)...";
+            lbl_searchAutoClearCountdown.Visible = true;
+            _searchAutoClearTimer.Start();
+        }
+
+        private void DismissSearchAutoClearCountdown()
+        {
+            if (!_searchAutoClearTimer.Enabled && !lbl_searchAutoClearCountdown.Visible)
+                return;
+
+            _searchAutoClearTimer.Stop();
+            lbl_searchAutoClearCountdown.Visible = false;
+        }
+
+        /// <summary>Only counts as "the pointer moved" once the cursor has strayed more than
+        /// <see cref="MouseJitterThresholdPixels"/> from where it was when the countdown started -
+        /// a stationary mouse can still emit WM_MOUSEMOVE from sensor noise, and reacting to that
+        /// would cancel the countdown within the first second almost every time.</summary>
+        private void CheckMouseActivityForSearchAutoClear()
+        {
+            if (!lbl_searchAutoClearCountdown.Visible)
+                return;
+
+            Point current = Cursor.Position;
+            int dx = current.X - _searchAutoClearLastMousePosition.X;
+            int dy = current.Y - _searchAutoClearLastMousePosition.Y;
+
+            if ((dx * dx) + (dy * dy) >= MouseJitterThresholdPixels * MouseJitterThresholdPixels)
+                DismissSearchAutoClearCountdown();
+        }
+
+        private void SearchAutoClearTimer_Tick(object sender, EventArgs e)
+        {
+            _searchAutoClearRemainingSeconds--;
+
+            if (_searchAutoClearRemainingSeconds <= 0)
+            {
+                _searchAutoClearTimer.Stop();
+                lbl_searchAutoClearCountdown.Visible = false;
+                tbx_search.Clear();
+                return;
+            }
+
+            lbl_searchAutoClearCountdown.Text =
+                $"Clearing search in {_searchAutoClearRemainingSeconds}s (move the mouse to cancel)...";
+        }
+
+        /// <summary>Catches WM_MOUSEMOVE for the whole app, not just this form, since WinForms
+        /// mouse events don't bubble from a child control (the search grid, buttons, etc.) up to
+        /// the form - a plain Form.MouseMove handler would almost never fire.</summary>
+        private sealed class MouseMoveMessageFilter : IMessageFilter
+        {
+            private const int WM_MOUSEMOVE = 0x0200;
+            private readonly Action _onMouseMove;
+
+            public MouseMoveMessageFilter(Action onMouseMove) => _onMouseMove = onMouseMove;
+
+            public bool PreFilterMessage(ref Message m)
+            {
+                if (m.Msg == WM_MOUSEMOVE)
+                    _onMouseMove();
+                return false;
+            }
         }
 
         private async Task StampLastSeenIfOnlineAsync()
@@ -1043,6 +1265,57 @@ namespace Inventory
             lblOfflineItemsStatus.Text =
                 $"Offline {itemWord} pending sync: {pendingCount} - last updated {lastUpdated:MMMM dd, yyyy hh:mm tt}";
         }
+
+        /// <summary>Always-visible status bar readout of when the cached Items table (prices and
+        /// stock) last actually pulled from the live database - distinct from
+        /// lblOfflineItemsStatus, which only reports the offline-queued-items count/age and goes
+        /// blank once nothing's pending.</summary>
+        // Set/cleared around PendingItemSyncService's call in TryRefreshCacheIfReconnected so the
+        // status bar can show "Syncing..." for that window instead of just jumping straight from
+        // one last-synced timestamp to the next with nothing in between.
+        internal bool IsSyncingInventory;
+
+        /// <summary>Compact, icon-led sync-state readout - the visible text is just a glyph plus
+        /// one word; the exact timestamp and pending-item count live in the tooltip instead of
+        /// being spelled out in the status bar itself.</summary>
+        private void UpdateInventorySyncStatus()
+        {
+            DateTime? lastSynced = DataCacheManager.Instance.GetLastUpdated("Items");
+            int pendingCount = YourApp.Data.PendingItemStore.GetPendingCount();
+            string lastSyncedText = lastSynced.HasValue
+                ? $"last synced {lastSynced:MMMM dd, yyyy hh:mm tt}"
+                : "not yet synced with the database";
+
+            if (IsSyncingInventory)
+            {
+                lblInventorySyncStatus.Text = "🔄 Syncing";
+                lblInventorySyncStatus.ForeColor = Color.DarkOrange;
+                lblInventorySyncStatus.ToolTipText = $"Syncing offline-queued items with the database now ({lastSyncedText}).";
+            }
+            else if (DataCacheManager.Instance.IsOfflineMode)
+            {
+                lblInventorySyncStatus.Text = "📴 Offline";
+                lblInventorySyncStatus.ForeColor = Color.Firebrick;
+                lblInventorySyncStatus.ToolTipText = $"Database unreachable - running on the local cache ({lastSyncedText}). Click to retry.";
+            }
+            else if (pendingCount > 0)
+            {
+                lblInventorySyncStatus.Text = $"⚠ Out of sync ({pendingCount})";
+                lblInventorySyncStatus.ForeColor = Color.Firebrick;
+                string itemWord = pendingCount == 1 ? "item" : "items";
+                lblInventorySyncStatus.ToolTipText = $"{pendingCount} {itemWord} queued offline, not yet in the database ({lastSyncedText}). Click to sync now.";
+            }
+            else
+            {
+                // Both directions are actually in sync here: DB -> cache (DataCacheManager's last
+                // live pull) and cache -> DB (pendingCount == 0, nothing left queued to push).
+                lblInventorySyncStatus.Text = lastSynced.HasValue
+                    ? $"✅ Synced DB/C ({lastSynced:MMM d, h:mm tt})"
+                    : "✅ Synced DB/C";
+                lblInventorySyncStatus.ForeColor = Color.DarkGreen;
+                lblInventorySyncStatus.ToolTipText = $"Cache and database are in sync ({lastSyncedText}). Click to sync again.";
+            }
+        }
         private void Purchases_Load(object sender, EventArgs e)
         {
 
@@ -1110,6 +1383,7 @@ namespace Inventory
 
                 UpdateTime();
                 UpdateOfflineItemsStatus();
+                UpdateInventorySyncStatus();
 
                 timerClock.Start();
 
@@ -1120,6 +1394,7 @@ namespace Inventory
                 StartLowStockReminderWatcher();
                 StartNetworkTitleBarWatcher();
                 StartIdleCartWatcher();
+                StartSearchAutoClearWatcher();
                 RestoreHeldTransactions();
                 RestoreManagePricesHistory();
 
@@ -2035,6 +2310,7 @@ namespace Inventory
         {
             UpdateTime();
             UpdateOfflineItemsStatus();
+            UpdateInventorySyncStatus();
             UpdateTitleBar();
             UpdateCachedItemsStatusMenu();
         }
@@ -2199,6 +2475,8 @@ namespace Inventory
         }
         private void ResetQuantityEditUi()
         {
+            _qtyAutoResetTimer.Stop();
+
             tbx_quantity.Enabled = false;
             tbx_quantity.Text = "1";
 
@@ -2274,7 +2552,43 @@ namespace Inventory
 
         private void tbx_quantity_TextChanged(object sender, EventArgs e)
         {
+            if (tbx_quantity.Text.Length > 3)
+            {
+                string overflow = tbx_quantity.Text.Substring(3);
+                tbx_quantity.Text = tbx_quantity.Text.Substring(0, 3);
+                tbx_quantity.SelectionStart = tbx_quantity.Text.Length;
 
+                msgbox("Quantity can't exceed 3 digits. Moving focus to the serial code box.");
+
+                tbx_serialcode.Focus();
+                tbx_serialcode.Text += overflow;
+                tbx_serialcode.SelectionStart = tbx_serialcode.Text.Length;
+                Cursor.Position = tbx_serialcode.PointToScreen(
+                    new Point(tbx_serialcode.Width / 2, tbx_serialcode.Height / 2));
+            }
+
+            RestartQtyAutoResetTimer();
+        }
+
+        private static bool QtyAutoResetEnabled =>
+            !string.Equals(ConfigurationManager.AppSettings["QTY_AUTO_RESET_ENABLED"], "false", StringComparison.OrdinalIgnoreCase);
+
+        private static int QtyAutoResetSeconds =>
+            int.TryParse(ConfigurationManager.AppSettings["QTY_AUTO_RESET_SECONDS"], out int s) && s > 0 ? s : 5;
+
+        /// <summary>Called from tbx_quantity_TextChanged: restarts the idle-reset countdown while
+        /// a quantity edit is in progress, so an abandoned half-typed value doesn't sit there
+        /// indefinitely. No-ops once the row's edit session has already ended (tbx_quantity
+        /// disabled by <see cref="ResetQuantityEditUi"/>), so it can't keep re-arming itself.</summary>
+        private void RestartQtyAutoResetTimer()
+        {
+            _qtyAutoResetTimer.Stop();
+
+            if (!QtyAutoResetEnabled || !tbx_quantity.Enabled)
+                return;
+
+            _qtyAutoResetTimer.Interval = QtyAutoResetSeconds * 1000;
+            _qtyAutoResetTimer.Start();
         }
 
         private void Purchases_KeyUp(object sender, KeyEventArgs e)
@@ -2294,7 +2608,7 @@ namespace Inventory
 
         public void msgbox(string msg)
         {
-            MessageBox.Show(msg);
+            OkDialog.Show(this, msg, "Notice");
         }
 
         private async void tabControlMain_SelectedIndexChanged(object sender, EventArgs e)
@@ -2526,6 +2840,7 @@ namespace Inventory
                 case "price": return "Price";
                 case "retail_price": return "Retail Price";
                 case "price_perpc": return "Price/Pc";
+                case "category": return "Category";
                 default: return columnName;
             }
         }
@@ -2596,7 +2911,7 @@ namespace Inventory
                 await ConnectDb();
                 try
                 {
-                    using (var adapter = new MySqlDataAdapter("SELECT serial, description, price, retail_price, price_perpc FROM items_", connect_db))
+                    using (var adapter = new MySqlDataAdapter("SELECT serial, description, category, price, retail_price, price_perpc FROM items_", connect_db))
                     {
                         var table = new DataTable();
                         adapter.Fill(table);
@@ -2624,6 +2939,7 @@ namespace Inventory
                 dgv_managePrices.Columns["serial"].ReadOnly = true;
                 dgv_managePrices.Columns["description"].HeaderText = "Description";
                 dgv_managePrices.Columns["description"].ReadOnly = true;
+                ReplaceCategoryColumnWithComboBox((DataTable)dgv_managePrices.DataSource);
                 dgv_managePrices.Columns["price"].HeaderText = "Price (whole number)";
                 dgv_managePrices.Columns["price"].DefaultCellStyle.Format = "0.00";
                 dgv_managePrices.Columns["retail_price"].HeaderText = "Retail Price (whole number)";
@@ -2641,6 +2957,44 @@ namespace Inventory
             {
                 ErrorDialog.Show(this, "Could not load the item list for Manage Prices.", "Failed to Load Items", ex);
             }
+        }
+
+        /// <summary>
+        /// Swaps the auto-generated plain-text "category" column for a DataGridViewComboBoxColumn
+        /// populated with every distinct category already in use, so picking one avoids near-
+        /// duplicates from retyping (e.g. "Snacks" vs "snack"). Still lets a brand new category be
+        /// typed directly - dgv_managePrices_EditingControlShowing sets the cell's editing combo
+        /// box to DropDownStyle.DropDown (not DropDownList) rather than restricting to the list.
+        /// </summary>
+        private void ReplaceCategoryColumnWithComboBox(DataTable table)
+        {
+            DataGridViewColumn oldColumn = dgv_managePrices.Columns["category"];
+            int index = oldColumn.Index;
+
+            var categories = table.AsEnumerable()
+                .Select(r => r["category"]?.ToString()?.Trim())
+                .Where(c => !string.IsNullOrEmpty(c))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(c => c, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            dgv_managePrices.Columns.Remove(oldColumn);
+
+            var categoryColumn = new DataGridViewComboBoxColumn
+            {
+                Name = "category",
+                DataPropertyName = "category",
+                HeaderText = "Category",
+            };
+            categoryColumn.Items.AddRange(categories);
+
+            dgv_managePrices.Columns.Insert(index, categoryColumn);
+        }
+
+        private void dgv_managePrices_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+        {
+            if (dgv_managePrices.CurrentCell?.OwningColumn?.Name == "category" && e.Control is ComboBox comboBox)
+                comboBox.DropDownStyle = ComboBoxStyle.DropDown;
         }
 
         private async void btn_refreshPrices_Click(object sender, EventArgs e) => await LoadManagePricesGrid();
@@ -2683,6 +3037,7 @@ namespace Inventory
                     RefreshItemsCache();
                     await LoadManagePricesGrid();
                     UpdateOfflineItemsStatus();
+                    UpdateInventorySyncStatus();
                 }
             }
         }
@@ -2718,11 +3073,12 @@ namespace Inventory
                 {
                     foreach (DataRow row in changes.Rows)
                     {
-                        using (var cmd = new MySqlCommand("UPDATE items_ SET price=@price, retail_price=@retail_price, price_perpc=@price_perpc WHERE serial=@serial", connect_db))
+                        using (var cmd = new MySqlCommand("UPDATE items_ SET price=@price, retail_price=@retail_price, price_perpc=@price_perpc, category=@category WHERE serial=@serial", connect_db))
                         {
                             cmd.Parameters.AddWithValue("@price", row["price"]);
                             cmd.Parameters.AddWithValue("@retail_price", row["retail_price"]);
                             cmd.Parameters.AddWithValue("@price_perpc", row["price_perpc"]);
+                            cmd.Parameters.AddWithValue("@category", row["category"]);
                             cmd.Parameters.AddWithValue("@serial", row["serial"]);
                             await cmd.ExecuteNonQueryAsync();
                         }
@@ -2734,7 +3090,7 @@ namespace Inventory
                 }
 
                 foreach (DataRow row in changes.Rows)
-                    OperationLog.RecordUpdate(nameof(Purchases), $"Item '{row["serial"]}' price updated (price={row["price"]}, retail={row["retail_price"]}, perpc={row["price_perpc"]}).");
+                    OperationLog.RecordUpdate(nameof(Purchases), $"Item '{row["serial"]}' price updated (price={row["price"]}, retail={row["retail_price"]}, perpc={row["price_perpc"]}, category={row["category"]}).");
 
                 table.AcceptChanges();
                 RefreshItemsCache();
@@ -2874,6 +3230,8 @@ namespace Inventory
                 }
             }
             listing.Text = "Total items: " + retriever.ToString();
+
+            RestartSearchAutoClearCountdown();
         }
         #endregion
         private const int SlowPingThresholdMs = 300;
@@ -3148,6 +3506,8 @@ namespace Inventory
                 "  F8           Resume a held transaction\n" +
                 "  Numpad /     View held transactions\n" +
                 "  Ctrl+H       Show this shortcuts list\n" +
+                "  (status bar) Click the inventory sync indicator (bottom of the window)\n" +
+                "               to push offline-queued items to the database on demand\n" +
                 "\n" +
                 "SERIAL CODE BOX\n" +
                 "  Enter        Look up the scanned/typed code and add it to the cart\n" +
@@ -3166,6 +3526,8 @@ namespace Inventory
                 "  Enter        Search items matching the typed text\n" +
                 "  F4           Jump to the search results grid\n" +
                 "  Escape       Clear the search box\n" +
+                "  (auto)       Left idle, clears itself after a few seconds - move the\n" +
+                "               mouse to cancel (System Config > Alerts)\n" +
                 "\n" +
                 "ITEM SEARCH RESULTS GRID\n" +
                 "  F7           Add the highlighted item to the cart\n" +
@@ -3183,6 +3545,9 @@ namespace Inventory
                 "QUANTITY BOX\n" +
                 "  Enter        Apply the typed quantity and recalculate totals\n" +
                 "  Escape       Clear and return to the serial code box\n" +
+                "  (auto)       Typing a 4th digit moves it to the serial code box instead\n" +
+                "  (auto)       Left idle, resets to 1 after a few seconds (System Config >\n" +
+                "               Alerts)\n" +
                 "\n" +
                 "CASH / DENOMINATION BOX\n" +
                 "  Enter        Finalize the sale: print receipt, update inventory, reset cart\n" +
@@ -3551,7 +3916,7 @@ namespace Inventory
             new InventoryReport().ShowDialog();
         }
 
-        private void cachedItemsStatusToolStripMenuItem_Click(object sender, EventArgs e) =>
+        private void lblCachedItemsStatus_Click(object sender, EventArgs e) =>
             inventoryReportToolStripMenuItem_Click(sender, e);
 
         private void salesReportToolStripMenuItem_Click(object sender, EventArgs e)

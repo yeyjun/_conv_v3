@@ -1,7 +1,10 @@
 using System;
 using System.Configuration;
+using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
+using YourApp.Data;
 
 namespace Inventory
 {
@@ -15,6 +18,34 @@ namespace Inventory
             YourApp.Data.LogoCache.ApplyTo(this);
             YourApp.Data.AppTheme.ApplyTo(this);
             YourApp.Data.AppFontScale.ApplyTo(this);
+
+            PopulateCategoryChoices();
+        }
+
+        /// <summary>Lets the admin pick an existing category instead of retyping it (and risking
+        /// a near-duplicate like "Snacks" vs "snack") while still allowing a brand new one to be
+        /// typed directly - cbx_category's DropDownStyle is DropDown, not DropDownList.</summary>
+        private void PopulateCategoryChoices()
+        {
+            try
+            {
+                DataTable items = DataCacheManager.Instance.GetTable("Items");
+                if (!items.Columns.Contains("category"))
+                    return;
+
+                var categories = items.AsEnumerable()
+                    .Select(r => r["category"]?.ToString()?.Trim())
+                    .Where(c => !string.IsNullOrEmpty(c))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(c => c, StringComparer.OrdinalIgnoreCase);
+
+                cbx_category.Items.AddRange(categories.ToArray());
+            }
+            catch
+            {
+                // Cache not loaded (e.g. opened before LoadAll completes) - the combo just starts
+                // empty and still accepts freely typed text either way.
+            }
         }
 
         private void WholeNumberTextBox_KeyPress(object sender, KeyPressEventArgs e)
@@ -47,6 +78,7 @@ namespace Inventory
         {
             string code = tbx_code.Text.Trim();
             string description = tbx_description.Text.Trim();
+            string category = cbx_category.Text.Trim();
 
             if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(description))
             {
@@ -77,7 +109,7 @@ namespace Inventory
             catch (Exception ex)
             {
                 conn.Dispose();
-                YourApp.Data.PendingItemStore.Add(code, description, price, retailPrice, pricePerPc, quantity, dateOfEntry);
+                YourApp.Data.PendingItemStore.Add(code, description, category, price, retailPrice, pricePerPc, quantity, dateOfEntry);
                 ItemSaved = true;
                 OperationLog.RecordCreate(nameof(AddItemForm), $"Item '{code}' ({description}) created offline - queued for later sync.");
                 ErrorDialog.Show(this,
@@ -91,11 +123,12 @@ namespace Inventory
             {
                 using (conn)
                 using (var cmd = new MySqlCommand(
-                    "INSERT INTO items_(serial, description, price, retail_price, price_perpc, new_quantity, qty_inpc, date_of_entry) " +
-                    "VALUES (@serial, @description, @price, @retail_price, @price_perpc, @quantity, @quantity, @date_of_entry)", conn))
+                    "INSERT INTO items_(serial, description, category, price, retail_price, price_perpc, new_quantity, qty_inpc, date_of_entry) " +
+                    "VALUES (@serial, @description, @category, @price, @retail_price, @price_perpc, @quantity, @quantity, @date_of_entry)", conn))
                 {
                     cmd.Parameters.AddWithValue("@serial", code);
                     cmd.Parameters.AddWithValue("@description", description);
+                    cmd.Parameters.AddWithValue("@category", category);
                     cmd.Parameters.AddWithValue("@price", price);
                     cmd.Parameters.AddWithValue("@retail_price", retailPrice);
                     cmd.Parameters.AddWithValue("@price_perpc", pricePerPc);
@@ -106,6 +139,13 @@ namespace Inventory
 
                 ItemSaved = true;
                 OperationLog.RecordCreate(nameof(AddItemForm), $"Item '{code}' ({description}) created.");
+
+                // Without this, the newly saved item (and its category) wouldn't show up anywhere
+                // that reads from the cache - Manage Prices, the item search grid, or the
+                // categorized inventory report/preview - until some other action happened to
+                // refresh it first.
+                try { DataCacheManager.Instance.RefreshTable("Items", "SELECT * FROM items_"); } catch { }
+
                 MessageBox.Show("Item saved. You can now print its barcode.", "Item Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
