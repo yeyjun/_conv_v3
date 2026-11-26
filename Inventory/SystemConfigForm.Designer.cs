@@ -274,6 +274,14 @@ namespace Inventory
             this.chkPendingItemSyncEnabled = new System.Windows.Forms.CheckBox();
             this.lblPendingItemSyncStatus = new System.Windows.Forms.Label();
             this.btnSyncPendingItemsNow = new System.Windows.Forms.Button();
+            this.tabPageUpdates = new System.Windows.Forms.TabPage();
+            this.lblUpdatesHint = new System.Windows.Forms.Label();
+            this.lblCurrentVersion = new System.Windows.Forms.Label();
+            this.chkUpdateCheckEnabled = new System.Windows.Forms.CheckBox();
+            this.btnCheckUpdateNow = new System.Windows.Forms.Button();
+            this.btnSaveUpdates = new System.Windows.Forms.Button();
+            this.btnRefreshUpdates = new System.Windows.Forms.Button();
+            this.lblUpdatesStatus = new System.Windows.Forms.Label();
             this.openFileDialogAccess = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialogCounterReceipt = new System.Windows.Forms.FolderBrowserDialog();
             this.lblStatus = new System.Windows.Forms.Label();
@@ -322,6 +330,7 @@ namespace Inventory
             this.tabPageCartColumns.SuspendLayout();
             this.tabPageInventoryPrint.SuspendLayout();
             this.tabPageOfflineSync.SuspendLayout();
+            this.tabPageUpdates.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tbPriceOverride)).BeginInit();
             this.SuspendLayout();
             //
@@ -374,7 +383,8 @@ namespace Inventory
             "Item Search",
             "Cart Board",
             "Inventory Print Schedule",
-            "Offline Sync"});
+            "Offline Sync",
+            "Updates"});
             this.lstConfigSections.Location = new System.Drawing.Point(12, 44);
             this.lstConfigSections.Name = "lstConfigSections";
             this.lstConfigSections.Size = new System.Drawing.Size(134, 468);
@@ -415,6 +425,7 @@ namespace Inventory
             this.tabControlConfig.Controls.Add(this.tabPageCartColumns);
             this.tabControlConfig.Controls.Add(this.tabPageInventoryPrint);
             this.tabControlConfig.Controls.Add(this.tabPageOfflineSync);
+            this.tabControlConfig.Controls.Add(this.tabPageUpdates);
             this.tabControlConfig.Location = new System.Drawing.Point(-4, -22);
             this.tabControlConfig.Name = "tabControlConfig";
             this.tabControlConfig.SelectedIndex = 0;
@@ -3308,6 +3319,96 @@ namespace Inventory
             this.btnSyncPendingItemsNow.UseVisualStyleBackColor = true;
             this.btnSyncPendingItemsNow.Click += new System.EventHandler(this.btnSyncPendingItemsNow_Click);
             //
+            // tabPageUpdates
+            //
+            this.tabPageUpdates.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageUpdates.Controls.Add(this.lblUpdatesStatus);
+            this.tabPageUpdates.Controls.Add(this.btnRefreshUpdates);
+            this.tabPageUpdates.Controls.Add(this.btnSaveUpdates);
+            this.tabPageUpdates.Controls.Add(this.btnCheckUpdateNow);
+            this.tabPageUpdates.Controls.Add(this.chkUpdateCheckEnabled);
+            this.tabPageUpdates.Controls.Add(this.lblCurrentVersion);
+            this.tabPageUpdates.Controls.Add(this.lblUpdatesHint);
+            this.tabPageUpdates.Location = new System.Drawing.Point(4, 22);
+            this.tabPageUpdates.Name = "tabPageUpdates";
+            this.tabPageUpdates.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageUpdates.Size = new System.Drawing.Size(392, 400);
+            this.tabPageUpdates.TabIndex = 18;
+            this.tabPageUpdates.Text = "Updates";
+            //
+            // lblUpdatesHint
+            //
+            this.lblUpdatesHint.AutoSize = true;
+            this.lblUpdatesHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblUpdatesHint.Location = new System.Drawing.Point(6, 6);
+            this.lblUpdatesHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblUpdatesHint.Name = "lblUpdatesHint";
+            this.lblUpdatesHint.Size = new System.Drawing.Size(370, 52);
+            this.lblUpdatesHint.TabIndex = 0;
+            this.lblUpdatesHint.Text = "Checks the public GitHub repo for a newer published release. This never downlo" +
+    "ads or installs anything - it only notifies so an admin can open the release a" +
+    "nd run the installer manually.";
+            //
+            // lblCurrentVersion
+            //
+            this.lblCurrentVersion.AutoSize = true;
+            this.lblCurrentVersion.Location = new System.Drawing.Point(6, 64);
+            this.lblCurrentVersion.Name = "lblCurrentVersion";
+            this.lblCurrentVersion.Size = new System.Drawing.Size(120, 13);
+            this.lblCurrentVersion.TabIndex = 1;
+            this.lblCurrentVersion.Text = "Installed version: 1.0.0";
+            //
+            // chkUpdateCheckEnabled
+            //
+            this.chkUpdateCheckEnabled.AutoSize = true;
+            this.chkUpdateCheckEnabled.Location = new System.Drawing.Point(6, 90);
+            this.chkUpdateCheckEnabled.Name = "chkUpdateCheckEnabled";
+            this.chkUpdateCheckEnabled.Size = new System.Drawing.Size(220, 17);
+            this.chkUpdateCheckEnabled.TabIndex = 2;
+            this.chkUpdateCheckEnabled.Text = "Automatically check for updates (every 24h)";
+            this.chkUpdateCheckEnabled.UseVisualStyleBackColor = true;
+            //
+            // btnCheckUpdateNow
+            //
+            this.btnCheckUpdateNow.Location = new System.Drawing.Point(6, 118);
+            this.btnCheckUpdateNow.Name = "btnCheckUpdateNow";
+            this.btnCheckUpdateNow.Size = new System.Drawing.Size(180, 30);
+            this.btnCheckUpdateNow.TabIndex = 3;
+            this.btnCheckUpdateNow.Text = "Check for Updates Now";
+            this.btnCheckUpdateNow.UseVisualStyleBackColor = true;
+            this.btnCheckUpdateNow.Click += new System.EventHandler(this.btnCheckUpdateNow_Click);
+            //
+            // btnSaveUpdates
+            //
+            this.btnSaveUpdates.Location = new System.Drawing.Point(6, 192);
+            this.btnSaveUpdates.Name = "btnSaveUpdates";
+            this.btnSaveUpdates.Size = new System.Drawing.Size(180, 30);
+            this.btnSaveUpdates.TabIndex = 4;
+            this.btnSaveUpdates.Text = "Save Update Setting";
+            this.btnSaveUpdates.UseVisualStyleBackColor = true;
+            this.btnSaveUpdates.Click += new System.EventHandler(this.btnSaveUpdates_Click);
+            //
+            // btnRefreshUpdates
+            //
+            this.btnRefreshUpdates.Location = new System.Drawing.Point(192, 192);
+            this.btnRefreshUpdates.Name = "btnRefreshUpdates";
+            this.btnRefreshUpdates.Size = new System.Drawing.Size(180, 30);
+            this.btnRefreshUpdates.TabIndex = 5;
+            this.btnRefreshUpdates.Text = "Refresh Status";
+            this.btnRefreshUpdates.UseVisualStyleBackColor = true;
+            this.btnRefreshUpdates.Click += new System.EventHandler(this.btnRefreshUpdates_Click);
+            //
+            // lblUpdatesStatus
+            //
+            this.lblUpdatesStatus.AutoSize = true;
+            this.lblUpdatesStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
+            this.lblUpdatesStatus.ForeColor = System.Drawing.Color.Gray;
+            this.lblUpdatesStatus.Location = new System.Drawing.Point(6, 230);
+            this.lblUpdatesStatus.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblUpdatesStatus.Name = "lblUpdatesStatus";
+            this.lblUpdatesStatus.Size = new System.Drawing.Size(101, 24);
+            this.lblUpdatesStatus.TabIndex = 6;
+            //
             // openFileDialogAccess
             //
             this.openFileDialogAccess.CheckFileExists = false;
@@ -3437,6 +3538,8 @@ namespace Inventory
             this.tabPageInventoryPrint.PerformLayout();
             this.tabPageOfflineSync.ResumeLayout(false);
             this.tabPageOfflineSync.PerformLayout();
+            this.tabPageUpdates.ResumeLayout(false);
+            this.tabPageUpdates.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -3698,6 +3801,14 @@ namespace Inventory
         private System.Windows.Forms.CheckBox chkPendingItemSyncEnabled;
         private System.Windows.Forms.Label lblPendingItemSyncStatus;
         private System.Windows.Forms.Button btnSyncPendingItemsNow;
+        private System.Windows.Forms.TabPage tabPageUpdates;
+        private System.Windows.Forms.Label lblUpdatesHint;
+        private System.Windows.Forms.Label lblCurrentVersion;
+        private System.Windows.Forms.CheckBox chkUpdateCheckEnabled;
+        private System.Windows.Forms.Button btnCheckUpdateNow;
+        private System.Windows.Forms.Button btnSaveUpdates;
+        private System.Windows.Forms.Button btnRefreshUpdates;
+        private System.Windows.Forms.Label lblUpdatesStatus;
         private System.Windows.Forms.OpenFileDialog openFileDialogAccess;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Button btnSave;

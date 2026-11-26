@@ -302,6 +302,7 @@
     </Compile>
     <Compile Include="Form1.Receipts.cs">
       <DependentUpon>Form1.cs</DependentUpon>
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="GenerateBarcode.cs">
       <SubType>Form</SubType>

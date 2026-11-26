@@ -33,6 +33,7 @@ namespace Inventory
         private const string LowStockEnabledKey = "LOW_STOCK_REMINDER_ENABLED";
         private const string LowStockThresholdKey = "LOW_STOCK_THRESHOLD";
         private const string LowStockIntervalKey = "LOW_STOCK_REMINDER_INTERVAL_MINUTES";
+        private const string UpdateCheckEnabledKey = "UPDATE_CHECK_ENABLED";
 
         private const int DefaultLowStockThreshold = 10;
         private const int DefaultLowStockIntervalMinutes = 30;
@@ -174,6 +175,52 @@ namespace Inventory
                 await UpsertAsync(conn, LowStockEnabledKey, enabled ? "true" : "false");
                 await UpsertAsync(conn, LowStockThresholdKey, threshold.ToString());
                 await UpsertAsync(conn, LowStockIntervalKey, intervalMinutes.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Fails open (checks off) on any connection error, same reasoning as
+        /// GetMaintenanceStatusAsync - a DB hiccup should never be what decides whether the
+        /// update checker runs. Also defaults to off (opt-in) the first time this is read on a
+        /// store that's never visited System Config > Updates, matching Maintenance/Low Stock's
+        /// existing "new feature starts disabled" convention.
+        /// </summary>
+        public static async Task<bool> GetUpdateCheckEnabledAsync()
+        {
+            try
+            {
+                using (var conn = new MySqlConnection(BuildConnectionString()))
+                {
+                    await conn.OpenAsync();
+                    await EnsureTableAsync(conn);
+                    using (var cmd = new MySqlCommand(
+                        $"SELECT config_value FROM {TableName} WHERE config_key = @k", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@k", UpdateCheckEnabledKey);
+                        object result = await cmd.ExecuteScalarAsync();
+                        string value = result as string;
+                        return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) || value == "1";
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Unlike GetUpdateCheckEnabledAsync, this does not swallow failures - it is only ever
+        /// called from System Config's Save button, which already has its own try/catch to show
+        /// the error to the admin who's setting it.
+        /// </summary>
+        public static async Task SetUpdateCheckEnabledAsync(bool enabled)
+        {
+            using (var conn = new MySqlConnection(BuildConnectionString()))
+            {
+                await conn.OpenAsync();
+                await EnsureTableAsync(conn);
+                await UpsertAsync(conn, UpdateCheckEnabledKey, enabled ? "true" : "false");
             }
         }
 

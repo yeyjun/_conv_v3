@@ -131,6 +131,7 @@ namespace Inventory
 
             _ = LoadMaintenanceAsync();
             _ = LoadLowStockReminderAsync();
+            _ = LoadUpdatesAsync();
         }
 
         // Cached from the last successful load/save/refresh so ComputeWarnings (called
@@ -227,6 +228,63 @@ namespace Inventory
         }
 
         private async void btnRefreshLowStock_Click(object sender, EventArgs e) => await LoadLowStockReminderAsync();
+
+        private async Task LoadUpdatesAsync()
+        {
+            lblCurrentVersion.Text = $"Installed version: {AppVersion.Current}";
+            lblUpdatesStatus.Text = "Checking current status...";
+
+            bool enabled = await AppConfigService.GetUpdateCheckEnabledAsync();
+            chkUpdateCheckEnabled.Checked = enabled;
+
+            lblUpdatesStatus.ForeColor = System.Drawing.Color.Gray;
+            lblUpdatesStatus.Text = $"Status: Automatic update checks are currently {(enabled ? "ON" : "OFF")} (live, shared across all terminals).";
+        }
+
+        private async void btnSaveUpdates_Click(object sender, EventArgs e)
+        {
+            btnSaveUpdates.Enabled = false;
+            lblUpdatesStatus.Text = "Saving...";
+
+            try
+            {
+                bool enabled = chkUpdateCheckEnabled.Checked;
+                await AppConfigService.SetUpdateCheckEnabledAsync(enabled);
+
+                lblUpdatesStatus.ForeColor = System.Drawing.Color.Gray;
+                lblUpdatesStatus.Text = $"Status: Automatic update checks are currently {(enabled ? "ON" : "OFF")} (live, shared across all terminals).";
+            }
+            catch (Exception ex)
+            {
+                lblUpdatesStatus.ForeColor = System.Drawing.Color.Tomato;
+                lblUpdatesStatus.Text = $"Failed to save: {ex.Message}";
+            }
+            finally
+            {
+                btnSaveUpdates.Enabled = true;
+            }
+        }
+
+        private async void btnRefreshUpdates_Click(object sender, EventArgs e) => await LoadUpdatesAsync();
+
+        private async void btnCheckUpdateNow_Click(object sender, EventArgs e)
+        {
+            btnCheckUpdateNow.Enabled = false;
+            lblUpdatesStatus.ForeColor = System.Drawing.Color.Gray;
+            lblUpdatesStatus.Text = "Checking GitHub for a newer release...";
+
+            try
+            {
+                UpdateInfo info = await UpdateCheckService.CheckForUpdateAsync();
+                lblUpdatesStatus.Text = info != null
+                    ? $"Update available: {info.TagName} (installed: {AppVersion.Current})."
+                    : $"Up to date (installed: {AppVersion.Current}).";
+            }
+            finally
+            {
+                btnCheckUpdateNow.Enabled = true;
+            }
+        }
 
         private void LoadRemoteControl()
         {

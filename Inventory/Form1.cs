@@ -808,6 +808,51 @@ namespace Inventory
             }
         }
 
+        private System.Windows.Forms.Timer updateCheckTimer;
+        private const int UpdateCheckPollMs = 24 * 60 * 60 * 1000;
+        private Form _updateAvailableForm;
+        private string _dismissedUpdateVersion;
+
+        /// <summary>
+        /// Polls GitHub's Releases API (via UpdateCheckService) for a newer published version -
+        /// 24h, not the 2-minute pattern used by the other watchers, since a release doesn't need
+        /// near-real-time reaction and a short interval risks GitHub's unauthenticated 60-req/hour
+        /// rate limit across multiple terminals sharing one store's public IP. Opt-in via
+        /// UPDATE_CHECK_ENABLED (System Config > Updates), same reasoning as Maintenance/Low Stock
+        /// - a store-wide policy, not a per-machine preference.
+        /// </summary>
+        private void StartUpdateCheckWatcher()
+        {
+            updateCheckTimer = new System.Windows.Forms.Timer { Interval = UpdateCheckPollMs };
+            updateCheckTimer.Tick += async (s, e) => await CheckForUpdateAsync();
+            updateCheckTimer.Start();
+
+            this.FormClosed += (s, e) => updateCheckTimer.Stop();
+
+            // Also check shortly after login, so a terminal doesn't wait out the first 24h poll.
+            _ = CheckForUpdateAsync();
+        }
+
+        private async Task CheckForUpdateAsync()
+        {
+            bool enabled = await AppConfigService.GetUpdateCheckEnabledAsync();
+            if (!enabled)
+                return;
+
+            UpdateInfo info = await UpdateCheckService.CheckForUpdateAsync();
+            if (info == null)
+                return;
+
+            if (info.TagName == _dismissedUpdateVersion)
+                return;
+
+            if (_updateAvailableForm != null && !_updateAvailableForm.IsDisposed)
+                return;
+
+            _updateAvailableForm = UpdateAvailableForm.Show(this, info);
+            _updateAvailableForm.FormClosed += (s, e) => _dismissedUpdateVersion = info.TagName;
+        }
+
         /// <summary>
         /// Reads from the already-cached Items table (DataCacheManager), same as the existing
         /// "Out of Stock Items" dashboard panel's query at LoadDashboardSalesAsync - no extra DB
@@ -1392,6 +1437,7 @@ namespace Inventory
                 StartMaintenanceWatcher();
                 StartTrialExpiryWatcher();
                 StartLowStockReminderWatcher();
+                StartUpdateCheckWatcher();
                 StartNetworkTitleBarWatcher();
                 StartIdleCartWatcher();
                 StartSearchAutoClearWatcher();
