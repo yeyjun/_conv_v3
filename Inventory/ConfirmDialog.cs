@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -9,12 +8,6 @@ namespace Inventory
     {
         private static readonly Color YesColor = Color.FromArgb(46, 125, 50);
         private static readonly Color NoColor = Color.FromArgb(198, 40, 40);
-
-        private static bool AutoDismissEnabled =>
-            !string.Equals(ConfigurationManager.AppSettings["ALERT_AUTO_DISMISS_ENABLED"], "false", StringComparison.OrdinalIgnoreCase);
-
-        private static int AutoDismissSeconds =>
-            int.TryParse(ConfigurationManager.AppSettings["ALERT_AUTO_DISMISS_SECONDS"], out int s) && s > 0 ? s : 5;
 
         public static DialogResult Show(IWin32Window owner, string text, string caption,
             MessageBoxIcon icon = MessageBoxIcon.Question)
@@ -37,11 +30,12 @@ namespace Inventory
                 {
                     Dock = DockStyle.Fill,
                     ColumnCount = 2,
-                    RowCount = 2,
+                    RowCount = 3,
                     AutoSize = true,
                 };
                 layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
                 layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+                layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
                 layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
                 layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
@@ -98,18 +92,16 @@ namespace Inventory
                     }
                 };
 
-                Timer autoDismissTimer = null;
-                if (AutoDismissEnabled)
+                var countdownLabel = new Label
                 {
-                    autoDismissTimer = new Timer { Interval = AutoDismissSeconds * 1000 };
-                    autoDismissTimer.Tick += (s, e) =>
-                    {
-                        form.DialogResult = DialogResult.No;
-                        form.Close();
-                    };
-                    autoDismissTimer.Start();
-                    form.FormClosed += (s, e) => autoDismissTimer.Dispose();
-                }
+                    AutoSize = true,
+                    ForeColor = Color.Gray,
+                    Font = new Font(FontFamily.GenericSansSerif, 7.5f, FontStyle.Italic),
+                    Margin = new Padding(0, 4, 0, 0),
+                };
+                layout.Controls.Add(countdownLabel, 1, 2);
+
+                AutoDismissCountdown.Attach(form, yesButton, countdownLabel);
 
                 YourApp.Data.AppTheme.Exempt(yesButton);
                 YourApp.Data.AppTheme.Exempt(noButton);

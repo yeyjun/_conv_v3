@@ -38,6 +38,7 @@ namespace Inventory
                 "price_perpc DECIMAL(10,2) NOT NULL DEFAULT 0, " +
                 "new_quantity INT NOT NULL DEFAULT 0, " +
                 "qty_inpc INT NOT NULL DEFAULT 0, " +
+                "category VARCHAR(100) NOT NULL DEFAULT '', " +
                 "date_of_entry DATETIME NOT NULL)"),
 
             // sales_token is a legacy free-form TEXT column that used to hold the last-login
@@ -164,6 +165,15 @@ namespace Inventory
                     {
                         progress?.Report("Adding last_seen_utc to user_...");
                         using (var cmd = new MySqlCommand("ALTER TABLE user_ ADD COLUMN last_seen_utc DATETIME NULL", conn))
+                            cmd.ExecuteNonQuery();
+                    }
+
+                    // Same reasoning - items_ pre-dates the category column, so a store that set
+                    // up its database before it existed needs it added rather than created.
+                    if (!ColumnExists(conn, databaseName, "items_", "category"))
+                    {
+                        progress?.Report("Adding category to items_...");
+                        using (var cmd = new MySqlCommand("ALTER TABLE items_ ADD COLUMN category VARCHAR(100) NOT NULL DEFAULT ''", conn))
                             cmd.ExecuteNonQuery();
                     }
                 }

@@ -63,6 +63,12 @@ namespace Inventory
             this.lblAlertAutoDismissSeconds = new System.Windows.Forms.Label();
             this.nud_alertAutoDismissSeconds = new System.Windows.Forms.NumericUpDown();
             this.chkAlertAutoDismissEnabled = new System.Windows.Forms.CheckBox();
+            this.lblSearchAutoClearSeconds = new System.Windows.Forms.Label();
+            this.nud_searchAutoClearSeconds = new System.Windows.Forms.NumericUpDown();
+            this.chkSearchAutoClearEnabled = new System.Windows.Forms.CheckBox();
+            this.lblQtyAutoResetSeconds = new System.Windows.Forms.Label();
+            this.nud_qtyAutoResetSeconds = new System.Windows.Forms.NumericUpDown();
+            this.chkQtyAutoResetEnabled = new System.Windows.Forms.CheckBox();
             this.gbxStartup = new System.Windows.Forms.GroupBox();
             this.chkAutoStartWithWindows = new System.Windows.Forms.CheckBox();
             this.tabPageNetwork = new System.Windows.Forms.TabPage();
@@ -108,6 +114,10 @@ namespace Inventory
             this.lblLayoutEditHint = new System.Windows.Forms.Label();
             this.colorDialogAccent = new System.Windows.Forms.ColorDialog();
             this.tabPageLayout = new System.Windows.Forms.TabPage();
+            this.lblLayoutPreset = new System.Windows.Forms.Label();
+            this.cboLayoutPreset = new System.Windows.Forms.ComboBox();
+            this.btnApplyLayoutPreset = new System.Windows.Forms.Button();
+            this.lblLayoutPresetHint = new System.Windows.Forms.Label();
             this.lblLayoutRevisionHint = new System.Windows.Forms.Label();
             this.txtLayoutRevision = new System.Windows.Forms.TextBox();
             this.btnRefreshLayoutText = new System.Windows.Forms.Button();
@@ -176,6 +186,8 @@ namespace Inventory
             this.btnActivateLicense = new System.Windows.Forms.Button();
             this.btnImportLicenseFile = new System.Windows.Forms.Button();
             this.openFileDialogLicense = new System.Windows.Forms.OpenFileDialog();
+            this.chkTrialAutoClose = new System.Windows.Forms.CheckBox();
+            this.lblTrialAutoCloseHint = new System.Windows.Forms.Label();
             this.tabPageDbSetup = new System.Windows.Forms.TabPage();
             this.lblDbSetupHint = new System.Windows.Forms.Label();
             this.lblNewDbName = new System.Windows.Forms.Label();
@@ -235,11 +247,33 @@ namespace Inventory
             this.btnItemSearchColumnDown = new System.Windows.Forms.Button();
             this.chkItemSearchDateSortDescending = new System.Windows.Forms.CheckBox();
             this.chkItemSearchNameSortDescending = new System.Windows.Forms.CheckBox();
+            this.lblItemSearchBgColor = new System.Windows.Forms.Label();
+            this.chkItemSearchBgCustom = new System.Windows.Forms.CheckBox();
+            this.pnlItemSearchBgSwatch = new System.Windows.Forms.Panel();
+            this.btnPickItemSearchBgColor = new System.Windows.Forms.Button();
+            this.lblItemSearchBgHint = new System.Windows.Forms.Label();
             this.tabPageCartColumns = new System.Windows.Forms.TabPage();
             this.clbCartColumns = new System.Windows.Forms.CheckedListBox();
             this.lblCartColumnsHint = new System.Windows.Forms.Label();
             this.btnCartColumnUp = new System.Windows.Forms.Button();
             this.btnCartColumnDown = new System.Windows.Forms.Button();
+            this.lblCartBgColor = new System.Windows.Forms.Label();
+            this.chkCartBgCustom = new System.Windows.Forms.CheckBox();
+            this.pnlCartBgSwatch = new System.Windows.Forms.Panel();
+            this.btnPickCartBgColor = new System.Windows.Forms.Button();
+            this.lblCartBgHint = new System.Windows.Forms.Label();
+            this.tabPageInventoryPrint = new System.Windows.Forms.TabPage();
+            this.lblInventoryPrintHint = new System.Windows.Forms.Label();
+            this.chkInventoryPrintEnabled = new System.Windows.Forms.CheckBox();
+            this.lblInventoryPrintFrequency = new System.Windows.Forms.Label();
+            this.cbxInventoryPrintFrequency = new System.Windows.Forms.ComboBox();
+            this.lblInventoryPrintStatus = new System.Windows.Forms.Label();
+            this.btnPrintInventoryNow = new System.Windows.Forms.Button();
+            this.tabPageOfflineSync = new System.Windows.Forms.TabPage();
+            this.lblOfflineSyncHint = new System.Windows.Forms.Label();
+            this.chkPendingItemSyncEnabled = new System.Windows.Forms.CheckBox();
+            this.lblPendingItemSyncStatus = new System.Windows.Forms.Label();
+            this.btnSyncPendingItemsNow = new System.Windows.Forms.Button();
             this.openFileDialogAccess = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialogCounterReceipt = new System.Windows.Forms.FolderBrowserDialog();
             this.lblStatus = new System.Windows.Forms.Label();
@@ -258,6 +292,8 @@ namespace Inventory
             ((System.ComponentModel.ISupportInitialize)(this.nud_autoHoldMinutes)).BeginInit();
             this.gbxAlerts.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_alertAutoDismissSeconds)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nud_searchAutoClearSeconds)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nud_qtyAutoResetSeconds)).BeginInit();
             this.gbxStartup.SuspendLayout();
             this.tabPageNetwork.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartNetwork)).BeginInit();
@@ -284,6 +320,8 @@ namespace Inventory
             this.tabPageReceiptTesting.SuspendLayout();
             this.tabPageItemSearch.SuspendLayout();
             this.tabPageCartColumns.SuspendLayout();
+            this.tabPageInventoryPrint.SuspendLayout();
+            this.tabPageOfflineSync.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tbPriceOverride)).BeginInit();
             this.SuspendLayout();
             //
@@ -334,7 +372,9 @@ namespace Inventory
             "Low Stock Reminder",
             "Receipt Testing",
             "Item Search",
-            "Cart Board"});
+            "Cart Board",
+            "Inventory Print Schedule",
+            "Offline Sync"});
             this.lstConfigSections.Location = new System.Drawing.Point(12, 44);
             this.lstConfigSections.Name = "lstConfigSections";
             this.lstConfigSections.Size = new System.Drawing.Size(134, 468);
@@ -373,6 +413,8 @@ namespace Inventory
             this.tabControlConfig.Controls.Add(this.tabPageReceiptTesting);
             this.tabControlConfig.Controls.Add(this.tabPageItemSearch);
             this.tabControlConfig.Controls.Add(this.tabPageCartColumns);
+            this.tabControlConfig.Controls.Add(this.tabPageInventoryPrint);
+            this.tabControlConfig.Controls.Add(this.tabPageOfflineSync);
             this.tabControlConfig.Location = new System.Drawing.Point(-4, -22);
             this.tabControlConfig.Name = "tabControlConfig";
             this.tabControlConfig.SelectedIndex = 0;
@@ -715,10 +757,16 @@ namespace Inventory
             this.gbxAlerts.Controls.Add(this.lblAlertAutoDismissSeconds);
             this.gbxAlerts.Controls.Add(this.nud_alertAutoDismissSeconds);
             this.gbxAlerts.Controls.Add(this.chkAlertAutoDismissEnabled);
+            this.gbxAlerts.Controls.Add(this.lblSearchAutoClearSeconds);
+            this.gbxAlerts.Controls.Add(this.nud_searchAutoClearSeconds);
+            this.gbxAlerts.Controls.Add(this.chkSearchAutoClearEnabled);
+            this.gbxAlerts.Controls.Add(this.lblQtyAutoResetSeconds);
+            this.gbxAlerts.Controls.Add(this.nud_qtyAutoResetSeconds);
+            this.gbxAlerts.Controls.Add(this.chkQtyAutoResetEnabled);
             this.gbxAlerts.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
             this.gbxAlerts.Location = new System.Drawing.Point(6, 617);
             this.gbxAlerts.Name = "gbxAlerts";
-            this.gbxAlerts.Size = new System.Drawing.Size(380, 90);
+            this.gbxAlerts.Size = new System.Drawing.Size(380, 190);
             this.gbxAlerts.TabIndex = 4;
             this.gbxAlerts.TabStop = false;
             this.gbxAlerts.Text = "Alerts";
@@ -733,7 +781,7 @@ namespace Inventory
             this.chkAlertAutoDismissEnabled.Name = "chkAlertAutoDismissEnabled";
             this.chkAlertAutoDismissEnabled.Size = new System.Drawing.Size(280, 17);
             this.chkAlertAutoDismissEnabled.TabIndex = 0;
-            this.chkAlertAutoDismissEnabled.Text = "Automatically dismiss confirmation dialogs after:";
+            this.chkAlertAutoDismissEnabled.Text = "Automatically select the recommended option on dialogs after:";
             this.chkAlertAutoDismissEnabled.UseVisualStyleBackColor = true;
             this.chkAlertAutoDismissEnabled.CheckedChanged += new System.EventHandler(this.chkAlertAutoDismissEnabled_CheckedChanged);
             //
@@ -756,14 +804,84 @@ namespace Inventory
             this.lblAlertAutoDismissSeconds.Name = "lblAlertAutoDismissSeconds";
             this.lblAlertAutoDismissSeconds.Size = new System.Drawing.Size(120, 13);
             this.lblAlertAutoDismissSeconds.TabIndex = 2;
-            this.lblAlertAutoDismissSeconds.Text = "second(s), defaults to No";
+            this.lblAlertAutoDismissSeconds.Text = "second(s)";
+            //
+            // chkSearchAutoClearEnabled
+            //
+            this.chkSearchAutoClearEnabled.AutoSize = true;
+            this.chkSearchAutoClearEnabled.Checked = true;
+            this.chkSearchAutoClearEnabled.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkSearchAutoClearEnabled.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkSearchAutoClearEnabled.Location = new System.Drawing.Point(13, 72);
+            this.chkSearchAutoClearEnabled.Name = "chkSearchAutoClearEnabled";
+            this.chkSearchAutoClearEnabled.Size = new System.Drawing.Size(280, 17);
+            this.chkSearchAutoClearEnabled.TabIndex = 3;
+            this.chkSearchAutoClearEnabled.Text = "Automatically clear the idle item search box after:";
+            this.chkSearchAutoClearEnabled.UseVisualStyleBackColor = true;
+            this.chkSearchAutoClearEnabled.CheckedChanged += new System.EventHandler(this.chkSearchAutoClearEnabled_CheckedChanged);
+            //
+            // nud_searchAutoClearSeconds
+            //
+            this.nud_searchAutoClearSeconds.Location = new System.Drawing.Point(13, 99);
+            this.nud_searchAutoClearSeconds.Maximum = new decimal(new int[] { 300, 0, 0, 0 });
+            this.nud_searchAutoClearSeconds.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            this.nud_searchAutoClearSeconds.Name = "nud_searchAutoClearSeconds";
+            this.nud_searchAutoClearSeconds.Size = new System.Drawing.Size(70, 22);
+            this.nud_searchAutoClearSeconds.TabIndex = 4;
+            this.nud_searchAutoClearSeconds.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.nud_searchAutoClearSeconds.Value = new decimal(new int[] { 10, 0, 0, 0 });
+            //
+            // lblSearchAutoClearSeconds
+            //
+            this.lblSearchAutoClearSeconds.AutoSize = true;
+            this.lblSearchAutoClearSeconds.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblSearchAutoClearSeconds.Location = new System.Drawing.Point(89, 102);
+            this.lblSearchAutoClearSeconds.Name = "lblSearchAutoClearSeconds";
+            this.lblSearchAutoClearSeconds.Size = new System.Drawing.Size(185, 13);
+            this.lblSearchAutoClearSeconds.TabIndex = 5;
+            this.lblSearchAutoClearSeconds.Text = "second(s) idle (dismiss by moving mouse)";
+            //
+            // chkQtyAutoResetEnabled
+            //
+            this.chkQtyAutoResetEnabled.AutoSize = true;
+            this.chkQtyAutoResetEnabled.Checked = true;
+            this.chkQtyAutoResetEnabled.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkQtyAutoResetEnabled.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkQtyAutoResetEnabled.Location = new System.Drawing.Point(13, 119);
+            this.chkQtyAutoResetEnabled.Name = "chkQtyAutoResetEnabled";
+            this.chkQtyAutoResetEnabled.Size = new System.Drawing.Size(280, 17);
+            this.chkQtyAutoResetEnabled.TabIndex = 6;
+            this.chkQtyAutoResetEnabled.Text = "Automatically reset the idle quantity box to 1 after:";
+            this.chkQtyAutoResetEnabled.UseVisualStyleBackColor = true;
+            this.chkQtyAutoResetEnabled.CheckedChanged += new System.EventHandler(this.chkQtyAutoResetEnabled_CheckedChanged);
+            //
+            // nud_qtyAutoResetSeconds
+            //
+            this.nud_qtyAutoResetSeconds.Location = new System.Drawing.Point(13, 146);
+            this.nud_qtyAutoResetSeconds.Maximum = new decimal(new int[] { 60, 0, 0, 0 });
+            this.nud_qtyAutoResetSeconds.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            this.nud_qtyAutoResetSeconds.Name = "nud_qtyAutoResetSeconds";
+            this.nud_qtyAutoResetSeconds.Size = new System.Drawing.Size(70, 22);
+            this.nud_qtyAutoResetSeconds.TabIndex = 7;
+            this.nud_qtyAutoResetSeconds.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.nud_qtyAutoResetSeconds.Value = new decimal(new int[] { 5, 0, 0, 0 });
+            //
+            // lblQtyAutoResetSeconds
+            //
+            this.lblQtyAutoResetSeconds.AutoSize = true;
+            this.lblQtyAutoResetSeconds.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblQtyAutoResetSeconds.Location = new System.Drawing.Point(89, 149);
+            this.lblQtyAutoResetSeconds.Name = "lblQtyAutoResetSeconds";
+            this.lblQtyAutoResetSeconds.Size = new System.Drawing.Size(70, 13);
+            this.lblQtyAutoResetSeconds.TabIndex = 8;
+            this.lblQtyAutoResetSeconds.Text = "second(s)";
             //
             // gbxStartup
             //
             this.gbxStartup.BackColor = System.Drawing.Color.MintCream;
             this.gbxStartup.Controls.Add(this.chkAutoStartWithWindows);
             this.gbxStartup.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.gbxStartup.Location = new System.Drawing.Point(6, 713);
+            this.gbxStartup.Location = new System.Drawing.Point(6, 813);
             this.gbxStartup.Name = "gbxStartup";
             this.gbxStartup.Size = new System.Drawing.Size(380, 60);
             this.gbxStartup.TabIndex = 5;
@@ -1336,6 +1454,7 @@ namespace Inventory
             //
             // tabPageLayout
             //
+            this.tabPageLayout.AutoScroll = true;
             this.tabPageLayout.BackColor = System.Drawing.Color.FloralWhite;
             this.tabPageLayout.Controls.Add(this.btnSaveLayoutFile);
             this.tabPageLayout.Controls.Add(this.btnLoadLayoutFile);
@@ -1343,72 +1462,117 @@ namespace Inventory
             this.tabPageLayout.Controls.Add(this.btnRefreshLayoutText);
             this.tabPageLayout.Controls.Add(this.txtLayoutRevision);
             this.tabPageLayout.Controls.Add(this.lblLayoutRevisionHint);
+            this.tabPageLayout.Controls.Add(this.lblLayoutPresetHint);
+            this.tabPageLayout.Controls.Add(this.btnApplyLayoutPreset);
+            this.tabPageLayout.Controls.Add(this.cboLayoutPreset);
+            this.tabPageLayout.Controls.Add(this.lblLayoutPreset);
             this.tabPageLayout.Location = new System.Drawing.Point(4, 22);
             this.tabPageLayout.Name = "tabPageLayout";
             this.tabPageLayout.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageLayout.Size = new System.Drawing.Size(392, 400);
+            this.tabPageLayout.Size = new System.Drawing.Size(392, 444);
             this.tabPageLayout.TabIndex = 11;
             this.tabPageLayout.Text = "Layout";
+            //
+            // lblLayoutPreset
+            //
+            this.lblLayoutPreset.AutoSize = true;
+            this.lblLayoutPreset.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblLayoutPreset.Location = new System.Drawing.Point(6, 9);
+            this.lblLayoutPreset.Name = "lblLayoutPreset";
+            this.lblLayoutPreset.Size = new System.Drawing.Size(45, 13);
+            this.lblLayoutPreset.TabIndex = 0;
+            this.lblLayoutPreset.Text = "Preset:";
+            //
+            // cboLayoutPreset
+            //
+            this.cboLayoutPreset.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboLayoutPreset.FormattingEnabled = true;
+            this.cboLayoutPreset.Location = new System.Drawing.Point(54, 6);
+            this.cboLayoutPreset.Name = "cboLayoutPreset";
+            this.cboLayoutPreset.Size = new System.Drawing.Size(150, 24);
+            this.cboLayoutPreset.TabIndex = 1;
+            //
+            // btnApplyLayoutPreset
+            //
+            this.btnApplyLayoutPreset.Location = new System.Drawing.Point(210, 4);
+            this.btnApplyLayoutPreset.Name = "btnApplyLayoutPreset";
+            this.btnApplyLayoutPreset.Size = new System.Drawing.Size(120, 28);
+            this.btnApplyLayoutPreset.TabIndex = 2;
+            this.btnApplyLayoutPreset.Text = "Load Preset";
+            this.btnApplyLayoutPreset.UseVisualStyleBackColor = true;
+            this.btnApplyLayoutPreset.Click += new System.EventHandler(this.btnApplyLayoutPreset_Click);
+            //
+            // lblLayoutPresetHint
+            //
+            this.lblLayoutPresetHint.AutoSize = true;
+            this.lblLayoutPresetHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblLayoutPresetHint.Location = new System.Drawing.Point(6, 36);
+            this.lblLayoutPresetHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblLayoutPresetHint.Name = "lblLayoutPresetHint";
+            this.lblLayoutPresetHint.Size = new System.Drawing.Size(300, 26);
+            this.lblLayoutPresetHint.TabIndex = 3;
+            this.lblLayoutPresetHint.Text = "Loads a font size and a set of visible cart/item search columns into their own " +
+    "tabs. Click Save at the bottom of this window to keep it.";
             //
             // lblLayoutRevisionHint
             //
             this.lblLayoutRevisionHint.AutoSize = true;
             this.lblLayoutRevisionHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
-            this.lblLayoutRevisionHint.Location = new System.Drawing.Point(6, 6);
+            this.lblLayoutRevisionHint.Location = new System.Drawing.Point(6, 66);
             this.lblLayoutRevisionHint.MaximumSize = new System.Drawing.Size(370, 0);
             this.lblLayoutRevisionHint.Name = "lblLayoutRevisionHint";
             this.lblLayoutRevisionHint.Size = new System.Drawing.Size(300, 39);
-            this.lblLayoutRevisionHint.TabIndex = 0;
+            this.lblLayoutRevisionHint.TabIndex = 4;
             this.lblLayoutRevisionHint.Text = "The main screen\'s saved control positions and sizes as text. Copy this out as " +
     "a backup before a risky edit, hand-edit it, or load/save whole revisions as files.";
             //
             // txtLayoutRevision
             //
             this.txtLayoutRevision.Font = new System.Drawing.Font("Consolas", 8.25F);
-            this.txtLayoutRevision.Location = new System.Drawing.Point(6, 48);
+            this.txtLayoutRevision.Location = new System.Drawing.Point(6, 108);
             this.txtLayoutRevision.Multiline = true;
             this.txtLayoutRevision.Name = "txtLayoutRevision";
             this.txtLayoutRevision.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtLayoutRevision.Size = new System.Drawing.Size(370, 260);
-            this.txtLayoutRevision.TabIndex = 1;
+            this.txtLayoutRevision.TabIndex = 5;
             this.txtLayoutRevision.WordWrap = false;
             //
             // btnRefreshLayoutText
             //
-            this.btnRefreshLayoutText.Location = new System.Drawing.Point(6, 314);
+            this.btnRefreshLayoutText.Location = new System.Drawing.Point(6, 374);
             this.btnRefreshLayoutText.Name = "btnRefreshLayoutText";
             this.btnRefreshLayoutText.Size = new System.Drawing.Size(120, 28);
-            this.btnRefreshLayoutText.TabIndex = 2;
+            this.btnRefreshLayoutText.TabIndex = 6;
             this.btnRefreshLayoutText.Text = "Refresh";
             this.btnRefreshLayoutText.UseVisualStyleBackColor = true;
             this.btnRefreshLayoutText.Click += new System.EventHandler(this.btnRefreshLayoutText_Click);
             //
             // btnApplyLayoutText
             //
-            this.btnApplyLayoutText.Location = new System.Drawing.Point(132, 314);
+            this.btnApplyLayoutText.Location = new System.Drawing.Point(132, 374);
             this.btnApplyLayoutText.Name = "btnApplyLayoutText";
             this.btnApplyLayoutText.Size = new System.Drawing.Size(120, 28);
-            this.btnApplyLayoutText.TabIndex = 3;
+            this.btnApplyLayoutText.TabIndex = 7;
             this.btnApplyLayoutText.Text = "Apply";
             this.btnApplyLayoutText.UseVisualStyleBackColor = true;
             this.btnApplyLayoutText.Click += new System.EventHandler(this.btnApplyLayoutText_Click);
             //
             // btnLoadLayoutFile
             //
-            this.btnLoadLayoutFile.Location = new System.Drawing.Point(6, 348);
+            this.btnLoadLayoutFile.Location = new System.Drawing.Point(6, 408);
             this.btnLoadLayoutFile.Name = "btnLoadLayoutFile";
             this.btnLoadLayoutFile.Size = new System.Drawing.Size(120, 28);
-            this.btnLoadLayoutFile.TabIndex = 4;
+            this.btnLoadLayoutFile.TabIndex = 8;
             this.btnLoadLayoutFile.Text = "Load from File...";
             this.btnLoadLayoutFile.UseVisualStyleBackColor = true;
             this.btnLoadLayoutFile.Click += new System.EventHandler(this.btnLoadLayoutFile_Click);
             //
             // btnSaveLayoutFile
             //
-            this.btnSaveLayoutFile.Location = new System.Drawing.Point(132, 348);
+            this.btnSaveLayoutFile.Location = new System.Drawing.Point(132, 408);
             this.btnSaveLayoutFile.Name = "btnSaveLayoutFile";
             this.btnSaveLayoutFile.Size = new System.Drawing.Size(120, 28);
-            this.btnSaveLayoutFile.TabIndex = 5;
+            this.btnSaveLayoutFile.TabIndex = 9;
             this.btnSaveLayoutFile.Text = "Save to File...";
             this.btnSaveLayoutFile.UseVisualStyleBackColor = true;
             this.btnSaveLayoutFile.Click += new System.EventHandler(this.btnSaveLayoutFile_Click);
@@ -1949,6 +2113,8 @@ namespace Inventory
             // tabPageTrial
             //
             this.tabPageTrial.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageTrial.Controls.Add(this.lblTrialAutoCloseHint);
+            this.tabPageTrial.Controls.Add(this.chkTrialAutoClose);
             this.tabPageTrial.Controls.Add(this.btnImportLicenseFile);
             this.tabPageTrial.Controls.Add(this.btnActivateLicense);
             this.tabPageTrial.Controls.Add(this.cmbSubscriptionTier);
@@ -2098,6 +2264,29 @@ namespace Inventory
             this.openFileDialogLicense.DefaultExt = "tmrgo";
             this.openFileDialogLicense.Filter = "License Key File (*.tmrgo)|*.tmrgo|All files (*.*)|*.*";
             this.openFileDialogLicense.Title = "Choose License Key File";
+            //
+            // chkTrialAutoClose
+            //
+            this.chkTrialAutoClose.AutoSize = true;
+            this.chkTrialAutoClose.Location = new System.Drawing.Point(6, 285);
+            this.chkTrialAutoClose.Name = "chkTrialAutoClose";
+            this.chkTrialAutoClose.Size = new System.Drawing.Size(150, 17);
+            this.chkTrialAutoClose.TabIndex = 11;
+            this.chkTrialAutoClose.Text = "Auto-close app on expiry";
+            this.chkTrialAutoClose.UseVisualStyleBackColor = true;
+            //
+            // lblTrialAutoCloseHint
+            //
+            this.lblTrialAutoCloseHint.AutoSize = true;
+            this.lblTrialAutoCloseHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
+            this.lblTrialAutoCloseHint.ForeColor = System.Drawing.Color.Gray;
+            this.lblTrialAutoCloseHint.Location = new System.Drawing.Point(6, 305);
+            this.lblTrialAutoCloseHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblTrialAutoCloseHint.Name = "lblTrialAutoCloseHint";
+            this.lblTrialAutoCloseHint.Size = new System.Drawing.Size(101, 24);
+            this.lblTrialAutoCloseHint.TabIndex = 12;
+            this.lblTrialAutoCloseHint.Text = "If checked, a terminal already running will close itself as soon as the trial o" +
+    "r license expires, instead of waiting for the next restart.";
             //
             // tabPageDbSetup
             //
@@ -2723,6 +2912,7 @@ namespace Inventory
             //
             // tabPageItemSearch
             //
+            this.tabPageItemSearch.AutoScroll = true;
             this.tabPageItemSearch.BackColor = System.Drawing.Color.FloralWhite;
             this.tabPageItemSearch.Controls.Add(this.clbItemSearchColumns);
             this.tabPageItemSearch.Controls.Add(this.btnItemSearchColumnUp);
@@ -2730,10 +2920,15 @@ namespace Inventory
             this.tabPageItemSearch.Controls.Add(this.chkItemSearchDateSortDescending);
             this.tabPageItemSearch.Controls.Add(this.chkItemSearchNameSortDescending);
             this.tabPageItemSearch.Controls.Add(this.lblItemSearchHint);
+            this.tabPageItemSearch.Controls.Add(this.lblItemSearchBgColor);
+            this.tabPageItemSearch.Controls.Add(this.chkItemSearchBgCustom);
+            this.tabPageItemSearch.Controls.Add(this.pnlItemSearchBgSwatch);
+            this.tabPageItemSearch.Controls.Add(this.btnPickItemSearchBgColor);
+            this.tabPageItemSearch.Controls.Add(this.lblItemSearchBgHint);
             this.tabPageItemSearch.Location = new System.Drawing.Point(4, 22);
             this.tabPageItemSearch.Name = "tabPageItemSearch";
             this.tabPageItemSearch.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageItemSearch.Size = new System.Drawing.Size(392, 400);
+            this.tabPageItemSearch.Size = new System.Drawing.Size(392, 440);
             this.tabPageItemSearch.TabIndex = 12;
             this.tabPageItemSearch.Text = "Item Search";
             //
@@ -2801,17 +2996,75 @@ namespace Inventory
             this.chkItemSearchNameSortDescending.Text = "Browse/refresh results: descending (Z-A)";
             this.chkItemSearchNameSortDescending.UseVisualStyleBackColor = true;
             //
+            // lblItemSearchBgColor
+            //
+            this.lblItemSearchBgColor.AutoSize = true;
+            this.lblItemSearchBgColor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.lblItemSearchBgColor.Location = new System.Drawing.Point(6, 386);
+            this.lblItemSearchBgColor.Name = "lblItemSearchBgColor";
+            this.lblItemSearchBgColor.Size = new System.Drawing.Size(130, 13);
+            this.lblItemSearchBgColor.TabIndex = 6;
+            this.lblItemSearchBgColor.Text = "Search grid background:";
+            //
+            // chkItemSearchBgCustom
+            //
+            this.chkItemSearchBgCustom.AutoSize = true;
+            this.chkItemSearchBgCustom.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkItemSearchBgCustom.Location = new System.Drawing.Point(6, 404);
+            this.chkItemSearchBgCustom.Name = "chkItemSearchBgCustom";
+            this.chkItemSearchBgCustom.Size = new System.Drawing.Size(230, 17);
+            this.chkItemSearchBgCustom.TabIndex = 7;
+            this.chkItemSearchBgCustom.Text = "Use a custom color (unchecked = transparent)";
+            this.chkItemSearchBgCustom.UseVisualStyleBackColor = true;
+            this.chkItemSearchBgCustom.CheckedChanged += new System.EventHandler(this.chkItemSearchBgCustom_CheckedChanged);
+            //
+            // pnlItemSearchBgSwatch
+            //
+            this.pnlItemSearchBgSwatch.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlItemSearchBgSwatch.Location = new System.Drawing.Point(242, 403);
+            this.pnlItemSearchBgSwatch.Name = "pnlItemSearchBgSwatch";
+            this.pnlItemSearchBgSwatch.Size = new System.Drawing.Size(60, 23);
+            this.pnlItemSearchBgSwatch.TabIndex = 8;
+            //
+            // btnPickItemSearchBgColor
+            //
+            this.btnPickItemSearchBgColor.Location = new System.Drawing.Point(312, 402);
+            this.btnPickItemSearchBgColor.Name = "btnPickItemSearchBgColor";
+            this.btnPickItemSearchBgColor.Size = new System.Drawing.Size(74, 25);
+            this.btnPickItemSearchBgColor.TabIndex = 9;
+            this.btnPickItemSearchBgColor.Text = "Choose...";
+            this.btnPickItemSearchBgColor.UseVisualStyleBackColor = true;
+            this.btnPickItemSearchBgColor.Click += new System.EventHandler(this.btnPickItemSearchBgColor_Click);
+            //
+            // lblItemSearchBgHint
+            //
+            this.lblItemSearchBgHint.AutoSize = true;
+            this.lblItemSearchBgHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
+            this.lblItemSearchBgHint.ForeColor = System.Drawing.Color.Gray;
+            this.lblItemSearchBgHint.Location = new System.Drawing.Point(6, 428);
+            this.lblItemSearchBgHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblItemSearchBgHint.Name = "lblItemSearchBgHint";
+            this.lblItemSearchBgHint.Size = new System.Drawing.Size(101, 12);
+            this.lblItemSearchBgHint.TabIndex = 10;
+            this.lblItemSearchBgHint.Text = "Transparent blends the grid with its panel instead of the gray DataGridView default. Applies immediately to every open window as soon as you save.";
+            //
             // tabPageCartColumns
             //
+            this.tabPageCartColumns.AutoScroll = true;
             this.tabPageCartColumns.BackColor = System.Drawing.Color.FloralWhite;
             this.tabPageCartColumns.Controls.Add(this.clbCartColumns);
             this.tabPageCartColumns.Controls.Add(this.btnCartColumnUp);
             this.tabPageCartColumns.Controls.Add(this.btnCartColumnDown);
             this.tabPageCartColumns.Controls.Add(this.lblCartColumnsHint);
+            this.tabPageCartColumns.Controls.Add(this.lblCartBgColor);
+            this.tabPageCartColumns.Controls.Add(this.chkCartBgCustom);
+            this.tabPageCartColumns.Controls.Add(this.pnlCartBgSwatch);
+            this.tabPageCartColumns.Controls.Add(this.btnPickCartBgColor);
+            this.tabPageCartColumns.Controls.Add(this.lblCartBgHint);
             this.tabPageCartColumns.Location = new System.Drawing.Point(4, 22);
             this.tabPageCartColumns.Name = "tabPageCartColumns";
             this.tabPageCartColumns.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageCartColumns.Size = new System.Drawing.Size(392, 372);
+            this.tabPageCartColumns.Size = new System.Drawing.Size(392, 440);
             this.tabPageCartColumns.TabIndex = 13;
             this.tabPageCartColumns.Text = "Cart Board";
             //
@@ -2826,6 +3079,58 @@ namespace Inventory
             this.lblCartColumnsHint.TabIndex = 0;
             this.lblCartColumnsHint.Text = "Uncheck a column to hide it, or select one and use Move Up/Down to reorder it -" +
     " applies to the cart board on the main POS screen.";
+            //
+            // lblCartBgColor
+            //
+            this.lblCartBgColor.AutoSize = true;
+            this.lblCartBgColor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.lblCartBgColor.Location = new System.Drawing.Point(6, 376);
+            this.lblCartBgColor.Name = "lblCartBgColor";
+            this.lblCartBgColor.Size = new System.Drawing.Size(120, 13);
+            this.lblCartBgColor.TabIndex = 4;
+            this.lblCartBgColor.Text = "Cart board background:";
+            //
+            // chkCartBgCustom
+            //
+            this.chkCartBgCustom.AutoSize = true;
+            this.chkCartBgCustom.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkCartBgCustom.Location = new System.Drawing.Point(6, 394);
+            this.chkCartBgCustom.Name = "chkCartBgCustom";
+            this.chkCartBgCustom.Size = new System.Drawing.Size(230, 17);
+            this.chkCartBgCustom.TabIndex = 5;
+            this.chkCartBgCustom.Text = "Use a custom color (unchecked = transparent)";
+            this.chkCartBgCustom.UseVisualStyleBackColor = true;
+            this.chkCartBgCustom.CheckedChanged += new System.EventHandler(this.chkCartBgCustom_CheckedChanged);
+            //
+            // pnlCartBgSwatch
+            //
+            this.pnlCartBgSwatch.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlCartBgSwatch.Location = new System.Drawing.Point(242, 393);
+            this.pnlCartBgSwatch.Name = "pnlCartBgSwatch";
+            this.pnlCartBgSwatch.Size = new System.Drawing.Size(60, 23);
+            this.pnlCartBgSwatch.TabIndex = 6;
+            //
+            // btnPickCartBgColor
+            //
+            this.btnPickCartBgColor.Location = new System.Drawing.Point(312, 392);
+            this.btnPickCartBgColor.Name = "btnPickCartBgColor";
+            this.btnPickCartBgColor.Size = new System.Drawing.Size(74, 25);
+            this.btnPickCartBgColor.TabIndex = 7;
+            this.btnPickCartBgColor.Text = "Choose...";
+            this.btnPickCartBgColor.UseVisualStyleBackColor = true;
+            this.btnPickCartBgColor.Click += new System.EventHandler(this.btnPickCartBgColor_Click);
+            //
+            // lblCartBgHint
+            //
+            this.lblCartBgHint.AutoSize = true;
+            this.lblCartBgHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
+            this.lblCartBgHint.ForeColor = System.Drawing.Color.Gray;
+            this.lblCartBgHint.Location = new System.Drawing.Point(6, 418);
+            this.lblCartBgHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblCartBgHint.Name = "lblCartBgHint";
+            this.lblCartBgHint.Size = new System.Drawing.Size(101, 12);
+            this.lblCartBgHint.TabIndex = 8;
+            this.lblCartBgHint.Text = "Transparent blends the grid with its panel instead of the gray DataGridView default. Applies immediately to every open window as soon as you save.";
             //
             // clbCartColumns
             //
@@ -2857,6 +3162,151 @@ namespace Inventory
             this.btnCartColumnDown.Text = "Move Down";
             this.btnCartColumnDown.UseVisualStyleBackColor = true;
             this.btnCartColumnDown.Click += new System.EventHandler(this.btnCartColumnDown_Click);
+            //
+            // tabPageInventoryPrint
+            //
+            this.tabPageInventoryPrint.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageInventoryPrint.Controls.Add(this.lblInventoryPrintHint);
+            this.tabPageInventoryPrint.Controls.Add(this.chkInventoryPrintEnabled);
+            this.tabPageInventoryPrint.Controls.Add(this.lblInventoryPrintFrequency);
+            this.tabPageInventoryPrint.Controls.Add(this.cbxInventoryPrintFrequency);
+            this.tabPageInventoryPrint.Controls.Add(this.lblInventoryPrintStatus);
+            this.tabPageInventoryPrint.Controls.Add(this.btnPrintInventoryNow);
+            this.tabPageInventoryPrint.Location = new System.Drawing.Point(4, 22);
+            this.tabPageInventoryPrint.Name = "tabPageInventoryPrint";
+            this.tabPageInventoryPrint.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageInventoryPrint.Size = new System.Drawing.Size(392, 440);
+            this.tabPageInventoryPrint.TabIndex = 16;
+            this.tabPageInventoryPrint.Text = "Inventory Print Schedule";
+            //
+            // lblInventoryPrintHint
+            //
+            this.lblInventoryPrintHint.AutoSize = true;
+            this.lblInventoryPrintHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblInventoryPrintHint.Location = new System.Drawing.Point(6, 6);
+            this.lblInventoryPrintHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblInventoryPrintHint.Name = "lblInventoryPrintHint";
+            this.lblInventoryPrintHint.Size = new System.Drawing.Size(300, 65);
+            this.lblInventoryPrintHint.TabIndex = 0;
+            this.lblInventoryPrintHint.Text = "Automatically prints a categorized (Out of Stock / Low Stock / In Stock) invent" +
+    "ory report, items sorted alphabetically within each category, to the configured" +
+    " receipt printer (Printer tab) on the chosen cadence. \"Print Preview\" shows wha" +
+    "t would print without using the schedule.";
+            //
+            // chkInventoryPrintEnabled
+            //
+            this.chkInventoryPrintEnabled.AutoSize = true;
+            this.chkInventoryPrintEnabled.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkInventoryPrintEnabled.Location = new System.Drawing.Point(6, 80);
+            this.chkInventoryPrintEnabled.Name = "chkInventoryPrintEnabled";
+            this.chkInventoryPrintEnabled.Size = new System.Drawing.Size(280, 17);
+            this.chkInventoryPrintEnabled.TabIndex = 1;
+            this.chkInventoryPrintEnabled.Text = "Automatically print the inventory report";
+            this.chkInventoryPrintEnabled.UseVisualStyleBackColor = true;
+            //
+            // lblInventoryPrintFrequency
+            //
+            this.lblInventoryPrintFrequency.AutoSize = true;
+            this.lblInventoryPrintFrequency.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblInventoryPrintFrequency.Location = new System.Drawing.Point(6, 110);
+            this.lblInventoryPrintFrequency.Name = "lblInventoryPrintFrequency";
+            this.lblInventoryPrintFrequency.Size = new System.Drawing.Size(63, 13);
+            this.lblInventoryPrintFrequency.TabIndex = 2;
+            this.lblInventoryPrintFrequency.Text = "Frequency:";
+            //
+            // cbxInventoryPrintFrequency
+            //
+            this.cbxInventoryPrintFrequency.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxInventoryPrintFrequency.FormattingEnabled = true;
+            this.cbxInventoryPrintFrequency.Location = new System.Drawing.Point(100, 107);
+            this.cbxInventoryPrintFrequency.Name = "cbxInventoryPrintFrequency";
+            this.cbxInventoryPrintFrequency.Size = new System.Drawing.Size(150, 21);
+            this.cbxInventoryPrintFrequency.TabIndex = 3;
+            //
+            // lblInventoryPrintStatus
+            //
+            this.lblInventoryPrintStatus.AutoSize = true;
+            this.lblInventoryPrintStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
+            this.lblInventoryPrintStatus.ForeColor = System.Drawing.Color.Gray;
+            this.lblInventoryPrintStatus.Location = new System.Drawing.Point(6, 144);
+            this.lblInventoryPrintStatus.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblInventoryPrintStatus.Name = "lblInventoryPrintStatus";
+            this.lblInventoryPrintStatus.Size = new System.Drawing.Size(107, 24);
+            this.lblInventoryPrintStatus.TabIndex = 4;
+            this.lblInventoryPrintStatus.Text = "Last printed: never\r\nNext due: -";
+            //
+            // btnPrintInventoryNow
+            //
+            this.btnPrintInventoryNow.Location = new System.Drawing.Point(6, 184);
+            this.btnPrintInventoryNow.Name = "btnPrintInventoryNow";
+            this.btnPrintInventoryNow.Size = new System.Drawing.Size(180, 30);
+            this.btnPrintInventoryNow.TabIndex = 5;
+            this.btnPrintInventoryNow.Text = "Print Preview...";
+            this.btnPrintInventoryNow.UseVisualStyleBackColor = true;
+            this.btnPrintInventoryNow.Click += new System.EventHandler(this.btnPrintInventoryNow_Click);
+            //
+            // tabPageOfflineSync
+            //
+            this.tabPageOfflineSync.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageOfflineSync.Controls.Add(this.lblOfflineSyncHint);
+            this.tabPageOfflineSync.Controls.Add(this.chkPendingItemSyncEnabled);
+            this.tabPageOfflineSync.Controls.Add(this.lblPendingItemSyncStatus);
+            this.tabPageOfflineSync.Controls.Add(this.btnSyncPendingItemsNow);
+            this.tabPageOfflineSync.Location = new System.Drawing.Point(4, 22);
+            this.tabPageOfflineSync.Name = "tabPageOfflineSync";
+            this.tabPageOfflineSync.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageOfflineSync.Size = new System.Drawing.Size(392, 440);
+            this.tabPageOfflineSync.TabIndex = 17;
+            this.tabPageOfflineSync.Text = "Offline Sync";
+            //
+            // lblOfflineSyncHint
+            //
+            this.lblOfflineSyncHint.AutoSize = true;
+            this.lblOfflineSyncHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblOfflineSyncHint.Location = new System.Drawing.Point(6, 6);
+            this.lblOfflineSyncHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblOfflineSyncHint.Name = "lblOfflineSyncHint";
+            this.lblOfflineSyncHint.Size = new System.Drawing.Size(300, 65);
+            this.lblOfflineSyncHint.TabIndex = 0;
+            this.lblOfflineSyncHint.Text = "Items added while the database was unreachable (AddItemForm\'s offline fallback)" +
+    " are queued locally. When the connection comes back, this pushes them into the " +
+    "real database - without it, they would only ever show up in this terminal\'s own" +
+    " cache.";
+            //
+            // chkPendingItemSyncEnabled
+            //
+            this.chkPendingItemSyncEnabled.AutoSize = true;
+            this.chkPendingItemSyncEnabled.Checked = true;
+            this.chkPendingItemSyncEnabled.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkPendingItemSyncEnabled.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkPendingItemSyncEnabled.Location = new System.Drawing.Point(6, 80);
+            this.chkPendingItemSyncEnabled.Name = "chkPendingItemSyncEnabled";
+            this.chkPendingItemSyncEnabled.Size = new System.Drawing.Size(320, 17);
+            this.chkPendingItemSyncEnabled.TabIndex = 1;
+            this.chkPendingItemSyncEnabled.Text = "Automatically sync offline-queued items when reconnected";
+            this.chkPendingItemSyncEnabled.UseVisualStyleBackColor = true;
+            //
+            // lblPendingItemSyncStatus
+            //
+            this.lblPendingItemSyncStatus.AutoSize = true;
+            this.lblPendingItemSyncStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
+            this.lblPendingItemSyncStatus.ForeColor = System.Drawing.Color.Gray;
+            this.lblPendingItemSyncStatus.Location = new System.Drawing.Point(6, 110);
+            this.lblPendingItemSyncStatus.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblPendingItemSyncStatus.Name = "lblPendingItemSyncStatus";
+            this.lblPendingItemSyncStatus.Size = new System.Drawing.Size(130, 12);
+            this.lblPendingItemSyncStatus.TabIndex = 2;
+            this.lblPendingItemSyncStatus.Text = "0 item(s) queued offline.";
+            //
+            // btnSyncPendingItemsNow
+            //
+            this.btnSyncPendingItemsNow.Location = new System.Drawing.Point(6, 134);
+            this.btnSyncPendingItemsNow.Name = "btnSyncPendingItemsNow";
+            this.btnSyncPendingItemsNow.Size = new System.Drawing.Size(180, 30);
+            this.btnSyncPendingItemsNow.TabIndex = 3;
+            this.btnSyncPendingItemsNow.Text = "Sync Now";
+            this.btnSyncPendingItemsNow.UseVisualStyleBackColor = true;
+            this.btnSyncPendingItemsNow.Click += new System.EventHandler(this.btnSyncPendingItemsNow_Click);
             //
             // openFileDialogAccess
             //
@@ -2935,6 +3385,8 @@ namespace Inventory
             this.gbxAlerts.ResumeLayout(false);
             this.gbxAlerts.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_alertAutoDismissSeconds)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nud_searchAutoClearSeconds)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nud_qtyAutoResetSeconds)).EndInit();
             this.gbxStartup.ResumeLayout(false);
             this.gbxStartup.PerformLayout();
             this.tabPageNetwork.ResumeLayout(false);
@@ -2981,6 +3433,10 @@ namespace Inventory
             this.tabPageItemSearch.PerformLayout();
             this.tabPageCartColumns.ResumeLayout(false);
             this.tabPageCartColumns.PerformLayout();
+            this.tabPageInventoryPrint.ResumeLayout(false);
+            this.tabPageInventoryPrint.PerformLayout();
+            this.tabPageOfflineSync.ResumeLayout(false);
+            this.tabPageOfflineSync.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -3030,6 +3486,12 @@ namespace Inventory
         private System.Windows.Forms.CheckBox chkAlertAutoDismissEnabled;
         private System.Windows.Forms.NumericUpDown nud_alertAutoDismissSeconds;
         private System.Windows.Forms.Label lblAlertAutoDismissSeconds;
+        private System.Windows.Forms.CheckBox chkSearchAutoClearEnabled;
+        private System.Windows.Forms.NumericUpDown nud_searchAutoClearSeconds;
+        private System.Windows.Forms.Label lblSearchAutoClearSeconds;
+        private System.Windows.Forms.CheckBox chkQtyAutoResetEnabled;
+        private System.Windows.Forms.NumericUpDown nud_qtyAutoResetSeconds;
+        private System.Windows.Forms.Label lblQtyAutoResetSeconds;
         private System.Windows.Forms.GroupBox gbxStartup;
         private System.Windows.Forms.CheckBox chkAutoStartWithWindows;
         private System.Windows.Forms.TabPage tabPageNetwork;
@@ -3076,6 +3538,10 @@ namespace Inventory
         private System.Windows.Forms.Label lblLayoutEditHint;
         private System.Windows.Forms.ColorDialog colorDialogAccent;
         private System.Windows.Forms.TabPage tabPageLayout;
+        private System.Windows.Forms.Label lblLayoutPreset;
+        private System.Windows.Forms.ComboBox cboLayoutPreset;
+        private System.Windows.Forms.Button btnApplyLayoutPreset;
+        private System.Windows.Forms.Label lblLayoutPresetHint;
         private System.Windows.Forms.Label lblLayoutRevisionHint;
         private System.Windows.Forms.TextBox txtLayoutRevision;
         private System.Windows.Forms.Button btnRefreshLayoutText;
@@ -3144,6 +3610,8 @@ namespace Inventory
         private System.Windows.Forms.Button btnActivateLicense;
         private System.Windows.Forms.Button btnImportLicenseFile;
         private System.Windows.Forms.OpenFileDialog openFileDialogLicense;
+        private System.Windows.Forms.CheckBox chkTrialAutoClose;
+        private System.Windows.Forms.Label lblTrialAutoCloseHint;
         private System.Windows.Forms.TabPage tabPageDbSetup;
         private System.Windows.Forms.Label lblDbSetupHint;
         private System.Windows.Forms.Label lblNewDbName;
@@ -3203,11 +3671,33 @@ namespace Inventory
         private System.Windows.Forms.Button btnItemSearchColumnDown;
         private System.Windows.Forms.CheckBox chkItemSearchDateSortDescending;
         private System.Windows.Forms.CheckBox chkItemSearchNameSortDescending;
+        private System.Windows.Forms.Label lblItemSearchBgColor;
+        private System.Windows.Forms.CheckBox chkItemSearchBgCustom;
+        private System.Windows.Forms.Panel pnlItemSearchBgSwatch;
+        private System.Windows.Forms.Button btnPickItemSearchBgColor;
+        private System.Windows.Forms.Label lblItemSearchBgHint;
         private System.Windows.Forms.TabPage tabPageCartColumns;
         private System.Windows.Forms.CheckedListBox clbCartColumns;
         private System.Windows.Forms.Label lblCartColumnsHint;
         private System.Windows.Forms.Button btnCartColumnUp;
         private System.Windows.Forms.Button btnCartColumnDown;
+        private System.Windows.Forms.Label lblCartBgColor;
+        private System.Windows.Forms.CheckBox chkCartBgCustom;
+        private System.Windows.Forms.Panel pnlCartBgSwatch;
+        private System.Windows.Forms.Button btnPickCartBgColor;
+        private System.Windows.Forms.Label lblCartBgHint;
+        private System.Windows.Forms.TabPage tabPageInventoryPrint;
+        private System.Windows.Forms.Label lblInventoryPrintHint;
+        private System.Windows.Forms.CheckBox chkInventoryPrintEnabled;
+        private System.Windows.Forms.Label lblInventoryPrintFrequency;
+        private System.Windows.Forms.ComboBox cbxInventoryPrintFrequency;
+        private System.Windows.Forms.Label lblInventoryPrintStatus;
+        private System.Windows.Forms.Button btnPrintInventoryNow;
+        private System.Windows.Forms.TabPage tabPageOfflineSync;
+        private System.Windows.Forms.Label lblOfflineSyncHint;
+        private System.Windows.Forms.CheckBox chkPendingItemSyncEnabled;
+        private System.Windows.Forms.Label lblPendingItemSyncStatus;
+        private System.Windows.Forms.Button btnSyncPendingItemsNow;
         private System.Windows.Forms.OpenFileDialog openFileDialogAccess;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Button btnSave;

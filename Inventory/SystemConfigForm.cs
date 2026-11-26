@@ -43,6 +43,8 @@ namespace Inventory
             InitializeComponent();
             YourApp.Data.AppTheme.Exempt(pnlBgSwatch);
             YourApp.Data.AppTheme.Exempt(pnlFgSwatch);
+            YourApp.Data.AppTheme.Exempt(pnlCartBgSwatch);
+            YourApp.Data.AppTheme.Exempt(pnlItemSearchBgSwatch);
             YourApp.Data.AppTheme.Exempt(lblWarningBar);
             YourApp.Data.LogoCache.ApplyTo(this);
             YourApp.Data.AppTheme.ApplyTo(this);
@@ -116,7 +118,10 @@ namespace Inventory
             LoadReceiptPrinter();
             LoadAppearance();
             LoadLayoutRevision();
+            LoadLayoutPresets();
             LoadReportSchedule();
+            LoadInventoryPrintSchedule();
+            LoadOfflineSync();
             LoadDataSync();
             LoadTrialLicense();
             LoadDbSetup();
@@ -402,6 +407,7 @@ namespace Inventory
         {
             chkTrialEnabled.Checked = TrialLicense.IsEnabled;
             nud_trialDays.Value = Math.Min(Math.Max(TrialLicense.TrialDays, nud_trialDays.Minimum), nud_trialDays.Maximum);
+            chkTrialAutoClose.Checked = TrialLicense.AutoCloseOnExpiryEnabled;
             SetTrialControlsEnabled(chkTrialEnabled.Checked);
 
             int tierIndex = cmbSubscriptionTier.Items.IndexOf(TrialLicense.SubscriptionTier);
@@ -626,6 +632,102 @@ namespace Inventory
             UpdateScheduleStatusLabel();
         }
 
+        private void LoadInventoryPrintSchedule()
+        {
+            cbxInventoryPrintFrequency.Items.Clear();
+            cbxInventoryPrintFrequency.Items.AddRange(Enum.GetNames(typeof(ScheduledReportService.Frequency)));
+
+            int index = cbxInventoryPrintFrequency.Items.IndexOf(ScheduledInventoryPrintService.GetConfiguredFrequency().ToString());
+            cbxInventoryPrintFrequency.SelectedIndex = index >= 0 ? index : cbxInventoryPrintFrequency.Items.IndexOf("Weekly");
+
+            chkInventoryPrintEnabled.Checked = ScheduledInventoryPrintService.IsScheduleEnabled;
+
+            UpdateInventoryPrintStatusLabel();
+        }
+
+        private void UpdateInventoryPrintStatusLabel()
+        {
+            DateTime? lastPrinted = ScheduledInventoryPrintService.GetLastPrinted();
+            DateTime? nextDue = ScheduledInventoryPrintService.GetNextDue();
+
+            string lastPrintedText = lastPrinted.HasValue ? lastPrinted.Value.ToString("g") : "never";
+            string nextDueText = nextDue.HasValue ? nextDue.Value.ToString("g") : "as soon as it's enabled and a receipt printer is configured";
+
+            lblInventoryPrintStatus.Text = $"Last printed: {lastPrintedText}\nNext due: {nextDueText}";
+        }
+
+        private async void btnPrintInventoryNow_Click(object sender, EventArgs e)
+        {
+            btnPrintInventoryNow.Enabled = false;
+            ShowStatus("Preparing inventory report preview...", isError: false);
+            try
+            {
+                using (PrintDocument document = await ScheduledInventoryPrintService.CreatePrintDocumentAsync())
+                using (var preview = new PrintPreviewDialog())
+                {
+                    preview.Document = document;
+                    preview.Width = 700;
+                    preview.Height = 700;
+                    preview.Document.PrintController = new StandardPrintController();
+
+                    // Always opens at a literal 100% zoom (actual print scale) rather than
+                    // AutoZoom's fit-to-window, which rescaled the page to whatever size the
+                    // dialog happened to be instead of showing it the size it will really print.
+                    preview.PrintPreviewControl.AutoZoom = false;
+                    preview.PrintPreviewControl.Zoom = 1.0;
+                    ShowStatus("", isError: false);
+                    preview.ShowDialog(this);
+                }
+
+                // Only reflects a real change if the admin actually clicked Print inside the
+                // preview (EndPrint is what writes the last-printed marker) - closing the preview
+                // without printing leaves this exactly as it was.
+                UpdateInventoryPrintStatusLabel();
+            }
+            catch (Exception ex)
+            {
+                ShowStatus($"Failed to preview inventory report: {ex.Message}", isError: true);
+            }
+            finally
+            {
+                btnPrintInventoryNow.Enabled = true;
+            }
+        }
+
+        private void LoadOfflineSync()
+        {
+            chkPendingItemSyncEnabled.Checked = PendingItemSyncService.AutoSyncEnabled;
+            UpdatePendingItemSyncStatusLabel();
+        }
+
+        private void UpdatePendingItemSyncStatusLabel()
+        {
+            int pendingCount = YourApp.Data.PendingItemStore.GetPendingCount();
+            lblPendingItemSyncStatus.Text = pendingCount == 0
+                ? "0 item(s) queued offline."
+                : $"{pendingCount} item(s) queued offline, waiting to sync.";
+        }
+
+        private async void btnSyncPendingItemsNow_Click(object sender, EventArgs e)
+        {
+            btnSyncPendingItemsNow.Enabled = false;
+            ShowStatus("Syncing offline-queued items...", isError: false);
+            try
+            {
+                int synced = await PendingItemSyncService.SyncPendingItemsAsync();
+                ShowStatus(synced == 0 ? "Nothing queued to sync." : $"Synced {synced} item(s) to the database.", isError: false);
+                UpdatePendingItemSyncStatusLabel();
+            }
+            catch (Exception ex)
+            {
+                ShowStatus($"Failed to sync offline-queued items: {ex.Message}", isError: true);
+            }
+            finally
+            {
+                btnSyncPendingItemsNow.Enabled = true;
+            }
+        }
+
         private void UpdateMailProviderGroupsVisibility()
         {
             gbxGmail.Visible = rdoProviderGmail.Checked;
@@ -693,10 +795,32 @@ namespace Inventory
             nud_alertAutoDismissSeconds.Value = Math.Min(Math.Max(seconds, nud_alertAutoDismissSeconds.Minimum), nud_alertAutoDismissSeconds.Maximum);
 
             nud_alertAutoDismissSeconds.Enabled = enabled;
+
+            bool searchClearEnabled = !string.Equals(ConfigurationManager.AppSettings["SEARCH_AUTO_CLEAR_ENABLED"], "false", StringComparison.OrdinalIgnoreCase);
+            chkSearchAutoClearEnabled.Checked = searchClearEnabled;
+
+            int searchClearSeconds = int.TryParse(ConfigurationManager.AppSettings["SEARCH_AUTO_CLEAR_SECONDS"], out int sc) && sc > 0 ? sc : 10;
+            nud_searchAutoClearSeconds.Value = Math.Min(Math.Max(searchClearSeconds, nud_searchAutoClearSeconds.Minimum), nud_searchAutoClearSeconds.Maximum);
+
+            nud_searchAutoClearSeconds.Enabled = searchClearEnabled;
+
+            bool qtyResetEnabled = !string.Equals(ConfigurationManager.AppSettings["QTY_AUTO_RESET_ENABLED"], "false", StringComparison.OrdinalIgnoreCase);
+            chkQtyAutoResetEnabled.Checked = qtyResetEnabled;
+
+            int qtyResetSeconds = int.TryParse(ConfigurationManager.AppSettings["QTY_AUTO_RESET_SECONDS"], out int qs) && qs > 0 ? qs : 5;
+            nud_qtyAutoResetSeconds.Value = Math.Min(Math.Max(qtyResetSeconds, nud_qtyAutoResetSeconds.Minimum), nud_qtyAutoResetSeconds.Maximum);
+
+            nud_qtyAutoResetSeconds.Enabled = qtyResetEnabled;
         }
 
         private void chkAlertAutoDismissEnabled_CheckedChanged(object sender, EventArgs e) =>
             nud_alertAutoDismissSeconds.Enabled = chkAlertAutoDismissEnabled.Checked;
+
+        private void chkSearchAutoClearEnabled_CheckedChanged(object sender, EventArgs e) =>
+            nud_searchAutoClearSeconds.Enabled = chkSearchAutoClearEnabled.Checked;
+
+        private void chkQtyAutoResetEnabled_CheckedChanged(object sender, EventArgs e) =>
+            nud_qtyAutoResetSeconds.Enabled = chkQtyAutoResetEnabled.Checked;
 
         private void LoadMenuVisibility()
         {
@@ -723,6 +847,26 @@ namespace Inventory
 
             chkItemSearchDateSortDescending.Checked = Purchases.ItemSearchDateSortDescending;
             chkItemSearchNameSortDescending.Checked = Purchases.ItemSearchNameSortDescending;
+
+            chkItemSearchBgCustom.Checked = YourApp.Data.ItemSearchGridTheme.IsConfigured;
+            pnlItemSearchBgSwatch.BackColor = YourApp.Data.ItemSearchGridTheme.CustomColor ?? System.Drawing.Color.White;
+            SetItemSearchBgSwatchControlsEnabled(chkItemSearchBgCustom.Checked);
+        }
+
+        private void SetItemSearchBgSwatchControlsEnabled(bool enabled)
+        {
+            pnlItemSearchBgSwatch.Enabled = enabled;
+            btnPickItemSearchBgColor.Enabled = enabled;
+        }
+
+        private void chkItemSearchBgCustom_CheckedChanged(object sender, EventArgs e) =>
+            SetItemSearchBgSwatchControlsEnabled(chkItemSearchBgCustom.Checked);
+
+        private void btnPickItemSearchBgColor_Click(object sender, EventArgs e)
+        {
+            colorDialogAccent.Color = pnlItemSearchBgSwatch.BackColor;
+            if (colorDialogAccent.ShowDialog(this) == DialogResult.OK)
+                pnlItemSearchBgSwatch.BackColor = colorDialogAccent.Color;
         }
 
         private void LoadCartColumns()
@@ -735,6 +879,26 @@ namespace Inventory
             clbCartColumns.Items.Clear();
             foreach (var col in Purchases.GetOrderedCartColumns())
                 clbCartColumns.Items.Add(col.Label, !hidden.Contains(col.Name));
+
+            chkCartBgCustom.Checked = YourApp.Data.CartBoardTheme.IsConfigured;
+            pnlCartBgSwatch.BackColor = YourApp.Data.CartBoardTheme.CustomColor ?? System.Drawing.Color.White;
+            SetCartBgSwatchControlsEnabled(chkCartBgCustom.Checked);
+        }
+
+        private void SetCartBgSwatchControlsEnabled(bool enabled)
+        {
+            pnlCartBgSwatch.Enabled = enabled;
+            btnPickCartBgColor.Enabled = enabled;
+        }
+
+        private void chkCartBgCustom_CheckedChanged(object sender, EventArgs e) =>
+            SetCartBgSwatchControlsEnabled(chkCartBgCustom.Checked);
+
+        private void btnPickCartBgColor_Click(object sender, EventArgs e)
+        {
+            colorDialogAccent.Color = pnlCartBgSwatch.BackColor;
+            if (colorDialogAccent.ShowDialog(this) == DialogResult.OK)
+                pnlCartBgSwatch.BackColor = colorDialogAccent.Color;
         }
 
         private static void MoveCheckedListItem(CheckedListBox list, int delta)
@@ -991,6 +1155,45 @@ namespace Inventory
             }
         }
 
+        private void LoadLayoutPresets()
+        {
+            cboLayoutPreset.Items.Clear();
+            cboLayoutPreset.Items.AddRange(LayoutPresets.All);
+            cboLayoutPreset.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// Rebuilds a column CheckedListBox to match a preset: listed columns first, in order
+        /// and checked (visible); everything else from <paramref name="allColumns"/> appended
+        /// unchecked (hidden) - the same shape <see cref="SaveColumnConfig"/> already expects.
+        /// </summary>
+        private static void ApplyColumnPreset(CheckedListBox list, (string Name, string Label)[] allColumns, string[] visibleNamesInOrder)
+        {
+            var labelByName = allColumns.ToDictionary(c => c.Name, c => c.Label, StringComparer.OrdinalIgnoreCase);
+            var visible = new HashSet<string>(visibleNamesInOrder, StringComparer.OrdinalIgnoreCase);
+
+            list.Items.Clear();
+            foreach (string name in visibleNamesInOrder)
+                if (labelByName.TryGetValue(name, out string label))
+                    list.Items.Add(label, true);
+
+            foreach (var col in allColumns)
+                if (!visible.Contains(col.Name))
+                    list.Items.Add(col.Label, false);
+        }
+
+        private void btnApplyLayoutPreset_Click(object sender, EventArgs e)
+        {
+            if (!(cboLayoutPreset.SelectedItem is LayoutPreset preset))
+                return;
+
+            nud_fontScalePt.Value = Math.Min(Math.Max(preset.FontScalePt, nud_fontScalePt.Minimum), nud_fontScalePt.Maximum);
+            ApplyColumnPreset(clbCartColumns, Purchases.CartColumns, preset.VisibleCartColumns);
+            ApplyColumnPreset(clbItemSearchColumns, Purchases.ItemSearchColumns, preset.VisibleItemSearchColumns);
+
+            ShowStatus($"\"{preset.Name}\" preset loaded into Appearance/Cart Columns/Item Search - click Save to keep it.", isError: false);
+        }
+
         private void btnLoadLayoutFile_Click(object sender, EventArgs e)
         {
             if (openFileDialogLayout.ShowDialog(this) != DialogResult.OK)
@@ -1117,6 +1320,17 @@ namespace Inventory
                 SetSetting(config, "ALERT_AUTO_DISMISS_ENABLED", chkAlertAutoDismissEnabled.Checked.ToString());
                 SetSetting(config, "ALERT_AUTO_DISMISS_SECONDS", ((int)nud_alertAutoDismissSeconds.Value).ToString());
 
+                SetSetting(config, "INVENTORY_PRINT_SCHEDULE_ENABLED", chkInventoryPrintEnabled.Checked.ToString());
+                SetSetting(config, "INVENTORY_PRINT_SCHEDULE_FREQUENCY", cbxInventoryPrintFrequency.SelectedItem as string ?? "Weekly");
+
+                SetSetting(config, "PENDING_ITEM_SYNC_ENABLED", chkPendingItemSyncEnabled.Checked.ToString());
+
+                SetSetting(config, "SEARCH_AUTO_CLEAR_ENABLED", chkSearchAutoClearEnabled.Checked.ToString());
+                SetSetting(config, "SEARCH_AUTO_CLEAR_SECONDS", ((int)nud_searchAutoClearSeconds.Value).ToString());
+
+                SetSetting(config, "QTY_AUTO_RESET_ENABLED", chkQtyAutoResetEnabled.Checked.ToString());
+                SetSetting(config, "QTY_AUTO_RESET_SECONDS", ((int)nud_qtyAutoResetSeconds.Value).ToString());
+
                 var hiddenMenuNames = Purchases.ConfigurableMenuItems
                     .Where((menu, index) => index >= clbMenus.Items.Count || !clbMenus.GetItemChecked(index))
                     .Select(menu => menu.Name);
@@ -1124,8 +1338,14 @@ namespace Inventory
 
                 SaveColumnConfig(config, clbItemSearchColumns, Purchases.ItemSearchColumns,
                     "ITEM_SEARCH_HIDDEN_COLUMNS", "ITEM_SEARCH_COLUMN_ORDER");
+
+                SetSetting(config, "ITEM_SEARCH_BACKGROUND_COLOR",
+                    chkItemSearchBgCustom.Checked ? System.Drawing.ColorTranslator.ToHtml(pnlItemSearchBgSwatch.BackColor) : "");
                 SaveColumnConfig(config, clbCartColumns, Purchases.CartColumns,
                     "CART_HIDDEN_COLUMNS", "CART_COLUMN_ORDER");
+
+                SetSetting(config, "CART_BOARD_BACKGROUND_COLOR",
+                    chkCartBgCustom.Checked ? System.Drawing.ColorTranslator.ToHtml(pnlCartBgSwatch.BackColor) : "");
 
                 SetSetting(config, "ITEM_SEARCH_DATE_SORT_DESCENDING", chkItemSearchDateSortDescending.Checked.ToString());
                 SetSetting(config, "ITEM_SEARCH_NAME_SORT_DESCENDING", chkItemSearchNameSortDescending.Checked.ToString());
@@ -1160,6 +1380,7 @@ namespace Inventory
 
                 SetSetting(config, "TRIAL_ENABLED", chkTrialEnabled.Checked.ToString());
                 SetSetting(config, "TRIAL_DAYS", ((int)nud_trialDays.Value).ToString());
+                SetSetting(config, "TRIAL_AUTO_CLOSE_ENABLED", chkTrialAutoClose.Checked.ToString());
 
                 SetSetting(config, "REMOTE_CONTROL_ENABLED", chkRemoteControlEnabled.Checked.ToString());
                 SetSetting(config, "REMOTE_CONTROL_PORT", ((int)nud_remotePort.Value).ToString());
@@ -1186,6 +1407,13 @@ namespace Inventory
                 YourApp.Data.AppTheme.ReapplyToOpenForms();
                 YourApp.Data.AppFontScale.Reload();
                 YourApp.Data.AppFontScale.ReapplyToOpenForms();
+                YourApp.Data.CartBoardTheme.Reload();
+                YourApp.Data.ItemSearchGridTheme.Reload();
+                foreach (var purchases in Application.OpenForms.OfType<Purchases>().ToList())
+                {
+                    purchases.ApplyCartBoardBackground();
+                    purchases.ApplyItemSearchGridBackground();
+                }
                 UpdateScheduleStatusLabel();
                 UpdateTrialStatusLabel();
                 RemoteControlServer.Restart();

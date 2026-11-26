@@ -7,8 +7,11 @@ namespace Inventory
     // Companion to ConfirmDialog/OkDialog for warnings and errors that come from a caught
     // exception: shows a short, human-readable sentence up front, with the full technical
     // text (ex.ToString() - type, message, and stack trace) tucked behind a "Show details"
-    // toggle rather than always on screen. Unlike OkDialog, this never auto-dismisses -
-    // someone reading or copying a stack trace shouldn't have it vanish under them.
+    // toggle rather than always on screen. Shares the same visible auto-dismiss countdown as
+    // OkDialog/ConfirmDialog (ALERT_AUTO_DISMISS_ENABLED/_SECONDS) so unattended terminals don't
+    // sit on an error forever; anyone actually reading/copying the stack trace has the full
+    // countdown to interact with the dialog (any click resets nothing, but the countdown is
+    // visible the whole time rather than disappearing without warning).
     public static class ErrorDialog
     {
         public static DialogResult Show(IWin32Window owner, string friendlyMessage, string caption,
@@ -36,12 +39,12 @@ namespace Inventory
                 {
                     Dock = DockStyle.Fill,
                     ColumnCount = 2,
-                    RowCount = 4,
+                    RowCount = 5,
                     AutoSize = true,
                 };
                 layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
                 layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 5; i++)
                     layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
                 Icon dialogIcon = GetIcon(icon);
@@ -115,9 +118,20 @@ namespace Inventory
                     buttonPanel.Controls.Add(copyButton);
                 }
 
+                var countdownLabel = new Label
+                {
+                    AutoSize = true,
+                    ForeColor = Color.Gray,
+                    Font = new Font(FontFamily.GenericSansSerif, 7.5f, FontStyle.Italic),
+                    Margin = new Padding(0, 4, 0, 0),
+                };
+                layout.Controls.Add(countdownLabel, 1, 4);
+
                 form.Controls.Add(layout);
                 form.AcceptButton = okButton;
                 form.CancelButton = okButton;
+
+                AutoDismissCountdown.Attach(form, okButton, countdownLabel);
 
                 YourApp.Data.AppTheme.Exempt(okButton);
                 YourApp.Data.LogoCache.ApplyTo(form);

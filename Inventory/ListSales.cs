@@ -218,5 +218,95 @@ namespace Inventory
             if (e.RowIndex >= 0)
                 dgvSales.Rows[e.RowIndex].Selected = true;
         }
+
+        /// <summary>
+        /// sales_ has no status/voided column, so a refund is represented the same way this
+        /// schema already represents a sale: another sales_ row, with a negative item_price -
+        /// not a flag on the original row. No schema change needed.
+        /// </summary>
+        private async void btnVoidRefund_Click(object sender, EventArgs e)
+        {
+            DataRowView rowView = dgvSales.CurrentRow?.DataBoundItem as DataRowView;
+            if (rowView == null)
+            {
+                MessageBox.Show("Select a sold line item first.", "Refund/Void");
+                return;
+            }
+
+            string originalCode = rowView["TransactionCode"]?.ToString();
+            string itemCode = rowView["ItemCode"]?.ToString();
+            string itemName = rowView["ItemName"]?.ToString();
+            decimal price = Convert.ToDecimal(rowView["Price"]);
+
+            if (string.IsNullOrEmpty(itemCode))
+            {
+                MessageBox.Show("That row has no item code to refund.", "Refund/Void");
+                return;
+            }
+
+            using (var pinForm = new PinPromptForm())
+            {
+                pinForm.PromptText = "Enter manager PIN to refund/void this item:";
+                string managerPin = ConfigurationManager.AppSettings["MANAGER_PIN"];
+                if (pinForm.ShowDialog(this) != DialogResult.OK || pinForm.EnteredPin != managerPin)
+                {
+                    ErrorDialog.Show(this, "Incorrect PIN. Refund/Void is restricted.", "Access Denied",
+                        $"Manager PIN rejected for 'Refund/Void' at {DateTime.Now:G} on {Environment.MachineName}.", MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
+            var confirm = ConfirmDialog.Show(this,
+                $"Refund '{itemName}' ({itemCode}) from transaction {originalCode} for ₱{price:0.00}? This cannot be undone. (Y/N)",
+                "Refund/Void", MessageBoxIcon.Question);
+            if (confirm != DialogResult.Yes)
+                return;
+
+            string refundTransactionCode = $"RF-{originalCode}-{DateTime.Now:HHmmss}";
+
+            try
+            {
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
+                {
+                    await conn.OpenAsync();
+
+                    using (var cmd = new MySqlCommand(
+                        "INSERT INTO sales_(transaction_code, itemcode, transaction_date, seller, item_price) " +
+                        "VALUES (@code, @item, @date, @seller, @price)", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@code", refundTransactionCode);
+                        cmd.Parameters.AddWithValue("@item", itemCode);
+                        cmd.Parameters.AddWithValue("@date", DateTime.Now.ToString("yyyy-MMMM-dd H:m:ss"));
+                        cmd.Parameters.AddWithValue("@seller", Environment.UserName);
+                        cmd.Parameters.AddWithValue("@price", -price);
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+
+                    try
+                    {
+                        using (var restockCmd = new MySqlCommand(
+                            "UPDATE items_ SET new_quantity = new_quantity + 1 WHERE serial = @serial", conn))
+                        {
+                            restockCmd.Parameters.AddWithValue("@serial", itemCode);
+                            await restockCmd.ExecuteNonQueryAsync();
+                        }
+                    }
+                    catch
+                    {
+                        // Best-effort restock - the refund record above already succeeded and is
+                        // what matters; a failed stock bump just means a manual fix later.
+                    }
+                }
+
+                OperationLog.RecordAction(nameof(ListSales),
+                    $"Refunded '{itemName}' ({itemCode}) from transaction {originalCode}, ₱{price:0.00}");
+
+                await ApplyDateFilterAsync();
+            }
+            catch (Exception ex)
+            {
+                ErrorDialog.Show(this, "Could not record the refund.", "Refund/Void Failed", ex);
+            }
+        }
     }
 }

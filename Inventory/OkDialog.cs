@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -8,12 +7,6 @@ namespace Inventory
     public static class OkDialog
     {
         private static readonly Color OkColor = Color.FromArgb(25, 118, 210);
-
-        private static bool AutoDismissEnabled =>
-            !string.Equals(ConfigurationManager.AppSettings["ALERT_AUTO_DISMISS_ENABLED"], "false", StringComparison.OrdinalIgnoreCase);
-
-        private static int AutoDismissSeconds =>
-            int.TryParse(ConfigurationManager.AppSettings["ALERT_AUTO_DISMISS_SECONDS"], out int s) && s > 0 ? s : 5;
 
         public static DialogResult Show(IWin32Window owner, string text, string caption,
             MessageBoxIcon icon = MessageBoxIcon.Information)
@@ -36,11 +29,12 @@ namespace Inventory
                 {
                     Dock = DockStyle.Fill,
                     ColumnCount = 2,
-                    RowCount = 2,
+                    RowCount = 3,
                     AutoSize = true,
                 };
                 layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
                 layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+                layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
                 layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
                 layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
 
@@ -77,22 +71,20 @@ namespace Inventory
                 var okButton = MakeButton("&OK", DialogResult.OK, OkColor);
                 buttonPanel.Controls.Add(okButton);
 
+                var countdownLabel = new Label
+                {
+                    AutoSize = true,
+                    ForeColor = Color.Gray,
+                    Font = new Font(FontFamily.GenericSansSerif, 7.5f, FontStyle.Italic),
+                    Margin = new Padding(0, 4, 0, 0),
+                };
+                layout.Controls.Add(countdownLabel, 1, 2);
+
                 form.Controls.Add(layout);
                 form.AcceptButton = okButton;
                 form.CancelButton = okButton;
 
-                Timer autoDismissTimer = null;
-                if (AutoDismissEnabled)
-                {
-                    autoDismissTimer = new Timer { Interval = AutoDismissSeconds * 1000 };
-                    autoDismissTimer.Tick += (s, e) =>
-                    {
-                        form.DialogResult = DialogResult.OK;
-                        form.Close();
-                    };
-                    autoDismissTimer.Start();
-                    form.FormClosed += (s, e) => autoDismissTimer.Dispose();
-                }
+                AutoDismissCountdown.Attach(form, okButton, countdownLabel);
 
                 YourApp.Data.AppTheme.Exempt(okButton);
                 YourApp.Data.LogoCache.ApplyTo(form);

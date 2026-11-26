@@ -125,6 +125,7 @@ namespace Inventory
             }
 
             _ = Task.Run(() => ScheduledReportService.CheckAndSendAsync());
+            _ = Task.Run(() => ScheduledInventoryPrintService.CheckAndPrintAsync());
 
             RemoteControlServer.Restart();
             try
