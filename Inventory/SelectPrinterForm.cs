@@ -186,7 +186,12 @@ namespace Inventory
         /// it actually prints before relying on it at checkout. Prints the single longest item
         /// description in the catalog - deliberately the worst case for line wrapping/edge
         /// clipping on a narrow thermal roll - rather than a generic test string, using the same
-        /// paper size/margins Purchases.ApplyReceiptPrinterSettings gives real receipts.
+        /// paper size/margins Purchases.ApplyReceiptPrinterSettings gives real receipts. Also
+        /// covers everything an admin would want to sanity-check at a glance: a welcome greeting
+        /// (so it reads like a real receipt header, not just a diagnostic dump), the store's
+        /// name and STORE_CODE (confirms which till identity this printer is bound to), today's
+        /// date, and the full list of printers installed on this machine (confirms the right
+        /// driver is actually present, not just that *a* printer answered).
         /// </summary>
         internal static void PrintTestPage()
         {
@@ -197,6 +202,10 @@ namespace Inventory
 
             string itemDescription = longestItem != null ? longestItem["description"].ToString() : "(no items in catalog)";
             string itemSerial = longestItem != null ? longestItem["serial"].ToString() : "";
+
+            string storeName = ConfigurationManager.AppSettings["STORE_NAME"] ?? "Baclig Minimart";
+            string storeCode = ConfigurationManager.AppSettings["STORE_CODE"] ?? "BCLGMNM";
+            List<string> installedPrinters = PrinterSettings.InstalledPrinters.Cast<string>().ToList();
 
             var document = new PrintDocument();
             Purchases.ApplyReceiptPrinterSettings(document);
@@ -218,11 +227,14 @@ namespace Inventory
                     e.Graphics.DrawString(text, font, Brushes.Black, x, yPos);
                 }
 
-                string storeName = ConfigurationManager.AppSettings["STORE_NAME"] ?? "Baclig Minimart";
-                DrawCentered(storeName, fontHeader, y);
+                DrawCentered($"Welcome to {storeName}!", fontHeader, y);
                 y += fontHeader.GetHeight() + 4;
+                DrawCentered($"{storeName} (Store Code: {storeCode})", fontBody, y);
+                y += fontBody.GetHeight() + 4;
                 DrawCentered("PRINTER TEST PAGE", fontHeader, y);
-                y += fontHeader.GetHeight() + 10;
+                y += fontHeader.GetHeight() + 2;
+                DrawCentered(DateTime.Now.ToString("MMMM d, yyyy"), fontBody, y);
+                y += fontBody.GetHeight() + 10;
 
                 e.Graphics.DrawLine(Pens.Black, startX, y, startX + maxWidth, y);
                 y += 6;
@@ -247,8 +259,34 @@ namespace Inventory
                 e.Graphics.DrawLine(Pens.Black, startX, y, startX + maxWidth, y);
                 y += 6;
 
-                DrawCentered($"Printer: {document.PrinterSettings.PrinterName}", fontBody, y);
+                e.Graphics.DrawString("Installed printer drivers:", fontBody, Brushes.Black, startX, y);
                 y += fontBody.GetHeight() + 2;
+
+                if (installedPrinters.Count == 0)
+                {
+                    e.Graphics.DrawString("(none detected)", fontBody, Brushes.Black, startX, y);
+                    y += fontBody.GetHeight() + 1;
+                }
+                else
+                {
+                    foreach (string printerName in installedPrinters)
+                    {
+                        string label = string.Equals(printerName, document.PrinterSettings.PrinterName, StringComparison.OrdinalIgnoreCase)
+                            ? $"- {printerName} (in use)"
+                            : $"- {printerName}";
+
+                        foreach (string line in WrapText(label, fontBody, maxWidth, e.Graphics))
+                        {
+                            e.Graphics.DrawString(line, fontBody, Brushes.Black, startX, y);
+                            y += fontBody.GetHeight() + 1;
+                        }
+                    }
+                }
+
+                y += 8;
+                e.Graphics.DrawLine(Pens.Black, startX, y, startX + maxWidth, y);
+                y += 6;
+
                 DrawCentered(DateTime.Now.ToString("yyyy-MM-dd HH:mm"), fontBody, y);
             };
 
