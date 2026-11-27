@@ -10,14 +10,29 @@ namespace Inventory
     /// OkDialog/ConfirmDialog (manual Form, no .Designer.cs) but shown via Show(owner) instead
     /// of ShowDialog - this must never block the till. "View Release" just opens the release
     /// page in the default browser; downloading and running the installer stays a deliberate,
-    /// manual action by an admin (StartUpdateCheckWatcher in Form1.cs never auto-installs).
+    /// manual action by an admin UNLESS AUTO_UPDATE_ENABLED is on and the release has a matching
+    /// zip asset, in which case CheckForUpdateAsync in Form1.cs takes the SelfUpdateService path
+    /// instead and shows ShowReadyToInstall below rather than this notify-only Show.
     /// </summary>
     internal static class UpdateAvailableForm
     {
         private static readonly Color ViewColor = Color.FromArgb(25, 118, 210);
         private static readonly Color DismissColor = Color.FromArgb(117, 117, 117);
 
-        public static Form Show(IWin32Window owner, UpdateInfo info)
+        public static Form Show(IWin32Window owner, UpdateInfo info) =>
+            Build(owner, $"A new version ({info.TagName ?? info.Version?.ToString()}) is available.", info);
+
+        /// <summary>
+        /// Purely informational - unlike Show, there is no "install now" action because it's
+        /// already automatic, and nothing to cancel since it just waits for the till to be idle.
+        /// </summary>
+        public static Form ShowReadyToInstall(IWin32Window owner, UpdateInfo info) =>
+            Build(owner,
+                $"Update {info.TagName ?? info.Version?.ToString()} has been downloaded and will be installed " +
+                "automatically the next time the till is idle.",
+                info);
+
+        private static Form Build(IWin32Window owner, string titleText, UpdateInfo info)
         {
             var form = new Form
             {
@@ -44,7 +59,7 @@ namespace Inventory
 
             var titleLabel = new Label
             {
-                Text = $"A new version ({info.TagName ?? info.Version?.ToString()}) is available.",
+                Text = titleText,
                 AutoSize = true,
                 MaximumSize = new Size(360, 0),
                 Font = new Font(FontFamily.GenericSansSerif, 9f, FontStyle.Bold),

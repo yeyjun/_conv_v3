@@ -853,6 +853,8 @@ namespace Inventory
         private const int UpdateCheckPollMs = 24 * 60 * 60 * 1000;
         private Form _updateAvailableForm;
         private string _dismissedUpdateVersion;
+        private PendingSelfUpdate _pendingSelfUpdate;
+        private bool _isDownloadingSelfUpdate;
 
         /// <summary>
         /// Polls GitHub's Releases API (via UpdateCheckService) for a newer published version -
@@ -884,14 +886,90 @@ namespace Inventory
             if (info == null)
                 return;
 
-            if (info.TagName == _dismissedUpdateVersion)
+            if (info.TagName == _dismissedUpdateVersion || info.TagName == _pendingSelfUpdate?.Info.TagName)
                 return;
+
+            bool autoUpdateEnabled = await AppConfigService.GetAutoUpdateEnabledAsync();
+            if (autoUpdateEnabled && !string.IsNullOrWhiteSpace(info.AssetDownloadUrl))
+            {
+                _ = DownloadAndStageSelfUpdateAsync(info);
+                return;
+            }
 
             if (_updateAvailableForm != null && !_updateAvailableForm.IsDisposed)
                 return;
 
             _updateAvailableForm = UpdateAvailableForm.Show(this, info);
             _updateAvailableForm.FormClosed += (s, e) => _dismissedUpdateVersion = info.TagName;
+        }
+
+        /// <summary>
+        /// Runs in the background, independent of the 24h poll loop that kicked it off - a slow
+        /// download should never block CheckForUpdateAsync's caller. Fails open (logs and retries
+        /// on the next poll) on any download failure, same convention as UpdateCheckService.
+        /// </summary>
+        private async Task DownloadAndStageSelfUpdateAsync(UpdateInfo info)
+        {
+            if (_isDownloadingSelfUpdate)
+                return;
+
+            _isDownloadingSelfUpdate = true;
+            try
+            {
+                string zipPath = await SelfUpdateService.DownloadUpdateZipAsync(info);
+                if (zipPath == null)
+                    return;
+
+                _pendingSelfUpdate = new PendingSelfUpdate { Info = info, ZipPath = zipPath };
+                OperationLog.RecordAction(nameof(Purchases), $"Downloaded self-update {info.TagName}; staged for install when idle.");
+
+                if (_updateAvailableForm != null && !_updateAvailableForm.IsDisposed)
+                    _updateAvailableForm.Close();
+
+                _updateAvailableForm = UpdateAvailableForm.ShowReadyToInstall(this, info);
+            }
+            finally
+            {
+                _isDownloadingSelfUpdate = false;
+            }
+        }
+
+        /// <summary>
+        /// Shares the idle-cart timer's 60s tick rather than its own Timer - no need for a second
+        /// poll loop just for this. "Idle" here means: empty cart, no held-transaction preview
+        /// being viewed, and no other window open (Application.OpenForms.Count == 1 is an
+        /// approximation - there's no generalized modal tracker in this app to check against).
+        /// </summary>
+        private void CheckPendingSelfUpdateInstall()
+        {
+            if (_pendingSelfUpdate == null)
+                return;
+
+            if (dgv_items.Rows.Count > 0)
+                return;
+
+            if (_preHeldPreviewSnapshot != null)
+                return;
+
+            if (Application.OpenForms.Count > 1)
+                return;
+
+            TriggerSelfUpdateInstall();
+        }
+
+        private void TriggerSelfUpdateInstall()
+        {
+            PendingSelfUpdate update = _pendingSelfUpdate;
+
+            if (!SelfUpdateService.LaunchInstaller(update.ZipPath))
+            {
+                OperationLog.RecordAction(nameof(Purchases), $"Failed to launch self-update installer for {update.Info.TagName}; will retry.");
+                return;
+            }
+
+            _pendingSelfUpdate = null;
+            OperationLog.RecordAction(nameof(Purchases), $"Closing to apply self-update {update.Info.TagName} in the background.");
+            Application.Exit();
         }
 
         /// <summary>
@@ -927,6 +1005,7 @@ namespace Inventory
         {
             idleCartCheckTimer = new System.Windows.Forms.Timer { Interval = IdleCartPollMs };
             idleCartCheckTimer.Tick += (s, e) => CheckIdleCart();
+            idleCartCheckTimer.Tick += (s, e) => CheckPendingSelfUpdateInstall();
             idleCartCheckTimer.Start();
 
             this.FormClosed += (s, e) => idleCartCheckTimer.Stop();
