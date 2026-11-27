@@ -21,6 +21,7 @@ namespace Inventory
             this.lstPrinters = new System.Windows.Forms.ListBox();
             this.btnSetPrinter = new System.Windows.Forms.Button();
             this.btnNotNow = new System.Windows.Forms.Button();
+            this.lblCountdown = new System.Windows.Forms.Label();
             this.SuspendLayout();
             //
             // lblMessage
@@ -40,9 +41,20 @@ namespace Inventory
             this.lstPrinters.Size = new System.Drawing.Size(360, 132);
             this.lstPrinters.TabIndex = 1;
             //
+            // lblCountdown
+            //
+            this.lblCountdown.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.lblCountdown.ForeColor = System.Drawing.Color.DarkOrange;
+            this.lblCountdown.Location = new System.Drawing.Point(12, 196);
+            this.lblCountdown.Name = "lblCountdown";
+            this.lblCountdown.Size = new System.Drawing.Size(360, 20);
+            this.lblCountdown.TabIndex = 4;
+            this.lblCountdown.Visible = false;
+            this.lblCountdown.Click += new System.EventHandler(this.lblCountdown_Click);
+            //
             // btnSetPrinter
             //
-            this.btnSetPrinter.Location = new System.Drawing.Point(12, 202);
+            this.btnSetPrinter.Location = new System.Drawing.Point(12, 222);
             this.btnSetPrinter.Name = "btnSetPrinter";
             this.btnSetPrinter.Size = new System.Drawing.Size(175, 30);
             this.btnSetPrinter.TabIndex = 2;
@@ -52,7 +64,7 @@ namespace Inventory
             //
             // btnNotNow
             //
-            this.btnNotNow.Location = new System.Drawing.Point(197, 202);
+            this.btnNotNow.Location = new System.Drawing.Point(197, 222);
             this.btnNotNow.Name = "btnNotNow";
             this.btnNotNow.Size = new System.Drawing.Size(175, 30);
             this.btnNotNow.TabIndex = 3;
@@ -64,9 +76,10 @@ namespace Inventory
             //
             this.AcceptButton = this.btnSetPrinter;
             this.CancelButton = this.btnNotNow;
-            this.ClientSize = new System.Drawing.Size(384, 244);
+            this.ClientSize = new System.Drawing.Size(384, 264);
             this.Controls.Add(this.btnNotNow);
             this.Controls.Add(this.btnSetPrinter);
+            this.Controls.Add(this.lblCountdown);
             this.Controls.Add(this.lstPrinters);
             this.Controls.Add(this.lblMessage);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -85,5 +98,6 @@ namespace Inventory
         private System.Windows.Forms.ListBox lstPrinters;
         private System.Windows.Forms.Button btnSetPrinter;
         private System.Windows.Forms.Button btnNotNow;
+        private System.Windows.Forms.Label lblCountdown;
     }
 }

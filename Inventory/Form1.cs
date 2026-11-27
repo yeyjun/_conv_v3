@@ -40,6 +40,24 @@ namespace Inventory
         public static int countcells = 0;
         public static string log_in = "";
         private static string _loggedInCode;
+
+        /// <summary>Shown on the menu bar immediately left of the Logout button - log_in holds
+        /// the fullname (see Login.cs: id = match["fullname"]), which reads naturally in a
+        /// greeting, unlike _loggedInCode (the entered login code shown in the title bar).
+        /// Re-run from timerClock_Tick so the greeting flips to the next period automatically
+        /// if a session happens to span a threshold.</summary>
+        private void UpdateGreeting()
+        {
+            if (string.IsNullOrEmpty(log_in))
+            {
+                lblGreeting.Text = "";
+                return;
+            }
+
+            int hour = DateTime.Now.Hour;
+            string period = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+            lblGreeting.Text = $"Good {period}, {log_in}!";
+        }
         public DataTable dataTable = new DataTable();
         public string TransactionCode { get; private set; }
         public string L_DEFAULTNAME = ConfigurationManager.AppSettings["STORE_NAME"] ?? "Baclig Minimart";
@@ -428,15 +446,39 @@ namespace Inventory
             return serial != null && _itemsBySerial.TryGetValue(serial, out var found) ? found : null;
         }
 
-        private string _baseTitleBar;
-
         private const int NetworkTitleBarRefreshMs = 15 * 60 * 1000;
         private System.Windows.Forms.Timer networkTitleBarTimer;
 
         private async Task RefreshNetworkTitleBarAsync()
         {
-            _baseTitleBar = $"POSXX1 - {S_DEFAULTNAME}::{await netTesting()}";
+            string pingResult = await netTesting();
             UpdateTitleBar();
+            UpdateNetworkSpeedStatus(pingResult);
+        }
+
+        /// <summary>Mirrors the title bar's ping readout onto the status bar - same
+        /// lastPingRoundtripMs/SlowPingThresholdMs classification used by RunNetworkDiagnosticsAsync,
+        /// so the color here always agrees with whether that method would warn.</summary>
+        private void UpdateNetworkSpeedStatus(string pingResult)
+        {
+            if (lastPingRoundtripMs == null)
+            {
+                lblNetworkSpeedStatus.Text = "📶 No connection";
+                lblNetworkSpeedStatus.ForeColor = Color.Firebrick;
+                lblNetworkSpeedStatus.ToolTipText = "Cannot reach the database server.";
+            }
+            else if (lastPingRoundtripMs > SlowPingThresholdMs)
+            {
+                lblNetworkSpeedStatus.Text = $"📶 {pingResult}";
+                lblNetworkSpeedStatus.ForeColor = Color.Firebrick;
+                lblNetworkSpeedStatus.ToolTipText = $"Network connection to the database is slow (threshold: {SlowPingThresholdMs}ms).";
+            }
+            else
+            {
+                lblNetworkSpeedStatus.Text = $"📶 {pingResult}";
+                lblNetworkSpeedStatus.ForeColor = Color.DarkGreen;
+                lblNetworkSpeedStatus.ToolTipText = "Network connection to the database server is healthy.";
+            }
         }
 
         private void StartNetworkTitleBarWatcher()
@@ -469,10 +511,9 @@ namespace Inventory
 
         private void UpdateTitleBar()
         {
-            if (string.IsNullOrEmpty(_baseTitleBar))
-                return;
-
-            string title = _baseTitleBar;
+            string title = string.IsNullOrEmpty(_loggedInCode)
+                ? $"POS - {S_DEFAULTNAME}"
+                : $"POS - {S_DEFAULTNAME} - {_loggedInCode}";
 
             if (DataCacheManager.Instance.IsOfflineMode)
             {
@@ -1414,7 +1455,7 @@ namespace Inventory
                 log_in = login.id;
                 _loggedInCode = login.name;
 
-                teller.Text = $"Teller ID: {login.teller_id(log_in).Replace(login.teller_id(log_in), "******")}";
+                UpdateGreeting();
 
                 dgv_items.ReadOnly = true;
 
@@ -2358,6 +2399,7 @@ namespace Inventory
             UpdateOfflineItemsStatus();
             UpdateInventorySyncStatus();
             UpdateTitleBar();
+            UpdateGreeting();
             UpdateCachedItemsStatusMenu();
         }
         private async void tbx_denomination_KeyUp(object sender, KeyEventArgs e)
@@ -3646,6 +3688,50 @@ namespace Inventory
 
             using (var helpForm = new HelpForm("Technical Requirements", requirements))
                 helpForm.ShowDialog(this);
+        }
+
+        /// <summary>Hands the register to the next teller without restarting the app. Reuses
+        /// HoldCurrentTransaction (same as the idle-cart auto-hold) so an in-progress sale isn't
+        /// lost just because the current teller logged out mid-transaction.</summary>
+        private void logoutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show(this, $"Log out {_loggedInCode}?", "Logout",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                return;
+
+            HoldCurrentTransaction("Auto-held on logout.", silent: true);
+
+            string loggedOutCode = _loggedInCode;
+            string logText = $"User '{loggedOutCode}' logged out.";
+            _ = ActivityLog.LogAsync(logText);
+            OperationLog.RecordAction(nameof(Purchases), logText);
+
+            log_in = "";
+            _loggedInCode = null;
+            UpdateTitleBar();
+            UpdateGreeting();
+
+            this.Enabled = false;
+
+            Login login = new Login();
+            login.ShowDialog(this);
+
+            if (!login.IsAuthenticated)
+            {
+                ErrorDialog.Show(this, "Login failed or cancelled. The application will now close.", "Access Denied",
+                    $"Login dialog closed with IsAuthenticated=false at {DateTime.Now:G} on {Environment.MachineName}.", MessageBoxIcon.Warning);
+                this.Close();
+                return;
+            }
+
+            this.Enabled = true;
+
+            log_in = login.id;
+            _loggedInCode = login.name;
+
+            UpdateTitleBar();
+            UpdateGreeting();
+            tbx_serialcode.Focus();
         }
 
         private void SaveHeldTransactions() => HeldTransactionStore.Save(heldTransactions.Values);

@@ -62,7 +62,6 @@
             this.lbl_step1 = new System.Windows.Forms.Label();
             this.lbl_hintF12 = new System.Windows.Forms.Label();
             this.lbl_quantityStatus = new System.Windows.Forms.Label();
-            this.teller = new System.Windows.Forms.Label();
             this.menuStripMain = new System.Windows.Forms.MenuStrip();
             this.salesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.vIewSalesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -92,6 +91,8 @@
             this.gettingStartedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.transactionListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.techRequirementsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblGreeting = new System.Windows.Forms.ToolStripLabel();
+            this.logoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.printPreviewDialogReceipt = new System.Windows.Forms.PrintPreviewDialog();
             this.printDocumentOutOfStock = new System.Drawing.Printing.PrintDocument();
             this.lbl_hintF1F3 = new System.Windows.Forms.Label();
@@ -99,6 +100,7 @@
             this.lblOfflineItemsStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblInventorySyncStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblCachedItemsStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblNetworkSpeedStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.tabControlMain = new System.Windows.Forms.TabControl();
             this.tabPageSales = new System.Windows.Forms.TabPage();
             this.tabPageManagePrices = new System.Windows.Forms.TabPage();
@@ -542,20 +544,12 @@
             this.lbl_quantityStatus.Size = new System.Drawing.Size(15, 13);
             this.lbl_quantityStatus.TabIndex = 14;
             this.lbl_quantityStatus.Text = "**";
-            // 
-            // teller
-            // 
-            this.teller.AutoSize = true;
-            this.teller.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.teller.ForeColor = System.Drawing.Color.Tomato;
-            this.teller.Location = new System.Drawing.Point(522, 80);
-            this.teller.Name = "teller";
-            this.teller.Size = new System.Drawing.Size(61, 22);
-            this.teller.TabIndex = 15;
-            this.teller.Text = "Teller:";
-            // 
+            //
             // menuStripMain
-            // 
+            //
+            this.menuStripMain.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right));
+            this.menuStripMain.AutoSize = false;
             this.menuStripMain.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
             this.menuStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.salesToolStripMenuItem,
@@ -571,12 +565,18 @@
             this.helpToolStripMenuItem,
             this.gettingStartedToolStripMenuItem,
             this.transactionListToolStripMenuItem,
-            this.techRequirementsToolStripMenuItem});
+            this.techRequirementsToolStripMenuItem,
+            this.lblGreeting,
+            this.logoutToolStripMenuItem});
             this.menuStripMain.Location = new System.Drawing.Point(0, 0);
             this.menuStripMain.Name = "menuStripMain";
             this.menuStripMain.Size = new System.Drawing.Size(991, 24);
             this.menuStripMain.TabIndex = 16;
             this.menuStripMain.Text = "menuStripMain";
+            this.menuStripMain.OverflowButton.Text = "More";
+            this.menuStripMain.OverflowButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.menuStripMain.OverflowButton.AutoToolTip = false;
+            this.menuStripMain.OverflowButton.ToolTipText = "More menu items";
             // 
             // salesToolStripMenuItem
             // 
@@ -794,6 +794,24 @@
             this.techRequirementsToolStripMenuItem.Text = "?";
             this.techRequirementsToolStripMenuItem.ToolTipText = "Technical Requirements";
             this.techRequirementsToolStripMenuItem.Click += new System.EventHandler(this.techRequirementsToolStripMenuItem_Click);
+            //
+            // lblGreeting
+            //
+            this.lblGreeting.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.lblGreeting.Name = "lblGreeting";
+            this.lblGreeting.Size = new System.Drawing.Size(0, 20);
+            //
+            // logoutToolStripMenuItem
+            //
+            this.logoutToolStripMenuItem.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.logoutToolStripMenuItem.BackColor = System.Drawing.Color.Firebrick;
+            this.logoutToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.logoutToolStripMenuItem.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold);
+            this.logoutToolStripMenuItem.Name = "logoutToolStripMenuItem";
+            this.logoutToolStripMenuItem.Size = new System.Drawing.Size(55, 20);
+            this.logoutToolStripMenuItem.Text = "Logout";
+            this.logoutToolStripMenuItem.ToolTipText = "Log out of the current session";
+            this.logoutToolStripMenuItem.Click += new System.EventHandler(this.logoutToolStripMenuItem_Click);
             // 
             // printPreviewDialogReceipt
             // 
@@ -829,7 +847,8 @@
             this.statusStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblCachedItemsStatus,
             this.lblInventorySyncStatus,
-            this.lblOfflineItemsStatus});
+            this.lblOfflineItemsStatus,
+            this.lblNetworkSpeedStatus});
             this.statusStripMain.Location = new System.Drawing.Point(0, 738);
             this.statusStripMain.Name = "statusStripMain";
             this.statusStripMain.Size = new System.Drawing.Size(991, 22);
@@ -853,6 +872,11 @@
             this.lblOfflineItemsStatus.Name = "lblOfflineItemsStatus";
             this.lblOfflineItemsStatus.Size = new System.Drawing.Size(0, 17);
             //
+            // lblNetworkSpeedStatus
+            //
+            this.lblNetworkSpeedStatus.Name = "lblNetworkSpeedStatus";
+            this.lblNetworkSpeedStatus.Size = new System.Drawing.Size(0, 17);
+            //
             // tabControlMain
             // 
             this.tabControlMain.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -872,7 +896,6 @@
             // 
             this.tabPageSales.BackColor = System.Drawing.Color.FloralWhite;
             this.tabPageSales.Controls.Add(this.lbl_hintF1F3);
-            this.tabPageSales.Controls.Add(this.teller);
             this.tabPageSales.Controls.Add(this.lbl_quantityStatus);
             this.tabPageSales.Controls.Add(this.lbl_hintF12);
             this.tabPageSales.Controls.Add(this.lbl_step1);
@@ -1591,7 +1614,6 @@
         private System.Windows.Forms.Label lbl_step1;
         private System.Windows.Forms.Label lbl_hintF12;
         private System.Windows.Forms.Label lbl_quantityStatus;
-        private System.Windows.Forms.Label teller;
         private System.Windows.Forms.Label listing;
         private System.Windows.Forms.MenuStrip menuStripMain;
         private System.Windows.Forms.ToolStripMenuItem salesToolStripMenuItem;
@@ -1606,6 +1628,8 @@
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gettingStartedToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem techRequirementsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripLabel lblGreeting;
+        private System.Windows.Forms.ToolStripMenuItem logoutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem transactionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem holdTransactionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem resumeTransactionToolStripMenuItem;
@@ -1629,6 +1653,7 @@
         private System.Windows.Forms.ToolStripStatusLabel lblOfflineItemsStatus;
         private System.Windows.Forms.ToolStripStatusLabel lblInventorySyncStatus;
         private System.Windows.Forms.ToolStripStatusLabel lblCachedItemsStatus;
+        private System.Windows.Forms.ToolStripStatusLabel lblNetworkSpeedStatus;
         private System.Windows.Forms.TabControl tabControlMain;
         private System.Windows.Forms.TabPage tabPageSales;
         private System.Windows.Forms.TabPage tabPageManagePrices;

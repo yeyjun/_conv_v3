@@ -30,6 +30,11 @@ namespace Inventory
 
         public string SelectedPrinterName { get; private set; }
 
+        private const int AutoSelectCountdownSeconds = 5;
+        private System.Windows.Forms.Timer countdownTimer;
+        private int countdownSecondsLeft;
+        private string countdownPrinterName;
+
         public SelectPrinterForm()
         {
             InitializeComponent();
@@ -37,6 +42,10 @@ namespace Inventory
             YourApp.Data.AppTheme.ApplyTo(this);
             YourApp.Data.AppFontScale.ApplyTo(this);
             LoadPrinters();
+
+            lstPrinters.MouseDown += (s, e) => DismissCountdown();
+            lstPrinters.KeyDown += (s, e) => DismissCountdown();
+            this.FormClosed += (s, e) => DismissCountdown();
         }
 
         private void LoadPrinters()
@@ -77,10 +86,59 @@ namespace Inventory
             }
 
             lstPrinters.SelectedIndex = 0;
+
+            if (recommended != null)
+                StartAutoSelectCountdown(recommended);
         }
+
+        /// <summary>Dismissable - clicking lblCountdown, clicking/navigating the printer list, or
+        /// closing the form all cancel it (see constructor) - so a confident auto-pick doesn't
+        /// steal the choice from someone actively browsing the list.</summary>
+        private void StartAutoSelectCountdown(string recommendedPrinterName)
+        {
+            countdownPrinterName = recommendedPrinterName;
+            countdownSecondsLeft = AutoSelectCountdownSeconds;
+
+            lblCountdown.Visible = true;
+            UpdateCountdownText();
+
+            countdownTimer = new System.Windows.Forms.Timer { Interval = 1000 };
+            countdownTimer.Tick += (s, e) =>
+            {
+                countdownSecondsLeft--;
+                if (countdownSecondsLeft <= 0)
+                {
+                    DismissCountdown();
+                    SetPrinter(countdownPrinterName);
+                }
+                else
+                {
+                    UpdateCountdownText();
+                }
+            };
+            countdownTimer.Start();
+        }
+
+        private void UpdateCountdownText() =>
+            lblCountdown.Text = $"Auto-selecting \"{countdownPrinterName}\" in {countdownSecondsLeft}s - click to cancel";
+
+        private void DismissCountdown()
+        {
+            if (countdownTimer == null)
+                return;
+
+            countdownTimer.Stop();
+            countdownTimer.Dispose();
+            countdownTimer = null;
+            lblCountdown.Visible = false;
+        }
+
+        private void lblCountdown_Click(object sender, EventArgs e) => DismissCountdown();
 
         private void btnSetPrinter_Click(object sender, EventArgs e)
         {
+            DismissCountdown();
+
             if (lstPrinters.SelectedItem == null)
                 return;
 
@@ -89,6 +147,11 @@ namespace Inventory
             if (chosen.EndsWith(recommendedSuffix, StringComparison.Ordinal))
                 chosen = chosen.Substring(0, chosen.Length - recommendedSuffix.Length);
 
+            SetPrinter(chosen);
+        }
+
+        private void SetPrinter(string chosen)
+        {
             try
             {
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -113,6 +176,7 @@ namespace Inventory
 
         private void btnNotNow_Click(object sender, EventArgs e)
         {
+            DismissCountdown();
             DialogResult = DialogResult.Cancel;
             Close();
         }

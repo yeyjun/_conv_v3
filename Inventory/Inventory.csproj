@@ -251,6 +251,8 @@
     <Compile Include="ScheduledReportService.cs" />
     <Compile Include="ScheduledInventoryPrintService.cs" />
     <Compile Include="PendingItemSyncService.cs" />
+    <Compile Include="AppVersion.cs" />
+    <Compile Include="UpdateCheckService.cs" />
     <Compile Include="GmailApiMailer.cs" />
     <Compile Include="AppFonts.cs" />
     <Compile Include="AppFontScale.cs" />
@@ -267,6 +269,7 @@
     <Compile Include="ConfirmDialog.cs" />
     <Compile Include="ErrorDialog.cs" />
     <Compile Include="OkDialog.cs" />
+    <Compile Include="UpdateAvailableForm.cs" />
     <Compile Include="OperationLog.cs" />
     <Compile Include="TransactionShortcutFilter.cs" />
     <Compile Include="DataCacheManager.cs" />
