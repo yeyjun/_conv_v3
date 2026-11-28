@@ -16,6 +16,7 @@
 #define MyRemittanceBuildDir "..\Remittancce\bin\Release"
 #define MyInfraMonitorBuildDir "..\InfraMonitor\bin\Release"
 #define MyLauncherBuildDir "..\Launcher\bin\Release"
+#define MyInventoryUpdaterBuildDir "..\InventoryUpdater\bin\Release"
 
 [Setup]
 ; Fixed AppId so future versions upgrade in place instead of side-by-side installing.
@@ -54,6 +55,10 @@ Source: "{#MyInfraMonitorBuildDir}\*"; DestDir: "{app}\InfraMonitor"; Flags: ign
     Excludes: "*.pdb,*.xml,*.application,*.exe.manifest,app.publish\*,app.publish"
 Source: "{#MyLauncherBuildDir}\*"; DestDir: "{app}\Launcher"; Flags: ignoreversion recursesubdirs createallsubdirs; \
     Excludes: "*.pdb,*.xml,*.application,*.exe.manifest,app.publish\*,app.publish"
+; InventoryUpdater is a hidden helper used by Inventory's self-update feature (SelfUpdateService.cs) -
+; never launched by a person, so it gets no Start Menu/Desktop icon below.
+Source: "{#MyInventoryUpdaterBuildDir}\*"; DestDir: "{app}\InventoryUpdater"; Flags: ignoreversion recursesubdirs createallsubdirs; \
+    Excludes: "*.pdb,*.xml"
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\Launcher\{#MyLauncherExeName}"
@@ -61,6 +66,12 @@ Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\Launcher\{#MyLauncherExeName}"; Tasks: desktopicon
 
 [Run]
+; Inventory's self-update feature (SelfUpdateService.cs / InventoryUpdater.exe) rewrites files
+; inside {app}\Inventory at runtime under whatever standard, non-admin Windows account the till
+; is logged in as - Program Files is admin-write by default, so without this grant every silent
+; install attempt would fail (logged, never shown to the cashier) instead of actually applying.
+; Scoped to only this one subfolder - the other three apps keep the default admin-only ACL.
+Filename: "{sys}\icacls.exe"; Parameters: "\"{app}\Inventory\" /grant *S-1-5-32-545:(OI)(CI)M /T"; Flags: runhidden
 Filename: "{app}\Launcher\{#MyLauncherExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [Code]

@@ -89,7 +89,7 @@ namespace Inventory
         private readonly TransactionShortcutFilter _transactionShortcutFilter = new TransactionShortcutFilter();
 
         /// <summary>Default HIDDEN_MENUS value when the setting is missing from App.config - hides
-        public const string DefaultHiddenMenus = "systemConfigToolStripMenuItem,loyaltyToolStripMenuItem,taxConfigToolStripMenuItem,receiptsToolStripMenuItem,editLayoutToolStripMenuItem";
+        public const string DefaultHiddenMenus = "systemConfigToolStripMenuItem,loyaltyToolStripMenuItem,taxConfigToolStripMenuItem,receiptsToolStripMenuItem,editLayoutToolStripMenuItem,gettingStartedToolStripMenuItem,usersToolStripMenuItem,reportsToolStripMenuItem,helpToolStripMenuItem";
 
         /// <summary>
         /// Shows/hides each top-level menu per the HIDDEN_MENUS appSetting (comma-separated
@@ -853,6 +853,8 @@ namespace Inventory
         private const int UpdateCheckPollMs = 24 * 60 * 60 * 1000;
         private Form _updateAvailableForm;
         private string _dismissedUpdateVersion;
+        private PendingSelfUpdate _pendingSelfUpdate;
+        private bool _isDownloadingSelfUpdate;
 
         /// <summary>
         /// Polls GitHub's Releases API (via UpdateCheckService) for a newer published version -
@@ -884,14 +886,90 @@ namespace Inventory
             if (info == null)
                 return;
 
-            if (info.TagName == _dismissedUpdateVersion)
+            if (info.TagName == _dismissedUpdateVersion || info.TagName == _pendingSelfUpdate?.Info.TagName)
                 return;
+
+            bool autoUpdateEnabled = await AppConfigService.GetAutoUpdateEnabledAsync();
+            if (autoUpdateEnabled && !string.IsNullOrWhiteSpace(info.AssetDownloadUrl))
+            {
+                _ = DownloadAndStageSelfUpdateAsync(info);
+                return;
+            }
 
             if (_updateAvailableForm != null && !_updateAvailableForm.IsDisposed)
                 return;
 
             _updateAvailableForm = UpdateAvailableForm.Show(this, info);
             _updateAvailableForm.FormClosed += (s, e) => _dismissedUpdateVersion = info.TagName;
+        }
+
+        /// <summary>
+        /// Runs in the background, independent of the 24h poll loop that kicked it off - a slow
+        /// download should never block CheckForUpdateAsync's caller. Fails open (logs and retries
+        /// on the next poll) on any download failure, same convention as UpdateCheckService.
+        /// </summary>
+        private async Task DownloadAndStageSelfUpdateAsync(UpdateInfo info)
+        {
+            if (_isDownloadingSelfUpdate)
+                return;
+
+            _isDownloadingSelfUpdate = true;
+            try
+            {
+                string zipPath = await SelfUpdateService.DownloadUpdateZipAsync(info);
+                if (zipPath == null)
+                    return;
+
+                _pendingSelfUpdate = new PendingSelfUpdate { Info = info, ZipPath = zipPath };
+                OperationLog.RecordAction(nameof(Purchases), $"Downloaded self-update {info.TagName}; staged for install when idle.");
+
+                if (_updateAvailableForm != null && !_updateAvailableForm.IsDisposed)
+                    _updateAvailableForm.Close();
+
+                _updateAvailableForm = UpdateAvailableForm.ShowReadyToInstall(this, info);
+            }
+            finally
+            {
+                _isDownloadingSelfUpdate = false;
+            }
+        }
+
+        /// <summary>
+        /// Shares the idle-cart timer's 60s tick rather than its own Timer - no need for a second
+        /// poll loop just for this. "Idle" here means: empty cart, no held-transaction preview
+        /// being viewed, and no other window open (Application.OpenForms.Count == 1 is an
+        /// approximation - there's no generalized modal tracker in this app to check against).
+        /// </summary>
+        private void CheckPendingSelfUpdateInstall()
+        {
+            if (_pendingSelfUpdate == null)
+                return;
+
+            if (dgv_items.Rows.Count > 0)
+                return;
+
+            if (_preHeldPreviewSnapshot != null)
+                return;
+
+            if (Application.OpenForms.Count > 1)
+                return;
+
+            TriggerSelfUpdateInstall();
+        }
+
+        private void TriggerSelfUpdateInstall()
+        {
+            PendingSelfUpdate update = _pendingSelfUpdate;
+
+            if (!SelfUpdateService.LaunchInstaller(update.ZipPath))
+            {
+                OperationLog.RecordAction(nameof(Purchases), $"Failed to launch self-update installer for {update.Info.TagName}; will retry.");
+                return;
+            }
+
+            _pendingSelfUpdate = null;
+            OperationLog.RecordAction(nameof(Purchases), $"Closing to apply self-update {update.Info.TagName} in the background.");
+            Application.Exit();
         }
 
         /// <summary>
@@ -927,6 +1005,7 @@ namespace Inventory
         {
             idleCartCheckTimer = new System.Windows.Forms.Timer { Interval = IdleCartPollMs };
             idleCartCheckTimer.Tick += (s, e) => CheckIdleCart();
+            idleCartCheckTimer.Tick += (s, e) => CheckPendingSelfUpdateInstall();
             idleCartCheckTimer.Start();
 
             this.FormClosed += (s, e) => idleCartCheckTimer.Stop();
@@ -2707,6 +2786,12 @@ namespace Inventory
                 return;
             }
 
+            if (tabControlMain.SelectedTab == tabPageTopSold)
+            {
+                await LoadTopSoldAsync();
+                return;
+            }
+
             if (tabControlMain.SelectedTab != tabPageManagePrices)
                 return;
 
@@ -2859,6 +2944,144 @@ namespace Inventory
             for (int i = 0; i < 12; i++)
                 series.Points.AddXY(monthLabels[i], monthlyTotals[i]);
         }
+
+        private sealed class TopSoldAgg
+        {
+            public string Description;
+            public int TimesSold;
+            public decimal TotalSales;
+            public DateTime? LastSold;
+        }
+
+        // Trims/collapses whitespace and applies a configurable case style (TOP_SOLD_ITEM_NAME_CASE:
+        // None|Upper|Title, defaulting to Title) to items_.description before it's shown in the
+        // Top Sold grid - real rows have inconsistent spacing/casing from manual data entry
+        // (e.g. "coke  1.5L " vs "COKE 1.5l").
+        private static string NormalizeItemName(string raw)
+        {
+            string cleaned = Regex.Replace((raw ?? "").Trim(), @"\s+", " ");
+            if (cleaned.Length == 0)
+                return cleaned;
+
+            string caseMode = ConfigurationManager.AppSettings["TOP_SOLD_ITEM_NAME_CASE"] ?? "Title";
+            switch (caseMode)
+            {
+                case "Upper":
+                    return cleaned.ToUpperInvariant();
+                case "None":
+                    return cleaned;
+                case "Title":
+                default:
+                    return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(cleaned.ToLowerInvariant());
+            }
+        }
+
+        // Calendar-aligned start of the selected Top Sold period, matching the dashboard's
+        // "calendar month to date" convention (see LoadDashboardInventoryStats/PopulateDashboardSales).
+        private static DateTime GetTopSoldPeriodStart(string period)
+        {
+            DateTime today = DateTime.Today;
+            switch (period)
+            {
+                case "Weekly":
+                    int daysSinceMonday = ((int)today.DayOfWeek + 6) % 7;
+                    return today.AddDays(-daysSinceMonday);
+                case "Quarterly":
+                    int quarterStartMonth = ((today.Month - 1) / 3) * 3 + 1;
+                    return new DateTime(today.Year, quarterStartMonth, 1);
+                case "Annually":
+                    return new DateTime(today.Year, 1, 1);
+                case "Monthly":
+                default:
+                    return new DateTime(today.Year, today.Month, 1);
+            }
+        }
+
+        /// <summary>
+        /// Populates the Top Sold tab for the period selected in cmbTopSoldPeriod (Weekly/
+        /// Monthly/Quarterly/Annually, calendar-aligned to date): ranks items by how many
+        /// sales_ rows (checkout lines) reference them in that window and the revenue those
+        /// lines total. sales_ only persists itemcode + line total (see SaveSaleLineItemsAsync)
+        /// - not the line's quantity - so "Times Sold" counts checkout lines, not units, same
+        /// caveat as the rest of the sales reporting here. Aggregation (including "last sold")
+        /// happens client-side rather than via SQL GROUP BY/MAX/WHERE because transaction_date
+        /// is stored as "yyyy-MMMM-dd H:m:ss" (month name, unpadded hour/minute/second - see
+        /// SaveSaleLineItemsAsync) which doesn't sort or range-compare chronologically as a string.
+        /// </summary>
+        private async Task LoadTopSoldAsync()
+        {
+            DateTime periodStart = GetTopSoldPeriodStart(cmbTopSoldPeriod.SelectedItem.ToString());
+
+            btnTopSoldRefresh.Enabled = false;
+            dgvTopSold.Rows.Clear();
+            lblTopSoldStatus.Text = "";
+
+            try
+            {
+                var byItem = new Dictionary<string, TopSoldAgg>();
+
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
+                using (var cmd = new MySqlCommand(
+                    "SELECT s.itemcode AS itemcode, i.description AS itemname, " +
+                    "s.item_price AS item_price, s.transaction_date AS transaction_date " +
+                    "FROM sales_ s LEFT JOIN items_ i ON s.itemcode = i.serial", conn))
+                {
+                    await conn.OpenAsync();
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            string rawDate = reader["transaction_date"]?.ToString();
+                            if (!DateTime.TryParseExact(rawDate, "yyyy-MMMM-dd H:m:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsed)
+                                || parsed < periodStart)
+                                continue;
+
+                            string itemcode = reader["itemcode"]?.ToString() ?? "";
+                            if (!byItem.TryGetValue(itemcode, out TopSoldAgg agg))
+                            {
+                                agg = new TopSoldAgg();
+                                byItem[itemcode] = agg;
+                            }
+
+                            agg.Description = NormalizeItemName(reader["itemname"] == DBNull.Value ? "" : reader["itemname"].ToString());
+                            agg.TimesSold++;
+                            agg.TotalSales += reader["item_price"] == DBNull.Value ? 0m : Convert.ToDecimal(reader["item_price"]);
+
+                            if (agg.LastSold == null || parsed > agg.LastSold)
+                                agg.LastSold = parsed;
+                        }
+                    }
+                }
+
+                int rank = 1;
+                foreach (var kvp in byItem.OrderByDescending(p => p.Value.TimesSold).ThenByDescending(p => p.Value.TotalSales).Take(50))
+                {
+                    dgvTopSold.Rows.Add(
+                        rank++,
+                        kvp.Key,
+                        kvp.Value.Description,
+                        kvp.Value.TimesSold,
+                        kvp.Value.TotalSales.ToString("N2"),
+                        kvp.Value.LastSold?.ToString("yyyy-MM-dd") ?? "—");
+                }
+
+                if (dgvTopSold.Rows.Count == 0)
+                    lblTopSoldStatus.Text = "No sales recorded yet.";
+            }
+            catch (Exception)
+            {
+                lblTopSoldStatus.Text = "Top sold data unavailable offline.";
+            }
+            finally
+            {
+                btnTopSoldRefresh.Enabled = true;
+            }
+        }
+
+        private async void btnTopSoldRefresh_Click(object sender, EventArgs e) => await LoadTopSoldAsync();
+
+        private async void cmbTopSoldPeriod_SelectedIndexChanged(object sender, EventArgs e) => await LoadTopSoldAsync();
 
         private void btnDashInventoryReport_Click(object sender, EventArgs e) => inventoryReportToolStripMenuItem_Click(sender, e);
 

@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Configuration;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -14,16 +15,24 @@ namespace Inventory
         public string TagName { get; set; }
         public string HtmlUrl { get; set; }
         public string Notes { get; set; }
+
+        /// <summary>
+        /// Direct download URL of a release asset named like "Inventory-vX.Y.Z.zip" (contains
+        /// "Inventory", ends in ".zip"), if the release has one. Null when no such asset is
+        /// attached - callers fall back to the notify-only flow in that case.
+        /// </summary>
+        public string AssetDownloadUrl { get; set; }
+        public long AssetSize { get; set; }
     }
 
     /// <summary>
     /// Checks a public GitHub repo's Releases API for a version newer than AppVersion.Current.
     /// The repo (GITHUB_RELEASES_REPO) is public and the call is anonymous - no token, so none of
     /// the credential-sprawl concerns already flagged for App.config's DB settings apply here.
-    /// Notify-only by design (System Config > Updates / StartUpdateCheckWatcher in Form1.cs):
-    /// this never downloads or runs anything, it only reports that a newer tagged release exists
-    /// so an admin can open it and run the installer themselves - an unannounced update mid-shift
-    /// would be disruptive on a till.
+    /// System Config > Updates / StartUpdateCheckWatcher in Form1.cs decides what happens with the
+    /// result: notify-only (open the release page, a deliberate manual action) unless the release
+    /// has a matching zip asset and AUTO_UPDATE_ENABLED is on, in which case SelfUpdateService
+    /// downloads and silently installs it once the till is idle - see SelfUpdateService.cs.
     /// </summary>
     internal static class UpdateCheckService
     {
@@ -81,12 +90,19 @@ namespace Inventory
                     if (remoteVersion <= localVersion)
                         return null;
 
+                    JArray assets = release.Value<JArray>("assets") ?? new JArray();
+                    JObject zipAsset = assets
+                        .OfType<JObject>()
+                        .FirstOrDefault(a => IsSelfUpdateZipAssetName(a.Value<string>("name")));
+
                     return new UpdateInfo
                     {
                         Version = remoteVersion,
                         TagName = tagName,
                         HtmlUrl = release.Value<string>("html_url"),
                         Notes = release.Value<string>("body"),
+                        AssetDownloadUrl = zipAsset?.Value<string>("browser_download_url"),
+                        AssetSize = zipAsset?.Value<long?>("size") ?? 0,
                     };
                 }
             }
@@ -95,5 +111,10 @@ namespace Inventory
                 return null;
             }
         }
+
+        private static bool IsSelfUpdateZipAssetName(string name) =>
+            !string.IsNullOrWhiteSpace(name) &&
+            name.IndexOf("Inventory", StringComparison.OrdinalIgnoreCase) >= 0 &&
+            name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase);
     }
 }

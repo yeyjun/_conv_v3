@@ -153,6 +153,19 @@
             this.lblDashboardStatus = new System.Windows.Forms.Label();
             this.btnDashboardRefresh = new System.Windows.Forms.Button();
             this.lblDashboardTitle = new System.Windows.Forms.Label();
+            this.tabPageTopSold = new System.Windows.Forms.TabPage();
+            this.dgvTopSold = new System.Windows.Forms.DataGridView();
+            this.colTopSoldRank = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colTopSoldSerial = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colTopSoldDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colTopSoldTimesSold = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colTopSoldTotalSales = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colTopSoldLastSold = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.lblTopSoldStatus = new System.Windows.Forms.Label();
+            this.btnTopSoldRefresh = new System.Windows.Forms.Button();
+            this.lblTopSoldTitle = new System.Windows.Forms.Label();
+            this.lblTopSoldPeriod = new System.Windows.Forms.Label();
+            this.cmbTopSoldPeriod = new System.Windows.Forms.ComboBox();
             this.gbx_itemList.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_items)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picCartLogo)).BeginInit();
@@ -180,6 +193,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgvDashboardLowStock)).BeginInit();
             this.pnlDashLowStockToolbar.SuspendLayout();
             this.pnlDashButtons.SuspendLayout();
+            this.tabPageTopSold.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvTopSold)).BeginInit();
             this.SuspendLayout();
             // 
             // trayIcon
@@ -885,6 +900,7 @@
             this.tabControlMain.Controls.Add(this.tabPageSales);
             this.tabControlMain.Controls.Add(this.tabPageManagePrices);
             this.tabControlMain.Controls.Add(this.tabPageDashboard);
+            this.tabControlMain.Controls.Add(this.tabPageTopSold);
             this.tabControlMain.Location = new System.Drawing.Point(0, 24);
             this.tabControlMain.Name = "tabControlMain";
             this.tabControlMain.SelectedIndex = 0;
@@ -1520,7 +1536,147 @@
             this.lblDashboardTitle.Size = new System.Drawing.Size(107, 22);
             this.lblDashboardTitle.TabIndex = 0;
             this.lblDashboardTitle.Text = "Dashboard";
-            // 
+            //
+            // tabPageTopSold
+            //
+            this.tabPageTopSold.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageTopSold.Controls.Add(this.dgvTopSold);
+            this.tabPageTopSold.Controls.Add(this.lblTopSoldStatus);
+            this.tabPageTopSold.Controls.Add(this.cmbTopSoldPeriod);
+            this.tabPageTopSold.Controls.Add(this.lblTopSoldPeriod);
+            this.tabPageTopSold.Controls.Add(this.btnTopSoldRefresh);
+            this.tabPageTopSold.Controls.Add(this.lblTopSoldTitle);
+            this.tabPageTopSold.Location = new System.Drawing.Point(4, 22);
+            this.tabPageTopSold.Name = "tabPageTopSold";
+            this.tabPageTopSold.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageTopSold.Size = new System.Drawing.Size(983, 710);
+            this.tabPageTopSold.TabIndex = 3;
+            this.tabPageTopSold.Text = "Top Sold";
+            //
+            // dgvTopSold
+            //
+            this.dgvTopSold.AllowUserToAddRows = false;
+            this.dgvTopSold.AllowUserToDeleteRows = false;
+            this.dgvTopSold.AllowUserToResizeRows = false;
+            this.dgvTopSold.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dgvTopSold.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvTopSold.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvTopSold.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colTopSoldRank,
+            this.colTopSoldSerial,
+            this.colTopSoldDescription,
+            this.colTopSoldTimesSold,
+            this.colTopSoldTotalSales,
+            this.colTopSoldLastSold});
+            this.dgvTopSold.Location = new System.Drawing.Point(10, 46);
+            this.dgvTopSold.Name = "dgvTopSold";
+            this.dgvTopSold.ReadOnly = true;
+            this.dgvTopSold.RowHeadersVisible = false;
+            this.dgvTopSold.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvTopSold.Size = new System.Drawing.Size(963, 654);
+            this.dgvTopSold.TabIndex = 4;
+            //
+            // colTopSoldRank
+            //
+            this.colTopSoldRank.FillWeight = 40F;
+            this.colTopSoldRank.HeaderText = "#";
+            this.colTopSoldRank.Name = "colTopSoldRank";
+            this.colTopSoldRank.ReadOnly = true;
+            //
+            // colTopSoldSerial
+            //
+            this.colTopSoldSerial.FillWeight = 90F;
+            this.colTopSoldSerial.HeaderText = "Serial";
+            this.colTopSoldSerial.Name = "colTopSoldSerial";
+            this.colTopSoldSerial.ReadOnly = true;
+            //
+            // colTopSoldDescription
+            //
+            this.colTopSoldDescription.FillWeight = 220F;
+            this.colTopSoldDescription.HeaderText = "Description";
+            this.colTopSoldDescription.Name = "colTopSoldDescription";
+            this.colTopSoldDescription.ReadOnly = true;
+            //
+            // colTopSoldTimesSold
+            //
+            this.colTopSoldTimesSold.FillWeight = 100F;
+            this.colTopSoldTimesSold.HeaderText = "Times Sold";
+            this.colTopSoldTimesSold.Name = "colTopSoldTimesSold";
+            this.colTopSoldTimesSold.ReadOnly = true;
+            //
+            // colTopSoldTotalSales
+            //
+            this.colTopSoldTotalSales.FillWeight = 120F;
+            this.colTopSoldTotalSales.HeaderText = "Total Sales";
+            this.colTopSoldTotalSales.Name = "colTopSoldTotalSales";
+            this.colTopSoldTotalSales.ReadOnly = true;
+            //
+            // colTopSoldLastSold
+            //
+            this.colTopSoldLastSold.FillWeight = 120F;
+            this.colTopSoldLastSold.HeaderText = "Last Sold";
+            this.colTopSoldLastSold.Name = "colTopSoldLastSold";
+            this.colTopSoldLastSold.ReadOnly = true;
+            //
+            // lblTopSoldStatus
+            //
+            this.lblTopSoldStatus.AutoSize = true;
+            this.lblTopSoldStatus.ForeColor = System.Drawing.Color.Tomato;
+            this.lblTopSoldStatus.Location = new System.Drawing.Point(120, 16);
+            this.lblTopSoldStatus.Name = "lblTopSoldStatus";
+            this.lblTopSoldStatus.Size = new System.Drawing.Size(0, 13);
+            this.lblTopSoldStatus.TabIndex = 2;
+            //
+            // btnTopSoldRefresh
+            //
+            this.btnTopSoldRefresh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnTopSoldRefresh.Location = new System.Drawing.Point(883, 10);
+            this.btnTopSoldRefresh.Name = "btnTopSoldRefresh";
+            this.btnTopSoldRefresh.Size = new System.Drawing.Size(90, 28);
+            this.btnTopSoldRefresh.TabIndex = 1;
+            this.btnTopSoldRefresh.Text = "Refresh";
+            this.btnTopSoldRefresh.UseVisualStyleBackColor = true;
+            this.btnTopSoldRefresh.Click += new System.EventHandler(this.btnTopSoldRefresh_Click);
+            //
+            // lblTopSoldPeriod
+            //
+            this.lblTopSoldPeriod.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblTopSoldPeriod.AutoSize = true;
+            this.lblTopSoldPeriod.Location = new System.Drawing.Point(708, 17);
+            this.lblTopSoldPeriod.Name = "lblTopSoldPeriod";
+            this.lblTopSoldPeriod.Size = new System.Drawing.Size(45, 13);
+            this.lblTopSoldPeriod.TabIndex = 4;
+            this.lblTopSoldPeriod.Text = "Period:";
+            //
+            // cmbTopSoldPeriod
+            //
+            this.cmbTopSoldPeriod.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmbTopSoldPeriod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbTopSoldPeriod.Items.AddRange(new object[] {
+            "Weekly",
+            "Monthly",
+            "Quarterly",
+            "Annually"});
+            this.cmbTopSoldPeriod.Location = new System.Drawing.Point(763, 12);
+            this.cmbTopSoldPeriod.Name = "cmbTopSoldPeriod";
+            this.cmbTopSoldPeriod.Size = new System.Drawing.Size(110, 21);
+            this.cmbTopSoldPeriod.TabIndex = 5;
+            this.cmbTopSoldPeriod.SelectedIndex = 1;
+            this.cmbTopSoldPeriod.SelectedIndexChanged += new System.EventHandler(this.cmbTopSoldPeriod_SelectedIndexChanged);
+            //
+            // lblTopSoldTitle
+            //
+            this.lblTopSoldTitle.AutoSize = true;
+            this.lblTopSoldTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTopSoldTitle.ForeColor = System.Drawing.Color.Teal;
+            this.lblTopSoldTitle.Location = new System.Drawing.Point(10, 10);
+            this.lblTopSoldTitle.Name = "lblTopSoldTitle";
+            this.lblTopSoldTitle.Size = new System.Drawing.Size(91, 22);
+            this.lblTopSoldTitle.TabIndex = 0;
+            this.lblTopSoldTitle.Text = "Top Sold";
+            //
             // Purchases
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1579,6 +1735,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgvDashboardLowStock)).EndInit();
             this.pnlDashLowStockToolbar.ResumeLayout(false);
             this.pnlDashButtons.ResumeLayout(false);
+            this.tabPageTopSold.ResumeLayout(false);
+            this.tabPageTopSold.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvTopSold)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1706,6 +1865,19 @@
         private System.Windows.Forms.Button btnDashPettyCash;
         private System.Windows.Forms.Button btnDashLoyalty;
         private System.Windows.Forms.Button btnDashSystemConfig;
+        private System.Windows.Forms.TabPage tabPageTopSold;
+        private System.Windows.Forms.Label lblTopSoldTitle;
+        private System.Windows.Forms.Button btnTopSoldRefresh;
+        private System.Windows.Forms.Label lblTopSoldStatus;
+        private System.Windows.Forms.DataGridView dgvTopSold;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colTopSoldRank;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colTopSoldSerial;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colTopSoldDescription;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colTopSoldTimesSold;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colTopSoldTotalSales;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colTopSoldLastSold;
+        private System.Windows.Forms.Label lblTopSoldPeriod;
+        private System.Windows.Forms.ComboBox cmbTopSoldPeriod;
     }
 }
 

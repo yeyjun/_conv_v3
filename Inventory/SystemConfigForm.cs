@@ -237,8 +237,12 @@ namespace Inventory
             bool enabled = await AppConfigService.GetUpdateCheckEnabledAsync();
             chkUpdateCheckEnabled.Checked = enabled;
 
+            bool autoEnabled = await AppConfigService.GetAutoUpdateEnabledAsync();
+            chkAutoUpdateEnabled.Checked = autoEnabled;
+
             lblUpdatesStatus.ForeColor = System.Drawing.Color.Gray;
-            lblUpdatesStatus.Text = $"Status: Automatic update checks are currently {(enabled ? "ON" : "OFF")} (live, shared across all terminals).";
+            lblUpdatesStatus.Text = $"Status: Automatic update checks are currently {(enabled ? "ON" : "OFF")}, " +
+                $"automatic silent install is currently {(autoEnabled ? "ON" : "OFF")} (live, shared across all terminals).";
         }
 
         private async void btnSaveUpdates_Click(object sender, EventArgs e)
@@ -251,8 +255,12 @@ namespace Inventory
                 bool enabled = chkUpdateCheckEnabled.Checked;
                 await AppConfigService.SetUpdateCheckEnabledAsync(enabled);
 
+                bool autoEnabled = chkAutoUpdateEnabled.Checked;
+                await AppConfigService.SetAutoUpdateEnabledAsync(autoEnabled);
+
                 lblUpdatesStatus.ForeColor = System.Drawing.Color.Gray;
-                lblUpdatesStatus.Text = $"Status: Automatic update checks are currently {(enabled ? "ON" : "OFF")} (live, shared across all terminals).";
+                lblUpdatesStatus.Text = $"Status: Automatic update checks are currently {(enabled ? "ON" : "OFF")}, " +
+                    $"automatic silent install is currently {(autoEnabled ? "ON" : "OFF")} (live, shared across all terminals).";
             }
             catch (Exception ex)
             {

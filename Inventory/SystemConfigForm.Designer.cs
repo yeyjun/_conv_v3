@@ -278,6 +278,7 @@ namespace Inventory
             this.lblUpdatesHint = new System.Windows.Forms.Label();
             this.lblCurrentVersion = new System.Windows.Forms.Label();
             this.chkUpdateCheckEnabled = new System.Windows.Forms.CheckBox();
+            this.chkAutoUpdateEnabled = new System.Windows.Forms.CheckBox();
             this.btnCheckUpdateNow = new System.Windows.Forms.Button();
             this.btnSaveUpdates = new System.Windows.Forms.Button();
             this.btnRefreshUpdates = new System.Windows.Forms.Button();
@@ -3327,6 +3328,7 @@ namespace Inventory
             this.tabPageUpdates.Controls.Add(this.btnSaveUpdates);
             this.tabPageUpdates.Controls.Add(this.btnCheckUpdateNow);
             this.tabPageUpdates.Controls.Add(this.chkUpdateCheckEnabled);
+            this.tabPageUpdates.Controls.Add(this.chkAutoUpdateEnabled);
             this.tabPageUpdates.Controls.Add(this.lblCurrentVersion);
             this.tabPageUpdates.Controls.Add(this.lblUpdatesHint);
             this.tabPageUpdates.Location = new System.Drawing.Point(4, 22);
@@ -3345,9 +3347,11 @@ namespace Inventory
             this.lblUpdatesHint.Name = "lblUpdatesHint";
             this.lblUpdatesHint.Size = new System.Drawing.Size(370, 52);
             this.lblUpdatesHint.TabIndex = 0;
-            this.lblUpdatesHint.Text = "Checks the public GitHub repo for a newer published release. This never downlo" +
-    "ads or installs anything - it only notifies so an admin can open the release a" +
-    "nd run the installer manually.";
+            this.lblUpdatesHint.Text = "Checks the public GitHub repo for a newer published release. By default this o" +
+    "nly notifies so an admin can open the release and run the installer manually." +
+    " If silent install is also enabled below and the release has a matching down" +
+    "load, the update is fetched in the background and applied automatically next" +
+    " time the till is idle - no prompts.";
             //
             // lblCurrentVersion
             //
@@ -3367,6 +3371,16 @@ namespace Inventory
             this.chkUpdateCheckEnabled.TabIndex = 2;
             this.chkUpdateCheckEnabled.Text = "Automatically check for updates (every 24h)";
             this.chkUpdateCheckEnabled.UseVisualStyleBackColor = true;
+            //
+            // chkAutoUpdateEnabled
+            //
+            this.chkAutoUpdateEnabled.AutoSize = true;
+            this.chkAutoUpdateEnabled.Location = new System.Drawing.Point(6, 150);
+            this.chkAutoUpdateEnabled.Name = "chkAutoUpdateEnabled";
+            this.chkAutoUpdateEnabled.Size = new System.Drawing.Size(220, 17);
+            this.chkAutoUpdateEnabled.TabIndex = 7;
+            this.chkAutoUpdateEnabled.Text = "Automatically install updates silently (no prompts)";
+            this.chkAutoUpdateEnabled.UseVisualStyleBackColor = true;
             //
             // btnCheckUpdateNow
             //
@@ -3805,6 +3819,7 @@ namespace Inventory
         private System.Windows.Forms.Label lblUpdatesHint;
         private System.Windows.Forms.Label lblCurrentVersion;
         private System.Windows.Forms.CheckBox chkUpdateCheckEnabled;
+        private System.Windows.Forms.CheckBox chkAutoUpdateEnabled;
         private System.Windows.Forms.Button btnCheckUpdateNow;
         private System.Windows.Forms.Button btnSaveUpdates;
         private System.Windows.Forms.Button btnRefreshUpdates;
