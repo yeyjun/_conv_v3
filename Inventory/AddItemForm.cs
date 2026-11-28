@@ -1,7 +1,9 @@
 using System;
 using System.Configuration;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using MySql.Data.MySqlClient;
 using YourApp.Data;
@@ -57,6 +59,67 @@ namespace Inventory
         private void btn_generateCode_Click(object sender, EventArgs e)
         {
             tbx_code.Text = DateTime.Now.ToString("yyyyMMddHHmmss");
+            _ = RefreshItemPhotoAsync();
+        }
+
+        private async void tbx_code_Leave(object sender, EventArgs e) => await RefreshItemPhotoAsync();
+
+        private async void tbx_code_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter)
+                return;
+
+            e.SuppressKeyPress = true;
+            await RefreshItemPhotoAsync();
+        }
+
+        /// <summary>
+        /// Looks up a sample photo for whatever barcode is currently in tbx_code (see
+        /// ItemPhotoService - keyed off a one-time sample of items_.serial showing most are
+        /// real EAN-13/UPC barcodes). "Latest wins": if the barcode field changes again before
+        /// a slower lookup finishes, the stale result is discarded instead of overwriting a
+        /// newer one.
+        /// </summary>
+        private async Task RefreshItemPhotoAsync()
+        {
+            string serial = tbx_code.Text.Trim();
+
+            picItemPhoto.Image?.Dispose();
+            picItemPhoto.Image = null;
+            lblItemPhotoStatus.Text = string.IsNullOrEmpty(serial) ? "" : "Looking up sample photo...";
+
+            if (string.IsNullOrEmpty(serial))
+                return;
+
+            string photoPath = await ItemPhotoService.GetPhotoPathAsync(serial);
+
+            if (tbx_code.Text.Trim() != serial)
+                return; // barcode changed again while the lookup was in flight
+
+            if (photoPath == null)
+            {
+                lblItemPhotoStatus.Text = "No sample photo found for this barcode.";
+                return;
+            }
+
+            try
+            {
+                // Loaded into memory and cloned via new Bitmap(...) rather than keeping the
+                // Image returned by Image.FromStream directly - GDI+ can lazily pull from the
+                // backing stream for the Image's whole lifetime, so the MemoryStream has to
+                // outlive it unless it's cloned first. Also avoids Image.FromFile, which keeps
+                // the source file locked for as long as the Image is alive - photoPath is also
+                // our on-disk cache file, and a lock on it would break the next lookup/app run.
+                byte[] bytes = File.ReadAllBytes(photoPath);
+                using (var stream = new MemoryStream(bytes))
+                using (var loaded = System.Drawing.Image.FromStream(stream))
+                    picItemPhoto.Image = new System.Drawing.Bitmap(loaded);
+                lblItemPhotoStatus.Text = "";
+            }
+            catch
+            {
+                lblItemPhotoStatus.Text = "No sample photo found for this barcode.";
+            }
         }
 
         private void btn_printBarcode_Click(object sender, EventArgs e)

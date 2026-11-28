@@ -395,6 +395,8 @@
       <DependentUpon>ReceiptPreviewForm.cs</DependentUpon>
     </Compile>
     <Compile Include="TrialLicense.cs" />
+    <Compile Include="PhilippineHolidays.cs" />
+    <Compile Include="ItemPhotoService.cs" />
     <Compile Include="DbSetupService.cs" />
     <Compile Include="AppConfigService.cs" />
     <Compile Include="RemoteControlServer.cs" />

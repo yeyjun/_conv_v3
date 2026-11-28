@@ -71,6 +71,8 @@ namespace Inventory
             this.chkQtyAutoResetEnabled = new System.Windows.Forms.CheckBox();
             this.gbxStartup = new System.Windows.Forms.GroupBox();
             this.chkAutoStartWithWindows = new System.Windows.Forms.CheckBox();
+            this.gbxGreeting = new System.Windows.Forms.GroupBox();
+            this.chkHolidayGreetingEnabled = new System.Windows.Forms.CheckBox();
             this.tabPageNetwork = new System.Windows.Forms.TabPage();
             this.lblNetworkHint = new System.Windows.Forms.Label();
             this.chartNetwork = new System.Windows.Forms.DataVisualization.Charting.Chart();
@@ -283,6 +285,13 @@ namespace Inventory
             this.btnSaveUpdates = new System.Windows.Forms.Button();
             this.btnRefreshUpdates = new System.Windows.Forms.Button();
             this.lblUpdatesStatus = new System.Windows.Forms.Label();
+            this.tabPageTopSoldSettings = new System.Windows.Forms.TabPage();
+            this.lblTopSoldCaseHint = new System.Windows.Forms.Label();
+            this.cbxTopSoldNameCase = new System.Windows.Forms.ComboBox();
+            this.lblTopSoldCase = new System.Windows.Forms.Label();
+            this.lblManagePricesCaseHint = new System.Windows.Forms.Label();
+            this.cbxManagePricesNameCase = new System.Windows.Forms.ComboBox();
+            this.lblManagePricesCase = new System.Windows.Forms.Label();
             this.openFileDialogAccess = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialogCounterReceipt = new System.Windows.Forms.FolderBrowserDialog();
             this.lblStatus = new System.Windows.Forms.Label();
@@ -304,6 +313,7 @@ namespace Inventory
             ((System.ComponentModel.ISupportInitialize)(this.nud_searchAutoClearSeconds)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nud_qtyAutoResetSeconds)).BeginInit();
             this.gbxStartup.SuspendLayout();
+            this.gbxGreeting.SuspendLayout();
             this.tabPageNetwork.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartNetwork)).BeginInit();
             this.tabPageMenus.SuspendLayout();
@@ -332,6 +342,7 @@ namespace Inventory
             this.tabPageInventoryPrint.SuspendLayout();
             this.tabPageOfflineSync.SuspendLayout();
             this.tabPageUpdates.SuspendLayout();
+            this.tabPageTopSoldSettings.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tbPriceOverride)).BeginInit();
             this.SuspendLayout();
             //
@@ -385,7 +396,8 @@ namespace Inventory
             "Cart Board",
             "Inventory Print Schedule",
             "Offline Sync",
-            "Updates"});
+            "Updates",
+            "Item Display"});
             this.lstConfigSections.Location = new System.Drawing.Point(12, 44);
             this.lstConfigSections.Name = "lstConfigSections";
             this.lstConfigSections.Size = new System.Drawing.Size(134, 468);
@@ -427,6 +439,7 @@ namespace Inventory
             this.tabControlConfig.Controls.Add(this.tabPageInventoryPrint);
             this.tabControlConfig.Controls.Add(this.tabPageOfflineSync);
             this.tabControlConfig.Controls.Add(this.tabPageUpdates);
+            this.tabControlConfig.Controls.Add(this.tabPageTopSoldSettings);
             this.tabControlConfig.Location = new System.Drawing.Point(-4, -22);
             this.tabControlConfig.Name = "tabControlConfig";
             this.tabControlConfig.SelectedIndex = 0;
@@ -445,6 +458,7 @@ namespace Inventory
             this.tabPageSettings.Controls.Add(this.gbxSecurity);
             this.tabPageSettings.Controls.Add(this.gbxAlerts);
             this.tabPageSettings.Controls.Add(this.gbxStartup);
+            this.tabPageSettings.Controls.Add(this.gbxGreeting);
             this.tabPageSettings.Location = new System.Drawing.Point(4, 22);
             this.tabPageSettings.Name = "tabPageSettings";
             this.tabPageSettings.Padding = new System.Windows.Forms.Padding(3);
@@ -910,6 +924,31 @@ namespace Inventory
             this.chkAutoStartWithWindows.TabIndex = 0;
             this.chkAutoStartWithWindows.Text = "Start BrewCode automatically when Windows starts";
             this.chkAutoStartWithWindows.UseVisualStyleBackColor = true;
+            //
+            // gbxGreeting
+            //
+            this.gbxGreeting.BackColor = System.Drawing.Color.MintCream;
+            this.gbxGreeting.Controls.Add(this.chkHolidayGreetingEnabled);
+            this.gbxGreeting.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.gbxGreeting.Location = new System.Drawing.Point(6, 879);
+            this.gbxGreeting.Name = "gbxGreeting";
+            this.gbxGreeting.Size = new System.Drawing.Size(380, 60);
+            this.gbxGreeting.TabIndex = 6;
+            this.gbxGreeting.TabStop = false;
+            this.gbxGreeting.Text = "Greeting";
+            //
+            // chkHolidayGreetingEnabled
+            //
+            this.chkHolidayGreetingEnabled.AutoSize = true;
+            this.chkHolidayGreetingEnabled.Checked = true;
+            this.chkHolidayGreetingEnabled.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkHolidayGreetingEnabled.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.chkHolidayGreetingEnabled.Location = new System.Drawing.Point(13, 25);
+            this.chkHolidayGreetingEnabled.Name = "chkHolidayGreetingEnabled";
+            this.chkHolidayGreetingEnabled.Size = new System.Drawing.Size(280, 17);
+            this.chkHolidayGreetingEnabled.TabIndex = 0;
+            this.chkHolidayGreetingEnabled.Text = "Show \"Happy {Holiday}!\" greeting on PH holidays";
+            this.chkHolidayGreetingEnabled.UseVisualStyleBackColor = true;
             //
             // lblManagerPin
             //
@@ -3423,6 +3462,94 @@ namespace Inventory
             this.lblUpdatesStatus.Size = new System.Drawing.Size(101, 24);
             this.lblUpdatesStatus.TabIndex = 6;
             //
+            // tabPageTopSoldSettings
+            //
+            this.tabPageTopSoldSettings.BackColor = System.Drawing.Color.FloralWhite;
+            this.tabPageTopSoldSettings.Controls.Add(this.lblTopSoldCaseHint);
+            this.tabPageTopSoldSettings.Controls.Add(this.cbxTopSoldNameCase);
+            this.tabPageTopSoldSettings.Controls.Add(this.lblTopSoldCase);
+            this.tabPageTopSoldSettings.Controls.Add(this.lblManagePricesCaseHint);
+            this.tabPageTopSoldSettings.Controls.Add(this.cbxManagePricesNameCase);
+            this.tabPageTopSoldSettings.Controls.Add(this.lblManagePricesCase);
+            this.tabPageTopSoldSettings.Location = new System.Drawing.Point(4, 22);
+            this.tabPageTopSoldSettings.Name = "tabPageTopSoldSettings";
+            this.tabPageTopSoldSettings.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPageTopSoldSettings.Size = new System.Drawing.Size(392, 400);
+            this.tabPageTopSoldSettings.TabIndex = 19;
+            this.tabPageTopSoldSettings.Text = "Item Display";
+            //
+            // lblTopSoldCase
+            //
+            this.lblTopSoldCase.AutoSize = true;
+            this.lblTopSoldCase.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblTopSoldCase.Location = new System.Drawing.Point(6, 9);
+            this.lblTopSoldCase.Name = "lblTopSoldCase";
+            this.lblTopSoldCase.Size = new System.Drawing.Size(130, 13);
+            this.lblTopSoldCase.TabIndex = 0;
+            this.lblTopSoldCase.Text = "Top Sold item names:";
+            //
+            // cbxTopSoldNameCase
+            //
+            this.cbxTopSoldNameCase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxTopSoldNameCase.Items.AddRange(new object[] {
+            "None",
+            "Upper",
+            "Title"});
+            this.cbxTopSoldNameCase.Location = new System.Drawing.Point(6, 26);
+            this.cbxTopSoldNameCase.Name = "cbxTopSoldNameCase";
+            this.cbxTopSoldNameCase.Size = new System.Drawing.Size(150, 21);
+            this.cbxTopSoldNameCase.TabIndex = 1;
+            //
+            // lblTopSoldCaseHint
+            //
+            this.lblTopSoldCaseHint.AutoSize = true;
+            this.lblTopSoldCaseHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
+            this.lblTopSoldCaseHint.ForeColor = System.Drawing.Color.Gray;
+            this.lblTopSoldCaseHint.Location = new System.Drawing.Point(6, 54);
+            this.lblTopSoldCaseHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblTopSoldCaseHint.Name = "lblTopSoldCaseHint";
+            this.lblTopSoldCaseHint.Size = new System.Drawing.Size(370, 39);
+            this.lblTopSoldCaseHint.TabIndex = 2;
+            this.lblTopSoldCaseHint.Text = "Controls how item descriptions are displayed in the Top Sold tab\'s grid - whit" +
+    "espace is always trimmed/collapsed. \"None\" leaves casing as stored in the ite" +
+    "ms table.";
+            //
+            // lblManagePricesCase
+            //
+            this.lblManagePricesCase.AutoSize = true;
+            this.lblManagePricesCase.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblManagePricesCase.Location = new System.Drawing.Point(6, 100);
+            this.lblManagePricesCase.Name = "lblManagePricesCase";
+            this.lblManagePricesCase.Size = new System.Drawing.Size(140, 13);
+            this.lblManagePricesCase.TabIndex = 3;
+            this.lblManagePricesCase.Text = "Manage Prices item names:";
+            //
+            // cbxManagePricesNameCase
+            //
+            this.cbxManagePricesNameCase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxManagePricesNameCase.Items.AddRange(new object[] {
+            "None",
+            "Upper",
+            "Title"});
+            this.cbxManagePricesNameCase.Location = new System.Drawing.Point(6, 117);
+            this.cbxManagePricesNameCase.Name = "cbxManagePricesNameCase";
+            this.cbxManagePricesNameCase.Size = new System.Drawing.Size(150, 21);
+            this.cbxManagePricesNameCase.TabIndex = 4;
+            //
+            // lblManagePricesCaseHint
+            //
+            this.lblManagePricesCaseHint.AutoSize = true;
+            this.lblManagePricesCaseHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
+            this.lblManagePricesCaseHint.ForeColor = System.Drawing.Color.Gray;
+            this.lblManagePricesCaseHint.Location = new System.Drawing.Point(6, 145);
+            this.lblManagePricesCaseHint.MaximumSize = new System.Drawing.Size(370, 0);
+            this.lblManagePricesCaseHint.Name = "lblManagePricesCaseHint";
+            this.lblManagePricesCaseHint.Size = new System.Drawing.Size(370, 39);
+            this.lblManagePricesCaseHint.TabIndex = 5;
+            this.lblManagePricesCaseHint.Text = "Controls how item descriptions are displayed in the Manage Prices grid - never" +
+    " written back to the database (only price/retail price/price-per-piece/categ" +
+    "ory are saved there).";
+            //
             // openFileDialogAccess
             //
             this.openFileDialogAccess.CheckFileExists = false;
@@ -3504,6 +3631,8 @@ namespace Inventory
             ((System.ComponentModel.ISupportInitialize)(this.nud_qtyAutoResetSeconds)).EndInit();
             this.gbxStartup.ResumeLayout(false);
             this.gbxStartup.PerformLayout();
+            this.gbxGreeting.ResumeLayout(false);
+            this.gbxGreeting.PerformLayout();
             this.tabPageNetwork.ResumeLayout(false);
             this.tabPageNetwork.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartNetwork)).EndInit();
@@ -3554,6 +3683,8 @@ namespace Inventory
             this.tabPageOfflineSync.PerformLayout();
             this.tabPageUpdates.ResumeLayout(false);
             this.tabPageUpdates.PerformLayout();
+            this.tabPageTopSoldSettings.ResumeLayout(false);
+            this.tabPageTopSoldSettings.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -3610,6 +3741,8 @@ namespace Inventory
         private System.Windows.Forms.NumericUpDown nud_qtyAutoResetSeconds;
         private System.Windows.Forms.Label lblQtyAutoResetSeconds;
         private System.Windows.Forms.GroupBox gbxStartup;
+        private System.Windows.Forms.GroupBox gbxGreeting;
+        private System.Windows.Forms.CheckBox chkHolidayGreetingEnabled;
         private System.Windows.Forms.CheckBox chkAutoStartWithWindows;
         private System.Windows.Forms.TabPage tabPageNetwork;
         private System.Windows.Forms.Button btnToggleMonitor;
@@ -3824,6 +3957,13 @@ namespace Inventory
         private System.Windows.Forms.Button btnSaveUpdates;
         private System.Windows.Forms.Button btnRefreshUpdates;
         private System.Windows.Forms.Label lblUpdatesStatus;
+        private System.Windows.Forms.TabPage tabPageTopSoldSettings;
+        private System.Windows.Forms.Label lblTopSoldCase;
+        private System.Windows.Forms.ComboBox cbxTopSoldNameCase;
+        private System.Windows.Forms.Label lblTopSoldCaseHint;
+        private System.Windows.Forms.Label lblManagePricesCase;
+        private System.Windows.Forms.ComboBox cbxManagePricesNameCase;
+        private System.Windows.Forms.Label lblManagePricesCaseHint;
         private System.Windows.Forms.OpenFileDialog openFileDialogAccess;
         private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.Button btnSave;

@@ -37,6 +37,9 @@ namespace Inventory
             this.lbl_wholeNumberHint = new System.Windows.Forms.Label();
             this.btn_save = new System.Windows.Forms.Button();
             this.btn_close = new System.Windows.Forms.Button();
+            this.picItemPhoto = new System.Windows.Forms.PictureBox();
+            this.lblItemPhotoStatus = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.picItemPhoto)).BeginInit();
             this.SuspendLayout();
             //
             // lbl_title
@@ -66,6 +69,8 @@ namespace Inventory
             this.tbx_code.Name = "tbx_code";
             this.tbx_code.Size = new System.Drawing.Size(220, 29);
             this.tbx_code.TabIndex = 2;
+            this.tbx_code.Leave += new System.EventHandler(this.tbx_code_Leave);
+            this.tbx_code.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tbx_code_KeyDown);
             //
             // btn_generateCode
             //
@@ -240,11 +245,34 @@ namespace Inventory
             this.btn_close.UseVisualStyleBackColor = true;
             this.btn_close.Click += new System.EventHandler(this.btn_close_Click);
             //
+            // picItemPhoto
+            //
+            this.picItemPhoto.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.picItemPhoto.Location = new System.Drawing.Point(560, 66);
+            this.picItemPhoto.Name = "picItemPhoto";
+            this.picItemPhoto.Size = new System.Drawing.Size(160, 160);
+            this.picItemPhoto.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picItemPhoto.TabIndex = 20;
+            this.picItemPhoto.TabStop = false;
+            //
+            // lblItemPhotoStatus
+            //
+            this.lblItemPhotoStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Italic);
+            this.lblItemPhotoStatus.ForeColor = System.Drawing.Color.Gray;
+            this.lblItemPhotoStatus.Location = new System.Drawing.Point(560, 230);
+            this.lblItemPhotoStatus.MaximumSize = new System.Drawing.Size(160, 0);
+            this.lblItemPhotoStatus.Name = "lblItemPhotoStatus";
+            this.lblItemPhotoStatus.Size = new System.Drawing.Size(160, 40);
+            this.lblItemPhotoStatus.TabIndex = 21;
+            this.lblItemPhotoStatus.Text = "Sample photo looked up by barcode once entered.";
+            //
             // AddItemForm
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(560, 504);
+            this.ClientSize = new System.Drawing.Size(750, 504);
+            this.Controls.Add(this.lblItemPhotoStatus);
+            this.Controls.Add(this.picItemPhoto);
             this.Controls.Add(this.btn_close);
             this.Controls.Add(this.btn_save);
             this.Controls.Add(this.lbl_wholeNumberHint);
@@ -271,6 +299,7 @@ namespace Inventory
             this.Name = "AddItemForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Add New Item";
+            ((System.ComponentModel.ISupportInitialize)(this.picItemPhoto)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -298,5 +327,7 @@ namespace Inventory
         private System.Windows.Forms.Label lbl_wholeNumberHint;
         private System.Windows.Forms.Button btn_save;
         private System.Windows.Forms.Button btn_close;
+        private System.Windows.Forms.PictureBox picItemPhoto;
+        private System.Windows.Forms.Label lblItemPhotoStatus;
     }
 }

@@ -115,6 +115,8 @@
             this.lbl_managePricesTitle = new System.Windows.Forms.Label();
             this.lbl_managePricesSearch = new System.Windows.Forms.Label();
             this.tbx_managePricesSearch = new System.Windows.Forms.TextBox();
+            this.lbl_managePricesCategory = new System.Windows.Forms.Label();
+            this.cbx_managePricesCategory = new System.Windows.Forms.ComboBox();
             this.tabPageDashboard = new System.Windows.Forms.TabPage();
             this.tlpDashboardBody = new System.Windows.Forms.TableLayoutPanel();
             this.tlpKpiRow = new System.Windows.Forms.TableLayoutPanel();
@@ -949,6 +951,8 @@
             this.tabPageManagePrices.Controls.Add(this.lbl_managePricesTitle);
             this.tabPageManagePrices.Controls.Add(this.lbl_managePricesSearch);
             this.tabPageManagePrices.Controls.Add(this.tbx_managePricesSearch);
+            this.tabPageManagePrices.Controls.Add(this.lbl_managePricesCategory);
+            this.tabPageManagePrices.Controls.Add(this.cbx_managePricesCategory);
             this.tabPageManagePrices.Location = new System.Drawing.Point(4, 22);
             this.tabPageManagePrices.Name = "tabPageManagePrices";
             this.tabPageManagePrices.Padding = new System.Windows.Forms.Padding(3);
@@ -963,6 +967,8 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgv_managePrices.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgv_managePrices.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_managePrices.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.dgv_managePrices.RowTemplate.Height = 30;
             this.dgv_managePrices.Location = new System.Drawing.Point(10, 45);
             this.dgv_managePrices.Name = "dgv_managePrices";
             this.dgv_managePrices.Size = new System.Drawing.Size(690, 590);
@@ -1020,11 +1026,11 @@
             // btn_addItem
             // 
             this.btn_addItem.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btn_addItem.Location = new System.Drawing.Point(813, 8);
+            this.btn_addItem.Location = new System.Drawing.Point(773, 8);
             this.btn_addItem.Name = "btn_addItem";
-            this.btn_addItem.Size = new System.Drawing.Size(160, 30);
+            this.btn_addItem.Size = new System.Drawing.Size(200, 30);
             this.btn_addItem.TabIndex = 5;
-            this.btn_addItem.Text = "Add New Item...";
+            this.btn_addItem.Text = "Add New Item... (Ctrl+N)";
             this.btn_addItem.UseVisualStyleBackColor = true;
             this.btn_addItem.Click += new System.EventHandler(this.btn_addItem_Click);
             // 
@@ -1059,24 +1065,45 @@
             this.lbl_managePricesTitle.Size = new System.Drawing.Size(296, 22);
             this.lbl_managePricesTitle.TabIndex = 0;
             this.lbl_managePricesTitle.Text = "Manage Item Prices (Restricted)";
-            // 
+            //
+            // lbl_managePricesCategory
+            //
+            this.lbl_managePricesCategory.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.lbl_managePricesCategory.AutoSize = true;
+            this.lbl_managePricesCategory.Location = new System.Drawing.Point(316, 14);
+            this.lbl_managePricesCategory.Name = "lbl_managePricesCategory";
+            this.lbl_managePricesCategory.Size = new System.Drawing.Size(58, 13);
+            this.lbl_managePricesCategory.TabIndex = 6;
+            this.lbl_managePricesCategory.Text = "Category:";
+            //
+            // cbx_managePricesCategory
+            //
+            this.cbx_managePricesCategory.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.cbx_managePricesCategory.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbx_managePricesCategory.FormattingEnabled = true;
+            this.cbx_managePricesCategory.Location = new System.Drawing.Point(385, 10);
+            this.cbx_managePricesCategory.Name = "cbx_managePricesCategory";
+            this.cbx_managePricesCategory.Size = new System.Drawing.Size(140, 21);
+            this.cbx_managePricesCategory.TabIndex = 7;
+            this.cbx_managePricesCategory.SelectedIndexChanged += new System.EventHandler(this.cbx_managePricesCategory_SelectedIndexChanged);
+            //
             // lbl_managePricesSearch
-            // 
+            //
             this.lbl_managePricesSearch.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.lbl_managePricesSearch.AutoSize = true;
-            this.lbl_managePricesSearch.Location = new System.Drawing.Point(400, 14);
+            this.lbl_managePricesSearch.Location = new System.Drawing.Point(535, 14);
             this.lbl_managePricesSearch.Name = "lbl_managePricesSearch";
             this.lbl_managePricesSearch.Size = new System.Drawing.Size(44, 13);
-            this.lbl_managePricesSearch.TabIndex = 6;
+            this.lbl_managePricesSearch.TabIndex = 8;
             this.lbl_managePricesSearch.Text = "Search:";
-            // 
+            //
             // tbx_managePricesSearch
-            // 
+            //
             this.tbx_managePricesSearch.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.tbx_managePricesSearch.Location = new System.Drawing.Point(450, 11);
+            this.tbx_managePricesSearch.Location = new System.Drawing.Point(580, 11);
             this.tbx_managePricesSearch.Name = "tbx_managePricesSearch";
-            this.tbx_managePricesSearch.Size = new System.Drawing.Size(300, 20);
-            this.tbx_managePricesSearch.TabIndex = 7;
+            this.tbx_managePricesSearch.Size = new System.Drawing.Size(170, 20);
+            this.tbx_managePricesSearch.TabIndex = 9;
             this.tbx_managePricesSearch.TextChanged += new System.EventHandler(this.tbx_managePricesSearch_TextChanged);
             // 
             // tabPageDashboard
@@ -1819,6 +1846,8 @@
         private System.Windows.Forms.Label lbl_managePricesTitle;
         private System.Windows.Forms.Label lbl_managePricesSearch;
         private System.Windows.Forms.TextBox tbx_managePricesSearch;
+        private System.Windows.Forms.Label lbl_managePricesCategory;
+        private System.Windows.Forms.ComboBox cbx_managePricesCategory;
         private System.Windows.Forms.Label lbl_managePricesStatus;
         private System.Windows.Forms.Button btn_refreshPrices;
         private System.Windows.Forms.Button btn_savePrices;

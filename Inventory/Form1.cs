@@ -44,13 +44,23 @@ namespace Inventory
         /// <summary>Shown on the menu bar immediately left of the Logout button - log_in holds
         /// the fullname (see Login.cs: id = match["fullname"]), which reads naturally in a
         /// greeting, unlike _loggedInCode (the entered login code shown in the title bar).
-        /// Re-run from timerClock_Tick so the greeting flips to the next period automatically
-        /// if a session happens to span a threshold.</summary>
+        /// Re-run from timerClock_Tick so the greeting flips to the next period (or the next
+        /// calendar day's holiday) automatically if a session happens to span a threshold.
+        /// On a PH holiday (HOLIDAY_GREETING_ENABLED, default on - see PhilippineHolidays)
+        /// the holiday name replaces the usual time-of-day greeting entirely.</summary>
         private void UpdateGreeting()
         {
             if (string.IsNullOrEmpty(log_in))
             {
                 lblGreeting.Text = "";
+                return;
+            }
+
+            bool holidayGreetingEnabled = !string.Equals(ConfigurationManager.AppSettings["HOLIDAY_GREETING_ENABLED"], "false", StringComparison.OrdinalIgnoreCase);
+            string holidayName = holidayGreetingEnabled ? PhilippineHolidays.GetHolidayName(DateTime.Today) : null;
+            if (holidayName != null)
+            {
+                lblGreeting.Text = $"Happy {holidayName}, {log_in}!";
                 return;
             }
 
@@ -2953,17 +2963,18 @@ namespace Inventory
             public DateTime? LastSold;
         }
 
-        // Trims/collapses whitespace and applies a configurable case style (TOP_SOLD_ITEM_NAME_CASE:
-        // None|Upper|Title, defaulting to Title) to items_.description before it's shown in the
-        // Top Sold grid - real rows have inconsistent spacing/casing from manual data entry
-        // (e.g. "coke  1.5L " vs "COKE 1.5l").
-        private static string NormalizeItemName(string raw)
+        // Trims/collapses whitespace and applies a configurable case style (None|Upper|Title,
+        // defaulting to Title) to items_.description before it's shown in a grid - real rows
+        // have inconsistent spacing/casing from manual data entry (e.g. "coke  1.5L " vs
+        // "COKE 1.5l"). settingKey lets each grid that shows item names (Top Sold, Manage
+        // Prices, ...) have its own independently configured case style.
+        private static string NormalizeItemName(string raw, string settingKey)
         {
             string cleaned = Regex.Replace((raw ?? "").Trim(), @"\s+", " ");
             if (cleaned.Length == 0)
                 return cleaned;
 
-            string caseMode = ConfigurationManager.AppSettings["TOP_SOLD_ITEM_NAME_CASE"] ?? "Title";
+            string caseMode = ConfigurationManager.AppSettings[settingKey] ?? "Title";
             switch (caseMode)
             {
                 case "Upper":
@@ -3044,7 +3055,7 @@ namespace Inventory
                                 byItem[itemcode] = agg;
                             }
 
-                            agg.Description = NormalizeItemName(reader["itemname"] == DBNull.Value ? "" : reader["itemname"].ToString());
+                            agg.Description = NormalizeItemName(reader["itemname"] == DBNull.Value ? "" : reader["itemname"].ToString(), "TOP_SOLD_ITEM_NAME_CASE");
                             agg.TimesSold++;
                             agg.TotalSales += reader["item_price"] == DBNull.Value ? 0m : Convert.ToDecimal(reader["item_price"]);
 
@@ -3227,6 +3238,16 @@ namespace Inventory
                         var table = new DataTable();
                         adapter.Fill(table);
 
+                        // Normalized for display only (MANAGE_PRICES_ITEM_NAME_CASE, same
+                        // None|Upper|Title styles as Top Sold) - description isn't part of
+                        // btn_savePrices_Click's UPDATE statement, so this never writes back to
+                        // the DB. AcceptChanges immediately after resets RowState to Unchanged
+                        // for every row; otherwise this edit itself would mark every row
+                        // Modified and get included in the next Save Changes/GetChanges(Modified).
+                        foreach (DataRow row in table.Rows)
+                            row["description"] = NormalizeItemName(row["description"]?.ToString(), "MANAGE_PRICES_ITEM_NAME_CASE");
+                        table.AcceptChanges();
+
                         // A reload swaps in a brand new DataTable/grid rows, so any highlight
                         // timers still pending from the previous load would otherwise touch
                         // disposed DataGridViewCell objects.
@@ -3251,6 +3272,7 @@ namespace Inventory
                 dgv_managePrices.Columns["description"].HeaderText = "Description";
                 dgv_managePrices.Columns["description"].ReadOnly = true;
                 ReplaceCategoryColumnWithComboBox((DataTable)dgv_managePrices.DataSource);
+                PopulateManagePricesCategoryFilter((DataTable)dgv_managePrices.DataSource);
                 dgv_managePrices.Columns["price"].HeaderText = "Price (whole number)";
                 dgv_managePrices.Columns["price"].DefaultCellStyle.Format = "0.00";
                 dgv_managePrices.Columns["retail_price"].HeaderText = "Retail Price (whole number)";
@@ -3277,17 +3299,20 @@ namespace Inventory
         /// typed directly - dgv_managePrices_EditingControlShowing sets the cell's editing combo
         /// box to DropDownStyle.DropDown (not DropDownList) rather than restricting to the list.
         /// </summary>
-        private void ReplaceCategoryColumnWithComboBox(DataTable table)
-        {
-            DataGridViewColumn oldColumn = dgv_managePrices.Columns["category"];
-            int index = oldColumn.Index;
-
-            var categories = table.AsEnumerable()
+        private static string[] GetDistinctCategories(DataTable table) =>
+            table.AsEnumerable()
                 .Select(r => r["category"]?.ToString()?.Trim())
                 .Where(c => !string.IsNullOrEmpty(c))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .OrderBy(c => c, StringComparer.OrdinalIgnoreCase)
                 .ToArray();
+
+        private void ReplaceCategoryColumnWithComboBox(DataTable table)
+        {
+            DataGridViewColumn oldColumn = dgv_managePrices.Columns["category"];
+            int index = oldColumn.Index;
+
+            string[] categories = GetDistinctCategories(table);
 
             dgv_managePrices.Columns.Remove(oldColumn);
 
@@ -3302,6 +3327,24 @@ namespace Inventory
             dgv_managePrices.Columns.Insert(index, categoryColumn);
         }
 
+        /// <summary>
+        /// Fills the category filter dropdown (left of the search box) with "All Categories"
+        /// plus every distinct category currently in use, preserving the previously selected
+        /// category across a reload when it still exists - same reasoning as ApplyManagePricesFilter
+        /// re-applying the search text after LoadManagePricesGrid swaps in a new DataTable.
+        /// </summary>
+        private void PopulateManagePricesCategoryFilter(DataTable table)
+        {
+            string previouslySelected = cbx_managePricesCategory.SelectedItem as string;
+
+            cbx_managePricesCategory.Items.Clear();
+            cbx_managePricesCategory.Items.Add("All Categories");
+            cbx_managePricesCategory.Items.AddRange(GetDistinctCategories(table));
+
+            int index = previouslySelected != null ? cbx_managePricesCategory.Items.IndexOf(previouslySelected) : -1;
+            cbx_managePricesCategory.SelectedIndex = index >= 0 ? index : 0;
+        }
+
         private void dgv_managePrices_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
         {
             if (dgv_managePrices.CurrentCell?.OwningColumn?.Name == "category" && e.Control is ComboBox comboBox)
@@ -3312,10 +3355,13 @@ namespace Inventory
 
         private void tbx_managePricesSearch_TextChanged(object sender, EventArgs e) => ApplyManagePricesFilter();
 
+        private void cbx_managePricesCategory_SelectedIndexChanged(object sender, EventArgs e) => ApplyManagePricesFilter();
+
         /// <summary>
         /// Filters dgv_managePrices to rows whose serial or description contains the search
-        /// text, via the bound DataTable's DefaultView - the same view instance the grid
-        /// already renders through, so this doesn't disturb row edit-tracking for Save Changes.
+        /// text, AND-ed with the selected category (if not "All Categories"), via the bound
+        /// DataTable's DefaultView - the same view instance the grid already renders through,
+        /// so this doesn't disturb row edit-tracking for Save Changes.
         /// </summary>
         private void ApplyManagePricesFilter()
         {
@@ -3325,10 +3371,15 @@ namespace Inventory
             try
             {
                 string search = tbx_managePricesSearch.Text.Trim().Replace("'", "''");
+                string category = cbx_managePricesCategory.SelectedItem as string;
 
-                table.DefaultView.RowFilter = string.IsNullOrEmpty(search)
-                    ? string.Empty
-                    : $"serial LIKE '%{search}%' OR description LIKE '%{search}%'";
+                var clauses = new List<string>();
+                if (!string.IsNullOrEmpty(search))
+                    clauses.Add($"(serial LIKE '%{search}%' OR description LIKE '%{search}%')");
+                if (!string.IsNullOrEmpty(category) && category != "All Categories")
+                    clauses.Add($"category = '{category.Replace("'", "''")}'");
+
+                table.DefaultView.RowFilter = string.Join(" AND ", clauses);
             }
             catch
             {
@@ -4367,6 +4418,19 @@ namespace Inventory
             if (keyData == (Keys.Control | Keys.Shift | Keys.S))
             {
                 systemConfigToolStripMenuItem_Click(this, EventArgs.Empty);
+                return true;
+            }
+
+            // Every F-key is already spoken for (F1-F5/F7/F9-F12 by tbx_serialcode_KeyUp/
+            // dgv_items_KeyDown, F6/F8 as holdTransactionToolStripMenuItem/
+            // resumeTransactionToolStripMenuItem's own ShortcutKeys - which, being a MenuStrip
+            // shortcut, wins over a plain KeyDown handler regardless of focus or KeyPreview,
+            // which is exactly what broke an earlier plain-F6 attempt at this). Ctrl+N is free.
+            // Manage Prices is itself PIN-gated (tabControlMain_SelectedIndexChanged), so this
+            // only fires once a manager has already unlocked that tab - Ctrl+N never bypasses it.
+            if (keyData == (Keys.Control | Keys.N) && tabControlMain.SelectedTab == tabPageManagePrices)
+            {
+                btn_addItem_Click(this, EventArgs.Empty);
                 return true;
             }
 

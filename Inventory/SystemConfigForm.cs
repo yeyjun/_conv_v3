@@ -126,6 +126,7 @@ namespace Inventory
             LoadTrialLicense();
             LoadDbSetup();
             LoadRemoteControl();
+            LoadTopSoldSettings();
             UpdateWarningBar();
             NotifyTrayOfWarnings();
 
@@ -667,6 +668,17 @@ namespace Inventory
             (Owner as Purchases)?.ShowTrayNotification("Configuration Warnings", message);
         }
 
+        private void LoadTopSoldSettings()
+        {
+            string current = ConfigurationManager.AppSettings["TOP_SOLD_ITEM_NAME_CASE"] ?? "Title";
+            int index = cbxTopSoldNameCase.Items.IndexOf(current);
+            cbxTopSoldNameCase.SelectedIndex = index >= 0 ? index : cbxTopSoldNameCase.Items.IndexOf("Title");
+
+            string managePricesCurrent = ConfigurationManager.AppSettings["MANAGE_PRICES_ITEM_NAME_CASE"] ?? "Title";
+            int managePricesIndex = cbxManagePricesNameCase.Items.IndexOf(managePricesCurrent);
+            cbxManagePricesNameCase.SelectedIndex = managePricesIndex >= 0 ? managePricesIndex : cbxManagePricesNameCase.Items.IndexOf("Title");
+        }
+
         private void LoadReportSchedule()
         {
             cbxReportFrequency.Items.Clear();
@@ -844,6 +856,8 @@ namespace Inventory
             chkBlockZeroPriceItems.Checked = !string.Equals(ConfigurationManager.AppSettings["BLOCK_ZERO_PRICE_ITEMS"], "false", StringComparison.OrdinalIgnoreCase);
 
             chkAutoStartWithWindows.Checked = AutoStartService.IsEnabled;
+
+            chkHolidayGreetingEnabled.Checked = !string.Equals(ConfigurationManager.AppSettings["HOLIDAY_GREETING_ENABLED"], "false", StringComparison.OrdinalIgnoreCase);
         }
 
         private void chkDefaultSelltype_CheckedChanged(object sender, EventArgs e) =>
@@ -1383,6 +1397,8 @@ namespace Inventory
 
                 SetSetting(config, "BLOCK_ZERO_PRICE_ITEMS", chkBlockZeroPriceItems.Checked.ToString());
 
+                SetSetting(config, "HOLIDAY_GREETING_ENABLED", chkHolidayGreetingEnabled.Checked.ToString());
+
                 SetSetting(config, "ALERT_AUTO_DISMISS_ENABLED", chkAlertAutoDismissEnabled.Checked.ToString());
                 SetSetting(config, "ALERT_AUTO_DISMISS_SECONDS", ((int)nud_alertAutoDismissSeconds.Value).ToString());
 
@@ -1441,6 +1457,10 @@ namespace Inventory
                 SetSetting(config, "LAYOUT_EDIT_ENABLED", chkLayoutEditEnabled.Checked.ToString());
 
                 SetSetting(config, "REPORT_SCHEDULE_FREQUENCY", cbxReportFrequency.SelectedItem as string ?? "Weekly");
+
+                SetSetting(config, "TOP_SOLD_ITEM_NAME_CASE", cbxTopSoldNameCase.SelectedItem as string ?? "Title");
+
+                SetSetting(config, "MANAGE_PRICES_ITEM_NAME_CASE", cbxManagePricesNameCase.SelectedItem as string ?? "Title");
 
                 SetSetting(config, "ACCESS_SYNC_PATH", txtAccessDbPath.Text.Trim());
 
