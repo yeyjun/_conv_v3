@@ -1497,6 +1497,7 @@ namespace Inventory
             try
             {
                 ApplyMenuVisibility();
+                ApplySelltypeUiStyle();
                 UpdateCachedItemsStatusMenu();
                 UpdateLastTransactionCodeMenu(null);
 
@@ -3639,8 +3640,56 @@ namespace Inventory
                 TransactionCode = DateTime.Now.ToString("yyyyMMddHHmm");
 
                 RefreshItemSearchList();
+
+                UpdateSelltypeButtonHighlight();
             }
             catch (Exception ex) { ErrorDialog.Show(this, "Something went wrong while switching the selling type.", "Selling Type", ex); }
+        }
+
+        private void btnSelltypeWholesale_Click(object sender, EventArgs e) => selltype.SelectedIndex = 0;
+        private void btnSelltypeRetail_Click(object sender, EventArgs e) => selltype.SelectedIndex = 1;
+        private void btnSelltypeByPiece_Click(object sender, EventArgs e) => selltype.SelectedIndex = 2;
+
+        private static readonly Color SelltypeButtonSelectedColor = Color.LightSteelBlue;
+
+        /// <summary>Bolds/colors whichever purchase-type button matches selltype.SelectedIndex
+        /// (none, while in the "Select..." reset state after a completed sale - see
+        /// SelltypeSelectIndex) - the button row's stand-in for a combo box's own selected
+        /// state, since unlike the combo these are three separate controls with no shared
+        /// "selected" concept of their own. No-op (and harmless) when the buttons aren't the
+        /// active UI style - SELLTYPE_UI_STYLE in System Config > Settings.</summary>
+        private void UpdateSelltypeButtonHighlight()
+        {
+            var buttons = new[] { btnSelltypeWholesale, btnSelltypeRetail, btnSelltypeByPiece };
+            for (int i = 0; i < buttons.Length; i++)
+            {
+                bool selected = selltype.SelectedIndex == i;
+                buttons[i].BackColor = selected ? SelltypeButtonSelectedColor : SystemColors.Control;
+                buttons[i].Font = new Font(buttons[i].Font, selected ? FontStyle.Bold : FontStyle.Regular);
+            }
+        }
+
+        /// <summary>Shows either the selltype combo box or the three purchase-type buttons per
+        /// SELLTYPE_UI_STYLE (Dropdown|Buttons, default Dropdown) - both drive the exact same
+        /// selltype.SelectedIndex, so every other place that reads it (RefreshItemSearchList,
+        /// F1/F2/F3 shortcuts, held-transaction restore, ...) needs no changes either way.
+        /// lbl_hintF1F3 ("Press F1/F2/F3 to select") is hidden in Buttons style - each button
+        /// already shows its own F-key inline (see Form1.Designer.cs), so the separate hint
+        /// would just be redundant clutter next to the row it used to sit under for the combo.
+        /// Called at startup and again after System Config closes, same pattern as
+        /// ApplyMenuVisibility.</summary>
+        public void ApplySelltypeUiStyle()
+        {
+            bool buttonsStyle = string.Equals(ConfigurationManager.AppSettings["SELLTYPE_UI_STYLE"], "Buttons", StringComparison.OrdinalIgnoreCase);
+
+            selltype.Visible = !buttonsStyle;
+            btnSelltypeWholesale.Visible = buttonsStyle;
+            btnSelltypeRetail.Visible = buttonsStyle;
+            btnSelltypeByPiece.Visible = buttonsStyle;
+            lbl_hintF1F3.Visible = !buttonsStyle;
+
+            if (buttonsStyle)
+                UpdateSelltypeButtonHighlight();
         }
 
         // Populates dgv_itemSearch for the current selltype selection. Shared by
@@ -4474,6 +4523,7 @@ namespace Inventory
             }
 
             ApplyMenuVisibility();
+            ApplySelltypeUiStyle();
             ApplyItemSearchColumnVisibility();
             ApplyCartColumnVisibility();
             ApplyStoreIdentity();

@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using YourApp.Data;
 
 namespace Inventory
@@ -19,7 +20,8 @@ namespace Inventory
     /// _FREQUENCY, System Config > Inventory Print Schedule). Same startup catch-up pattern as
     /// ScheduledReportService - this app has no background service, so whichever terminal opens
     /// first after the configured interval has elapsed does the printing - but unlike emailing a
-    /// report, printing consumes real paper, so this defaults to OFF rather than opt-out.
+    /// report, printing consumes real paper, so this defaults to OFF rather than opt-out, and
+    /// even once due it still asks for a Yes/No confirmation (defaulting to No) before printing.
     /// "Low Stock" uses the exact same LOW_STOCK_THRESHOLD as the Low Stock Reminder feature
     /// (via AppConfigService) so the category boundary means the same thing everywhere in the app.
     /// </summary>
@@ -53,12 +55,28 @@ namespace Inventory
         }
 
         /// <summary>Startup catch-up check: prints only if enabled, due, and a receipt printer is
-        /// configured. Swallows all failures - a failed scheduled print must never block startup.</summary>
+        /// configured - and only after the user confirms a Yes/No prompt defaulting to No, since
+        /// unlike emailing a report this consumes real paper and shouldn't fire unattended just
+        /// because a terminal happened to be the first one opened after the interval elapsed. A
+        /// decline (or dismissing the prompt any other way) leaves the last-printed marker
+        /// untouched, same as a failure - the very next launch that's still due asks again rather
+        /// than silently skipping the report entirely. Swallows all failures - a failed scheduled
+        /// print must never block startup.</summary>
         public static async Task CheckAndPrintAsync()
         {
             try
             {
                 if (!IsScheduleEnabled || !Purchases.IsReceiptPrinterConfigured() || !IsDue())
+                    return;
+
+                DialogResult confirm = MessageBox.Show(
+                    "A scheduled inventory report is due to print. Continue?",
+                    "Scheduled Inventory Print",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+
+                if (confirm != DialogResult.Yes)
                     return;
 
                 await PrintNowAsync();

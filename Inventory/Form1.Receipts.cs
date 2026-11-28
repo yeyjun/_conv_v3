@@ -524,10 +524,11 @@ namespace Inventory
             // pressed), but this preview can render with nothing typed there yet, or with
             // leftover text that isn't a clean integer (e.g. a decimal amount, or anything else),
             // either of which throws a FormatException. Validating with TryParse (rather than
-            // just checking for empty) and falling back to "0" keeps the Cash/Change lines on the
-            // preview instead of crashing it.
+            // just checking for empty) and falling back to the (rounded) total - rather than 0 -
+            // keeps the Cash/Change lines on the preview without a misleading negative Change
+            // for the all-too-common case of previewing before any cash amount has been typed.
             if (!int.TryParse(tbx_denomination.Text, out _))
-                tbx_denomination.Text = "0";
+                tbx_denomination.Text = Math.Round(TaxConfig.ComputeTotalWithTax(grandTotal)).ToString("0");
 
             try
             {

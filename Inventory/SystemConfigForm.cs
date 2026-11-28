@@ -858,6 +858,10 @@ namespace Inventory
             chkAutoStartWithWindows.Checked = AutoStartService.IsEnabled;
 
             chkHolidayGreetingEnabled.Checked = !string.Equals(ConfigurationManager.AppSettings["HOLIDAY_GREETING_ENABLED"], "false", StringComparison.OrdinalIgnoreCase);
+
+            string selltypeUiStyle = ConfigurationManager.AppSettings["SELLTYPE_UI_STYLE"] ?? "Dropdown";
+            int selltypeUiStyleIndex = cbxSelltypeUiStyle.Items.IndexOf(selltypeUiStyle);
+            cbxSelltypeUiStyle.SelectedIndex = selltypeUiStyleIndex >= 0 ? selltypeUiStyleIndex : cbxSelltypeUiStyle.Items.IndexOf("Dropdown");
         }
 
         private void chkDefaultSelltype_CheckedChanged(object sender, EventArgs e) =>
@@ -1398,6 +1402,8 @@ namespace Inventory
                 SetSetting(config, "BLOCK_ZERO_PRICE_ITEMS", chkBlockZeroPriceItems.Checked.ToString());
 
                 SetSetting(config, "HOLIDAY_GREETING_ENABLED", chkHolidayGreetingEnabled.Checked.ToString());
+
+                SetSetting(config, "SELLTYPE_UI_STYLE", cbxSelltypeUiStyle.SelectedItem as string ?? "Dropdown");
 
                 SetSetting(config, "ALERT_AUTO_DISMISS_ENABLED", chkAlertAutoDismissEnabled.Checked.ToString());
                 SetSetting(config, "ALERT_AUTO_DISMISS_SECONDS", ((int)nud_alertAutoDismissSeconds.Value).ToString());

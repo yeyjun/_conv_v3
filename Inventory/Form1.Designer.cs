@@ -59,6 +59,9 @@
             this.lbl_storeTitle = new System.Windows.Forms.Label();
             this.printDocumentReceipt = new System.Drawing.Printing.PrintDocument();
             this.selltype = new System.Windows.Forms.ComboBox();
+            this.btnSelltypeWholesale = new System.Windows.Forms.Button();
+            this.btnSelltypeRetail = new System.Windows.Forms.Button();
+            this.btnSelltypeByPiece = new System.Windows.Forms.Button();
             this.lbl_step1 = new System.Windows.Forms.Label();
             this.lbl_hintF12 = new System.Windows.Forms.Label();
             this.lbl_quantityStatus = new System.Windows.Forms.Label();
@@ -530,7 +533,43 @@
             this.selltype.TabIndex = 11;
             this.selltype.SelectedIndexChanged += new System.EventHandler(this.selltype_SelectedIndexChanged);
             this.selltype.KeyUp += new System.Windows.Forms.KeyEventHandler(this.selltype_KeyUp);
-            // 
+            //
+            // btnSelltypeWholesale
+            //
+            this.btnSelltypeWholesale.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSelltypeWholesale.Location = new System.Drawing.Point(160, 40);
+            this.btnSelltypeWholesale.Name = "btnSelltypeWholesale";
+            this.btnSelltypeWholesale.Size = new System.Drawing.Size(140, 28);
+            this.btnSelltypeWholesale.TabIndex = 21;
+            this.btnSelltypeWholesale.Text = "Wholesale (F2)";
+            this.btnSelltypeWholesale.UseVisualStyleBackColor = true;
+            this.btnSelltypeWholesale.Visible = false;
+            this.btnSelltypeWholesale.Click += new System.EventHandler(this.btnSelltypeWholesale_Click);
+            //
+            // btnSelltypeRetail
+            //
+            this.btnSelltypeRetail.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSelltypeRetail.Location = new System.Drawing.Point(308, 40);
+            this.btnSelltypeRetail.Name = "btnSelltypeRetail";
+            this.btnSelltypeRetail.Size = new System.Drawing.Size(140, 28);
+            this.btnSelltypeRetail.TabIndex = 22;
+            this.btnSelltypeRetail.Text = "Retail (F3)";
+            this.btnSelltypeRetail.UseVisualStyleBackColor = true;
+            this.btnSelltypeRetail.Visible = false;
+            this.btnSelltypeRetail.Click += new System.EventHandler(this.btnSelltypeRetail_Click);
+            //
+            // btnSelltypeByPiece
+            //
+            this.btnSelltypeByPiece.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSelltypeByPiece.Location = new System.Drawing.Point(12, 40);
+            this.btnSelltypeByPiece.Name = "btnSelltypeByPiece";
+            this.btnSelltypeByPiece.Size = new System.Drawing.Size(140, 28);
+            this.btnSelltypeByPiece.TabIndex = 20;
+            this.btnSelltypeByPiece.Text = "By Piece (F1)";
+            this.btnSelltypeByPiece.UseVisualStyleBackColor = true;
+            this.btnSelltypeByPiece.Visible = false;
+            this.btnSelltypeByPiece.Click += new System.EventHandler(this.btnSelltypeByPiece_Click);
+            //
             // lbl_step1
             // 
             this.lbl_step1.AutoSize = true;
@@ -918,6 +957,9 @@
             this.tabPageSales.Controls.Add(this.lbl_hintF12);
             this.tabPageSales.Controls.Add(this.lbl_step1);
             this.tabPageSales.Controls.Add(this.selltype);
+            this.tabPageSales.Controls.Add(this.btnSelltypeWholesale);
+            this.tabPageSales.Controls.Add(this.btnSelltypeRetail);
+            this.tabPageSales.Controls.Add(this.btnSelltypeByPiece);
             this.tabPageSales.Controls.Add(this.lbl_storeTitle);
             this.tabPageSales.Controls.Add(this.picLogo);
             this.tabPageSales.Controls.Add(this.lbl_pesoSign);
@@ -1797,6 +1839,9 @@
         private System.Windows.Forms.Label lbl_storeTitle;
         private System.Drawing.Printing.PrintDocument printDocumentReceipt;
         private System.Windows.Forms.ComboBox selltype;
+        private System.Windows.Forms.Button btnSelltypeWholesale;
+        private System.Windows.Forms.Button btnSelltypeRetail;
+        private System.Windows.Forms.Button btnSelltypeByPiece;
         private System.Windows.Forms.Label lbl_step1;
         private System.Windows.Forms.Label lbl_hintF12;
         private System.Windows.Forms.Label lbl_quantityStatus;

@@ -73,6 +73,10 @@ namespace Inventory
             this.chkAutoStartWithWindows = new System.Windows.Forms.CheckBox();
             this.gbxGreeting = new System.Windows.Forms.GroupBox();
             this.chkHolidayGreetingEnabled = new System.Windows.Forms.CheckBox();
+            this.gbxSelltypeStyle = new System.Windows.Forms.GroupBox();
+            this.lblSelltypeUiStyle = new System.Windows.Forms.Label();
+            this.cbxSelltypeUiStyle = new System.Windows.Forms.ComboBox();
+            this.lblSelltypeUiStyleHint = new System.Windows.Forms.Label();
             this.tabPageNetwork = new System.Windows.Forms.TabPage();
             this.lblNetworkHint = new System.Windows.Forms.Label();
             this.chartNetwork = new System.Windows.Forms.DataVisualization.Charting.Chart();
@@ -314,6 +318,7 @@ namespace Inventory
             ((System.ComponentModel.ISupportInitialize)(this.nud_qtyAutoResetSeconds)).BeginInit();
             this.gbxStartup.SuspendLayout();
             this.gbxGreeting.SuspendLayout();
+            this.gbxSelltypeStyle.SuspendLayout();
             this.tabPageNetwork.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartNetwork)).BeginInit();
             this.tabPageMenus.SuspendLayout();
@@ -459,6 +464,7 @@ namespace Inventory
             this.tabPageSettings.Controls.Add(this.gbxAlerts);
             this.tabPageSettings.Controls.Add(this.gbxStartup);
             this.tabPageSettings.Controls.Add(this.gbxGreeting);
+            this.tabPageSettings.Controls.Add(this.gbxSelltypeStyle);
             this.tabPageSettings.Location = new System.Drawing.Point(4, 22);
             this.tabPageSettings.Name = "tabPageSettings";
             this.tabPageSettings.Padding = new System.Windows.Forms.Padding(3);
@@ -949,6 +955,56 @@ namespace Inventory
             this.chkHolidayGreetingEnabled.TabIndex = 0;
             this.chkHolidayGreetingEnabled.Text = "Show \"Happy {Holiday}!\" greeting on PH holidays";
             this.chkHolidayGreetingEnabled.UseVisualStyleBackColor = true;
+            //
+            // gbxSelltypeStyle
+            //
+            this.gbxSelltypeStyle.BackColor = System.Drawing.Color.MintCream;
+            this.gbxSelltypeStyle.Controls.Add(this.lblSelltypeUiStyleHint);
+            this.gbxSelltypeStyle.Controls.Add(this.cbxSelltypeUiStyle);
+            this.gbxSelltypeStyle.Controls.Add(this.lblSelltypeUiStyle);
+            this.gbxSelltypeStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.gbxSelltypeStyle.Location = new System.Drawing.Point(6, 945);
+            this.gbxSelltypeStyle.Name = "gbxSelltypeStyle";
+            this.gbxSelltypeStyle.Size = new System.Drawing.Size(380, 95);
+            this.gbxSelltypeStyle.TabIndex = 7;
+            this.gbxSelltypeStyle.TabStop = false;
+            this.gbxSelltypeStyle.Text = "Purchase Type Selector";
+            //
+            // lblSelltypeUiStyle
+            //
+            this.lblSelltypeUiStyle.AutoSize = true;
+            this.lblSelltypeUiStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.lblSelltypeUiStyle.Location = new System.Drawing.Point(13, 25);
+            this.lblSelltypeUiStyle.Name = "lblSelltypeUiStyle";
+            this.lblSelltypeUiStyle.Size = new System.Drawing.Size(40, 13);
+            this.lblSelltypeUiStyle.TabIndex = 0;
+            this.lblSelltypeUiStyle.Text = "Style:";
+            //
+            // cbxSelltypeUiStyle
+            //
+            this.cbxSelltypeUiStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxSelltypeUiStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular);
+            this.cbxSelltypeUiStyle.FormattingEnabled = true;
+            this.cbxSelltypeUiStyle.Items.AddRange(new object[] {
+            "Dropdown",
+            "Buttons"});
+            this.cbxSelltypeUiStyle.Location = new System.Drawing.Point(70, 22);
+            this.cbxSelltypeUiStyle.Name = "cbxSelltypeUiStyle";
+            this.cbxSelltypeUiStyle.Size = new System.Drawing.Size(150, 22);
+            this.cbxSelltypeUiStyle.TabIndex = 1;
+            //
+            // lblSelltypeUiStyleHint
+            //
+            this.lblSelltypeUiStyleHint.AutoSize = true;
+            this.lblSelltypeUiStyleHint.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.75F, System.Drawing.FontStyle.Italic);
+            this.lblSelltypeUiStyleHint.ForeColor = System.Drawing.Color.Gray;
+            this.lblSelltypeUiStyleHint.Location = new System.Drawing.Point(13, 53);
+            this.lblSelltypeUiStyleHint.MaximumSize = new System.Drawing.Size(360, 0);
+            this.lblSelltypeUiStyleHint.Name = "lblSelltypeUiStyleHint";
+            this.lblSelltypeUiStyleHint.Size = new System.Drawing.Size(360, 26);
+            this.lblSelltypeUiStyleHint.TabIndex = 2;
+            this.lblSelltypeUiStyleHint.Text = "\"Buttons\" replaces the Sales tab\'s purchase-type dropdown with one button per " +
+    "type (Wholesale/Retail/By Piece).";
             //
             // lblManagerPin
             //
@@ -3633,6 +3689,8 @@ namespace Inventory
             this.gbxStartup.PerformLayout();
             this.gbxGreeting.ResumeLayout(false);
             this.gbxGreeting.PerformLayout();
+            this.gbxSelltypeStyle.ResumeLayout(false);
+            this.gbxSelltypeStyle.PerformLayout();
             this.tabPageNetwork.ResumeLayout(false);
             this.tabPageNetwork.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartNetwork)).EndInit();
@@ -3743,6 +3801,10 @@ namespace Inventory
         private System.Windows.Forms.GroupBox gbxStartup;
         private System.Windows.Forms.GroupBox gbxGreeting;
         private System.Windows.Forms.CheckBox chkHolidayGreetingEnabled;
+        private System.Windows.Forms.GroupBox gbxSelltypeStyle;
+        private System.Windows.Forms.Label lblSelltypeUiStyle;
+        private System.Windows.Forms.ComboBox cbxSelltypeUiStyle;
+        private System.Windows.Forms.Label lblSelltypeUiStyleHint;
         private System.Windows.Forms.CheckBox chkAutoStartWithWindows;
         private System.Windows.Forms.TabPage tabPageNetwork;
         private System.Windows.Forms.Button btnToggleMonitor;
