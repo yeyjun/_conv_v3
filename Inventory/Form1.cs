@@ -89,7 +89,7 @@ namespace Inventory
         private readonly TransactionShortcutFilter _transactionShortcutFilter = new TransactionShortcutFilter();
 
         /// <summary>Default HIDDEN_MENUS value when the setting is missing from App.config - hides
-        public const string DefaultHiddenMenus = "systemConfigToolStripMenuItem,loyaltyToolStripMenuItem,taxConfigToolStripMenuItem,receiptsToolStripMenuItem,editLayoutToolStripMenuItem";
+        public const string DefaultHiddenMenus = "systemConfigToolStripMenuItem,loyaltyToolStripMenuItem,taxConfigToolStripMenuItem,receiptsToolStripMenuItem,editLayoutToolStripMenuItem,gettingStartedToolStripMenuItem,usersToolStripMenuItem,reportsToolStripMenuItem,helpToolStripMenuItem";
 
         /// <summary>
         /// Shows/hides each top-level menu per the HIDDEN_MENUS appSetting (comma-separated
@@ -2786,6 +2786,12 @@ namespace Inventory
                 return;
             }
 
+            if (tabControlMain.SelectedTab == tabPageTopSold)
+            {
+                await LoadTopSoldAsync();
+                return;
+            }
+
             if (tabControlMain.SelectedTab != tabPageManagePrices)
                 return;
 
@@ -2938,6 +2944,144 @@ namespace Inventory
             for (int i = 0; i < 12; i++)
                 series.Points.AddXY(monthLabels[i], monthlyTotals[i]);
         }
+
+        private sealed class TopSoldAgg
+        {
+            public string Description;
+            public int TimesSold;
+            public decimal TotalSales;
+            public DateTime? LastSold;
+        }
+
+        // Trims/collapses whitespace and applies a configurable case style (TOP_SOLD_ITEM_NAME_CASE:
+        // None|Upper|Title, defaulting to Title) to items_.description before it's shown in the
+        // Top Sold grid - real rows have inconsistent spacing/casing from manual data entry
+        // (e.g. "coke  1.5L " vs "COKE 1.5l").
+        private static string NormalizeItemName(string raw)
+        {
+            string cleaned = Regex.Replace((raw ?? "").Trim(), @"\s+", " ");
+            if (cleaned.Length == 0)
+                return cleaned;
+
+            string caseMode = ConfigurationManager.AppSettings["TOP_SOLD_ITEM_NAME_CASE"] ?? "Title";
+            switch (caseMode)
+            {
+                case "Upper":
+                    return cleaned.ToUpperInvariant();
+                case "None":
+                    return cleaned;
+                case "Title":
+                default:
+                    return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(cleaned.ToLowerInvariant());
+            }
+        }
+
+        // Calendar-aligned start of the selected Top Sold period, matching the dashboard's
+        // "calendar month to date" convention (see LoadDashboardInventoryStats/PopulateDashboardSales).
+        private static DateTime GetTopSoldPeriodStart(string period)
+        {
+            DateTime today = DateTime.Today;
+            switch (period)
+            {
+                case "Weekly":
+                    int daysSinceMonday = ((int)today.DayOfWeek + 6) % 7;
+                    return today.AddDays(-daysSinceMonday);
+                case "Quarterly":
+                    int quarterStartMonth = ((today.Month - 1) / 3) * 3 + 1;
+                    return new DateTime(today.Year, quarterStartMonth, 1);
+                case "Annually":
+                    return new DateTime(today.Year, 1, 1);
+                case "Monthly":
+                default:
+                    return new DateTime(today.Year, today.Month, 1);
+            }
+        }
+
+        /// <summary>
+        /// Populates the Top Sold tab for the period selected in cmbTopSoldPeriod (Weekly/
+        /// Monthly/Quarterly/Annually, calendar-aligned to date): ranks items by how many
+        /// sales_ rows (checkout lines) reference them in that window and the revenue those
+        /// lines total. sales_ only persists itemcode + line total (see SaveSaleLineItemsAsync)
+        /// - not the line's quantity - so "Times Sold" counts checkout lines, not units, same
+        /// caveat as the rest of the sales reporting here. Aggregation (including "last sold")
+        /// happens client-side rather than via SQL GROUP BY/MAX/WHERE because transaction_date
+        /// is stored as "yyyy-MMMM-dd H:m:ss" (month name, unpadded hour/minute/second - see
+        /// SaveSaleLineItemsAsync) which doesn't sort or range-compare chronologically as a string.
+        /// </summary>
+        private async Task LoadTopSoldAsync()
+        {
+            DateTime periodStart = GetTopSoldPeriodStart(cmbTopSoldPeriod.SelectedItem.ToString());
+
+            btnTopSoldRefresh.Enabled = false;
+            dgvTopSold.Rows.Clear();
+            lblTopSoldStatus.Text = "";
+
+            try
+            {
+                var byItem = new Dictionary<string, TopSoldAgg>();
+
+                using (var conn = new MySqlConnection(DbConnectionHelper.BuildConnectionString()))
+                using (var cmd = new MySqlCommand(
+                    "SELECT s.itemcode AS itemcode, i.description AS itemname, " +
+                    "s.item_price AS item_price, s.transaction_date AS transaction_date " +
+                    "FROM sales_ s LEFT JOIN items_ i ON s.itemcode = i.serial", conn))
+                {
+                    await conn.OpenAsync();
+
+                    using (var reader = await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            string rawDate = reader["transaction_date"]?.ToString();
+                            if (!DateTime.TryParseExact(rawDate, "yyyy-MMMM-dd H:m:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsed)
+                                || parsed < periodStart)
+                                continue;
+
+                            string itemcode = reader["itemcode"]?.ToString() ?? "";
+                            if (!byItem.TryGetValue(itemcode, out TopSoldAgg agg))
+                            {
+                                agg = new TopSoldAgg();
+                                byItem[itemcode] = agg;
+                            }
+
+                            agg.Description = NormalizeItemName(reader["itemname"] == DBNull.Value ? "" : reader["itemname"].ToString());
+                            agg.TimesSold++;
+                            agg.TotalSales += reader["item_price"] == DBNull.Value ? 0m : Convert.ToDecimal(reader["item_price"]);
+
+                            if (agg.LastSold == null || parsed > agg.LastSold)
+                                agg.LastSold = parsed;
+                        }
+                    }
+                }
+
+                int rank = 1;
+                foreach (var kvp in byItem.OrderByDescending(p => p.Value.TimesSold).ThenByDescending(p => p.Value.TotalSales).Take(50))
+                {
+                    dgvTopSold.Rows.Add(
+                        rank++,
+                        kvp.Key,
+                        kvp.Value.Description,
+                        kvp.Value.TimesSold,
+                        kvp.Value.TotalSales.ToString("N2"),
+                        kvp.Value.LastSold?.ToString("yyyy-MM-dd") ?? "—");
+                }
+
+                if (dgvTopSold.Rows.Count == 0)
+                    lblTopSoldStatus.Text = "No sales recorded yet.";
+            }
+            catch (Exception)
+            {
+                lblTopSoldStatus.Text = "Top sold data unavailable offline.";
+            }
+            finally
+            {
+                btnTopSoldRefresh.Enabled = true;
+            }
+        }
+
+        private async void btnTopSoldRefresh_Click(object sender, EventArgs e) => await LoadTopSoldAsync();
+
+        private async void cmbTopSoldPeriod_SelectedIndexChanged(object sender, EventArgs e) => await LoadTopSoldAsync();
 
         private void btnDashInventoryReport_Click(object sender, EventArgs e) => inventoryReportToolStripMenuItem_Click(sender, e);
 
